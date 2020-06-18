@@ -1,0 +1,6 @@
+assembly-versioning-scheme: Major
+assembly-informational-format: '{SemVer}+{ShortSha}'
+mode: ContinuousDeployment
+branches: {}
+ignore:
+  sha: []
