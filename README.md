@@ -1,7 +1,7 @@
 AppCore .NET Data
 -----------------
 
-<Build status>
+[![Build Status](https://dev.azure.com/AppCoreNet/Data/_apis/build/status/AppCoreNet.Data%20CI?branchName=dev)](https://dev.azure.com/AppCoreNet/Data/_build/latest?definitionId=17&branchName=dev)
 
 This repository includes projects containing abstractions and implementations of the persistence framework.
 

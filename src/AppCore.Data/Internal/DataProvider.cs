@@ -1,4 +1,4 @@
-﻿// Licensed under the MIT License.
+// Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System;
@@ -13,6 +13,8 @@ namespace AppCore.Data
     internal sealed class DataProvider<TTag> : IDataProvider<TTag>
     {
         private readonly IDataProvider _provider;
+
+        internal IDataProvider WrappedProvider => _provider;
 
         public string Name => _provider.Name;
 
