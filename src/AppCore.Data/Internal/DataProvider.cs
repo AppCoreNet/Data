@@ -12,21 +12,20 @@ namespace AppCore.Data
 {
     internal sealed class DataProvider<TTag> : IDataProvider<TTag>
     {
-        private readonly IDataProvider _provider;
+        // Internal to support testing
+        internal IDataProvider Provider { get; }
 
-        internal IDataProvider WrappedProvider => _provider;
-
-        public string Name => _provider.Name;
+        public string Name => Provider.Name;
 
         ITransactionManager IDataProvider.TransactionManager => TransactionManager;
 
-        public ITransactionManager<TTag> TransactionManager => (ITransactionManager<TTag>) _provider.TransactionManager;
+        public ITransactionManager<TTag> TransactionManager => (ITransactionManager<TTag>) Provider.TransactionManager;
 
         public DataProvider(IEnumerable<IDataProvider> providers)
         {
             Ensure.Arg.NotNull(providers, nameof(providers));
 
-            _provider = FindProvider(providers)
+            Provider = FindProvider(providers)
                         ?? throw new InvalidOperationException($"Data provider with name '{typeof(TTag)}' is not registered.");
         }
 
@@ -38,12 +37,12 @@ namespace AppCore.Data
 
         public IDisposable BeginChangeScope(Action afterSaveCallback = null)
         {
-            return _provider.BeginChangeScope(afterSaveCallback);
+            return Provider.BeginChangeScope(afterSaveCallback);
         }
 
         public Task SaveChangesAsync(CancellationToken cancellationToken)
         {
-            return _provider.SaveChangesAsync(cancellationToken);
+            return Provider.SaveChangesAsync(cancellationToken);
         }
     }
 }

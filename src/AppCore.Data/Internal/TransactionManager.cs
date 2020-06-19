@@ -1,4 +1,4 @@
-﻿// Licensed under the MIT License.
+// Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System;
@@ -13,17 +13,18 @@ namespace AppCore.Data
 {
     internal sealed class TransactionManager<TTag> : ITransactionManager<TTag>
     {
-        private readonly ITransactionManager _manager;
+        // Internal to support testing
+        internal ITransactionManager Manager { get; }
         
-        public IDataProvider Provider => _manager.Provider;
+        public IDataProvider Provider => Manager.Provider;
 
-        public ITransaction CurrentTransaction => _manager.CurrentTransaction;
+        public ITransaction CurrentTransaction => Manager.CurrentTransaction;
 
         public TransactionManager(IEnumerable<ITransactionManager> managers)
         {
             Ensure.Arg.NotNull(managers, nameof(managers));
 
-            _manager = FindTransactionManager(managers)
+            Manager = FindTransactionManager(managers)
                        ?? throw new InvalidOperationException($"Data provider '{typeof(TTag)}' is not registered.");
         }
 
@@ -38,7 +39,7 @@ namespace AppCore.Data
             IsolationLevel isolationLevel,
             CancellationToken cancellationToken = default)
         {
-            return _manager.BeginTransactionAsync(isolationLevel, cancellationToken);
+            return Manager.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
     }
 }

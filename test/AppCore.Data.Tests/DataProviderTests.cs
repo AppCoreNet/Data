@@ -2,6 +2,7 @@
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -18,14 +19,21 @@ namespace AppCore.Data
             provider.Name.Returns(typeof(DefaultDataProvider).FullName);
             return provider;
         }
-        
+
+        [Fact]
+        public void ThrowsForUnknownProvider()
+        {
+            Assert.Throws<InvalidOperationException>(
+                () => new DataProvider<DefaultDataProvider>(Enumerable.Empty<IDataProvider>()));
+        }
+
         [Fact]
         public void ResolvesProviderByTypeName()
         {
             IDataProvider provider = CreateProvider();
 
             var providerWithTag = new DataProvider<DefaultDataProvider>(new[] {provider});
-            providerWithTag.WrappedProvider.Should()
+            providerWithTag.Provider.Should()
                            .BeSameAs(provider);
         }
 
