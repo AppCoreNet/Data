@@ -122,18 +122,21 @@ namespace AppCore.Data.EntityFrameworkCore
 
             _logger.EntitySaving(entity);
 
-            TDbEntity dbEntity;
-            if (entity.IsTransient())
+            TDbEntity dbEntity = null;
+            if (!entity.IsTransient())
             {
-                dbEntity = _mapper.Map<TDbEntity>(entity);
+                dbEntity = await ApplyIncludes(Set)
+                                 .Where(FindByIdExpression(entity.Id))
+                                 .FirstOrDefaultAsync(cancellationToken);
+            }
+
+            if (dbEntity != null)
+            {
+                _mapper.Map(entity, dbEntity);
             }
             else
             {
-                dbEntity = await ApplyIncludes(Set)
-                    .Where(FindByIdExpression(entity.Id))
-                    .SingleAsync(cancellationToken);
-
-                _mapper.Map(entity, dbEntity);
+                dbEntity = _mapper.Map<TDbEntity>(entity);
             }
 
             using (Provider.BeginChangeScope())
