@@ -30,12 +30,20 @@ namespace AppCore.Data
         Task<TEntity> FindAsync(TId id, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Creates or updates the specified entity.
+        /// Updates the specified entity.
         /// </summary>
         /// <param name="entity">The entity to store.</param>
         /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
         /// <returns>The task representing the asynchronous operation.</returns>
-        Task<TEntity> SaveAsync(TEntity entity, CancellationToken cancellationToken = default);
+        Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity to store.</param>
+        /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
+        /// <returns>The task representing the asynchronous operation.</returns>
+        Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes the specified entity.

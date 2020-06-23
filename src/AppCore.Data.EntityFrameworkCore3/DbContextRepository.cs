@@ -107,7 +107,41 @@ namespace AppCore.Data.EntityFrameworkCore
             return _mapper.Map<TEntity>(dbEntity);
         }
 
-        protected virtual ValueTask<EntityEntry<TDbEntity>> SaveCoreAsync(
+        protected virtual ValueTask<EntityEntry<TDbEntity>> CreateCoreAsync(
+            TEntity entity,
+            TDbEntity dbEntity,
+            CancellationToken cancellationToken)
+        {
+            EntityEntry<TDbEntity> entityEntry = Set.Update(dbEntity);
+            entityEntry.State = EntityState.Added;
+
+            return new ValueTask<EntityEntry<TDbEntity>>(entityEntry);
+        }
+        
+        /// <inheritdoc />
+        public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
+        {
+            Ensure.Arg.NotNull(entity, nameof(entity));
+
+            _logger.EntitySaving(entity);
+
+            var dbEntity = _mapper.Map<TDbEntity>(entity);
+
+            using (Provider.BeginChangeScope())
+            {
+                EntityEntry<TDbEntity> dbEntry = await CreateCoreAsync(entity, dbEntity, cancellationToken);
+                dbEntity = dbEntry.Entity;
+                UpdateConcurrencyToken(dbEntry, entity);
+                await Provider.SaveChangesAsync(cancellationToken);
+            }
+
+            entity = _mapper.Map<TEntity>(dbEntity);
+            _logger.EntitySaved(entity);
+
+            return entity;
+        }
+
+        protected virtual ValueTask<EntityEntry<TDbEntity>> UpdateCoreAsync(
             TEntity entity,
             TDbEntity dbEntity,
             CancellationToken cancellationToken)
@@ -116,32 +150,24 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public async Task<TEntity> SaveAsync(TEntity entity, CancellationToken cancellationToken)
+        public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken)
         {
             Ensure.Arg.NotNull(entity, nameof(entity));
 
+            if (entity.IsTransient())
+                throw new InvalidOperationException("The entity cannot be updated because the primary key does not have the default value.");
+
             _logger.EntitySaving(entity);
 
-            TDbEntity dbEntity = null;
-            if (!entity.IsTransient())
-            {
-                dbEntity = await ApplyIncludes(Set)
-                                 .Where(FindByIdExpression(entity.Id))
-                                 .FirstOrDefaultAsync(cancellationToken);
-            }
+            TDbEntity dbEntity = await ApplyIncludes(Set)
+                                       .Where(FindByIdExpression(entity.Id))
+                                       .FirstOrDefaultAsync(cancellationToken);
 
-            if (dbEntity != null)
-            {
-                _mapper.Map(entity, dbEntity);
-            }
-            else
-            {
-                dbEntity = _mapper.Map<TDbEntity>(entity);
-            }
+            _mapper.Map(entity, dbEntity);
 
             using (Provider.BeginChangeScope())
             {
-                EntityEntry<TDbEntity> dbEntry = await SaveCoreAsync(entity, dbEntity, cancellationToken);
+                EntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(entity, dbEntity, cancellationToken);
                 dbEntity = dbEntry.Entity;
                 UpdateConcurrencyToken(dbEntry, entity);
                 await Provider.SaveChangesAsync(cancellationToken);
