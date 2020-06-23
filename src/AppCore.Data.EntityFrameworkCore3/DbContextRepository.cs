@@ -112,10 +112,7 @@ namespace AppCore.Data.EntityFrameworkCore
             TDbEntity dbEntity,
             CancellationToken cancellationToken)
         {
-            EntityEntry<TDbEntity> entityEntry = Set.Update(dbEntity);
-            entityEntry.State = EntityState.Added;
-
-            return new ValueTask<EntityEntry<TDbEntity>>(entityEntry);
+            return new ValueTask<EntityEntry<TDbEntity>>(Set.Add(dbEntity));
         }
         
         /// <inheritdoc />
