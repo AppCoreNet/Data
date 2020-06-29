@@ -1,6 +1,7 @@
-﻿// Licensed under the MIT License.
+// Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
+using System;
 using System.Collections.Generic;
 using AppCore.Diagnostics;
 
@@ -18,6 +19,7 @@ namespace AppCore.Data
         /// <param name="entity">The entity.</param>
         /// <returns><c>tru</c> if the entity is transient; <c>false</c> otherwise.</returns>
         public static bool IsTransient<TId>(this IEntity<TId> entity)
+            where TId : IEquatable<TId>
         {
             Ensure.Arg.NotNull(entity, nameof(entity));
             return EqualityComparer<TId>.Default.Equals(entity.Id, default);

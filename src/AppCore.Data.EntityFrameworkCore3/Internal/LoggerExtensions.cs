@@ -109,6 +109,7 @@ namespace AppCore.Data.EntityFrameworkCore
                 "Entity {entityType} with id {entityId} deleted.");
 
         public static void EntitySaving<TId>(this ILogger logger, IEntity<TId> entity)
+            where TId : IEquatable<TId>
         {
             if (entity is IHasConcurrencyToken concurrentEntity)
             {
@@ -125,6 +126,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         public static void EntitySaved<TId>(this ILogger logger, IEntity<TId> entity)
+            where TId : IEquatable<TId>
         {
             if (entity is IHasConcurrencyToken concurrentEntity)
             {
@@ -141,6 +143,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         public static void EntityDeleting<TId>(this ILogger logger, IEntity<TId> entity)
+            where TId : IEquatable<TId>
         {
             if (entity is IHasConcurrencyToken concurrentEntity)
             {
@@ -157,6 +160,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         public static void EntityDeleted<TId>(this ILogger logger, IEntity<TId> entity)
+            where TId : IEquatable<TId>
         {
             _entityDeleted(logger, entity.GetType(), entity.Id);
         }

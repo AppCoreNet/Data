@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -14,7 +15,7 @@ namespace AppCore.Data.EntityFrameworkCore
         private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> Properties =
             new ConcurrentDictionary<(Type, Type), DbModelProperties>();
 
-        public string PrimaryKeyPropertyName { get; }
+        public IReadOnlyCollection<string> PrimaryKeyPropertyNames { get; }
 
         public bool HasConcurrencyToken { get; }
 
@@ -24,11 +25,13 @@ namespace AppCore.Data.EntityFrameworkCore
         {
             IEntityType modelEntityType = model.FindEntityType(entityType);
 
-            PrimaryKeyPropertyName = modelEntityType.FindPrimaryKey()
-                .Properties.Single().Name;
+            PrimaryKeyPropertyNames = modelEntityType
+                                      .FindPrimaryKey()
+                                      .Properties.Select(p => p.Name)
+                                      .ToList();
 
             IProperty concurrencyToken = modelEntityType.FindProperty(nameof(IHasConcurrencyToken.ConcurrencyToken));
-            if (concurrencyToken.IsConcurrencyToken)
+            if ((concurrencyToken?.IsConcurrencyToken).GetValueOrDefault())
             {
                 HasConcurrencyToken = true;
                 ConcurrencyTokenPropertyName = concurrencyToken.Name;

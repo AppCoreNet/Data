@@ -21,7 +21,8 @@ namespace AppCore.Data.EntityFrameworkCore
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     /// <typeparam name="TDbEntity">The type of the database entity.</typeparam>
     public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IRepository<TId, TEntity>
-        where TEntity : class, IEntity<TId>
+        where TId : IEquatable<TId>
+        where TEntity : IEntity<TId>
         where TDbContext : DbContext
         where TDbEntity : class
     {
@@ -31,7 +32,12 @@ namespace AppCore.Data.EntityFrameworkCore
         private readonly DbModelProperties _modelProperties;
 
         /// <summary>
-        /// Gets the <see cref="DbSet{TEntity}"/>.
+        /// Gets the <see cref="DbContext"/>.
+        /// </summary>
+        protected TDbContext Context { get; }
+
+        /// <summary>
+        /// Gets the <see cref="DbSet{TDbEntity}"/>.
         /// </summary>
         protected DbSet<TDbEntity> Set { get; }
 
@@ -60,12 +66,25 @@ namespace AppCore.Data.EntityFrameworkCore
             _modelProperties = DbModelProperties.Get(typeof(TDbContext), typeof(TDbEntity), context.Model, typeof(TEntity));
 
             Provider = provider;
+            Context = context;
             Set = context.Set<TDbEntity>();
         }
 
-        private Expression<Func<TDbEntity, bool>> FindByIdExpression(TId id)
+        protected virtual object[] GetPrimaryKey(TId id)
         {
-            return e => EF.Property<TId>(e, _modelProperties.PrimaryKeyPropertyName).Equals(id);
+            if (_modelProperties.PrimaryKeyPropertyNames.Count > 0)
+                throw new NotSupportedException();
+
+            return new object[] { id };
+        }
+
+        protected virtual Expression<Func<TDbEntity, bool>> GetPrimaryKeyExpression(TId id)
+        {
+            if (_modelProperties.PrimaryKeyPropertyNames.Count > 0)
+                throw new NotSupportedException();
+
+            string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames.First();
+            return e => EF.Property<object>(e, primaryKeyPropertyName).Equals(id);
         }
 
         protected virtual IQueryable<TDbEntity> ApplyIncludes(IQueryable<TDbEntity> queryable)
@@ -92,7 +111,7 @@ namespace AppCore.Data.EntityFrameworkCore
         {
             TDbEntity dbEntity = await ApplyIncludes(Set)
                                        .AsNoTracking()
-                                       .Where(FindByIdExpression(id))
+                                       .Where(GetPrimaryKeyExpression(id))
                                        .FirstOrDefaultAsync(cancellationToken);
 
             return dbEntity;
@@ -152,12 +171,12 @@ namespace AppCore.Data.EntityFrameworkCore
             Ensure.Arg.NotNull(entity, nameof(entity));
 
             if (entity.IsTransient())
-                throw new InvalidOperationException("The entity cannot be updated because the primary key does not have the default value.");
+                throw new InvalidOperationException("The entity cannot be updated because the primary has the default value.");
 
             _logger.EntitySaving(entity);
 
             TDbEntity dbEntity = await ApplyIncludes(Set)
-                                       .Where(FindByIdExpression(entity.Id))
+                                       .Where(GetPrimaryKeyExpression(entity.Id))
                                        .FirstOrDefaultAsync(cancellationToken);
 
             _mapper.Map(entity, dbEntity);
