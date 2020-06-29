@@ -179,6 +179,9 @@ namespace AppCore.Data.EntityFrameworkCore
                                        .Where(GetPrimaryKeyExpression(entity.Id))
                                        .FirstOrDefaultAsync(cancellationToken);
 
+            if (dbEntity == null)
+                throw new EntityNotFoundException(typeof(TEntity), entity.Id);
+
             _mapper.Map(entity, dbEntity);
 
             using (Provider.BeginChangeScope())
