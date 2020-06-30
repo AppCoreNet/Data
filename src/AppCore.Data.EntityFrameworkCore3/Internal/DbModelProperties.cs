@@ -15,15 +15,15 @@ namespace AppCore.Data.EntityFrameworkCore
         private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> Properties =
             new ConcurrentDictionary<(Type, Type), DbModelProperties>();
 
-        public IReadOnlyCollection<string> PrimaryKeyPropertyNames { get; }
+        public IReadOnlyList<string> PrimaryKeyPropertyNames { get; }
 
         public bool HasConcurrencyToken { get; }
 
         public string ConcurrencyTokenPropertyName { get; }
 
-        private DbModelProperties(IModel model, Type entityType)
+        private DbModelProperties(IModel model, Type dbEntityType)
         {
-            IEntityType modelEntityType = model.FindEntityType(entityType);
+            IEntityType modelEntityType = model.FindEntityType(dbEntityType);
 
             PrimaryKeyPropertyNames = modelEntityType
                                       .FindPrimaryKey()

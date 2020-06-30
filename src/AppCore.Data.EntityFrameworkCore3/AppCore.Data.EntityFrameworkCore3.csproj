@@ -11,6 +11,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="AppCore.TypeHelpers.Sources" Version="$(AppCore_Shared_Version)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="AppCore.Logging.Abstractions" Version="$(AppCore_DI_Version)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[3.1.0,4.0.0)" />
   </ItemGroup>

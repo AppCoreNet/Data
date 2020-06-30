@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCore.Diagnostics;
@@ -26,6 +25,9 @@ namespace AppCore.Data.EntityFrameworkCore
         where TDbContext : DbContext
         where TDbEntity : class
     {
+        private static readonly EntityModelProperties<TId, TEntity> EntityModelProperties =
+            new EntityModelProperties<TId, TEntity>();
+
         private readonly ITokenGenerator _tokenGenerator;
         private readonly IEntityMapper _mapper;
         private readonly ILogger _logger;
@@ -63,6 +65,7 @@ namespace AppCore.Data.EntityFrameworkCore
             _tokenGenerator = tokenGenerator;
             _mapper = entityMapper;
             _logger = logger;
+
             _modelProperties = DbModelProperties.Get(typeof(TDbContext), typeof(TDbEntity), context.Model, typeof(TEntity));
 
             Provider = provider;
@@ -72,19 +75,34 @@ namespace AppCore.Data.EntityFrameworkCore
 
         protected virtual object[] GetPrimaryKey(TId id)
         {
-            if (_modelProperties.PrimaryKeyPropertyNames.Count > 0)
-                throw new NotSupportedException();
-
-            return new object[] { id };
+            return EntityModelProperties.GetIdValues(id);
         }
 
-        protected virtual Expression<Func<TDbEntity, bool>> GetPrimaryKeyExpression(TId id)
+        protected virtual IQueryable<TDbEntity> ApplyPrimaryKeyExpression(IQueryable<TDbEntity> queryable, TId id)
         {
-            if (_modelProperties.PrimaryKeyPropertyNames.Count > 0)
-                throw new NotSupportedException();
+            object[] primaryKey = GetPrimaryKey(id);
 
-            string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames.First();
-            return e => EF.Property<object>(e, primaryKeyPropertyName).Equals(id);
+            if (primaryKey.Length == 1)
+            {
+                string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[0];
+                object keyValue = primaryKey[0];
+                return queryable.Where(e => EF.Property<object>(e, primaryKeyPropertyName).Equals(keyValue));
+            }
+
+            for (int i = 0; i < primaryKey.Length; i++)
+            {
+                string idPropertyName = EntityModelProperties.IdPropertyNames[i];
+                string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[i];
+
+                if (!string.Equals(idPropertyName, primaryKeyPropertyName, StringComparison.OrdinalIgnoreCase))
+                    throw new NotSupportedException("Entity.Id property names do not match the primary key property names.");
+
+                object keyValue = primaryKey[i];
+                queryable = queryable.Where(
+                    e => EF.Property<object>(e, primaryKeyPropertyName).Equals(keyValue));
+            }
+
+            return queryable;
         }
 
         protected virtual IQueryable<TDbEntity> ApplyIncludes(IQueryable<TDbEntity> queryable)
@@ -107,11 +125,15 @@ namespace AppCore.Data.EntityFrameworkCore
             }
         }
 
+        private IQueryable<TDbEntity> GetQueryable(TId id)
+        {
+            return ApplyPrimaryKeyExpression(ApplyIncludes(Set), id);
+        }
+
         protected virtual async Task<TDbEntity> FindCoreAsync(TId id, CancellationToken cancellationToken)
         {
-            TDbEntity dbEntity = await ApplyIncludes(Set)
+            TDbEntity dbEntity = await GetQueryable(id)
                                        .AsNoTracking()
-                                       .Where(GetPrimaryKeyExpression(id))
                                        .FirstOrDefaultAsync(cancellationToken);
 
             return dbEntity;
@@ -175,8 +197,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             _logger.EntitySaving(entity);
 
-            TDbEntity dbEntity = await ApplyIncludes(Set)
-                                       .Where(GetPrimaryKeyExpression(entity.Id))
+            TDbEntity dbEntity = await GetQueryable(entity.Id)
                                        .FirstOrDefaultAsync(cancellationToken);
 
             if (dbEntity == null)
