@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFramewor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.Tests", "test\AppCore.Data.Tests\AppCore.Data.Tests.csproj", "{2F1C1FB9-22F0-4109-85C4-09A59A60465E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore3.Tests", "test\AppCore.Data.EntityFrameworkCore3.Tests\AppCore.Data.EntityFrameworkCore3.Tests.csproj", "{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{2F1C1FB9-22F0-4109-85C4-09A59A60465E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F1C1FB9-22F0-4109-85C4-09A59A60465E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F1C1FB9-22F0-4109-85C4-09A59A60465E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
