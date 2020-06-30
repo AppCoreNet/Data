@@ -111,13 +111,13 @@ namespace AppCore.Data.EntityFrameworkCore
         public static void EntitySaving<TId>(this ILogger logger, IEntity<TId> entity)
             where TId : IEquatable<TId>
         {
-            if (entity is IHasConcurrencyToken concurrentEntity)
+            if (entity is IHasChangeToken concurrentEntity)
             {
                 _concurrentEntitySaving(
                     logger,
                     entity.GetType(),
                     entity.Id,
-                    concurrentEntity.ConcurrencyToken);
+                    concurrentEntity.ChangeToken);
             }
             else
             {
@@ -128,13 +128,13 @@ namespace AppCore.Data.EntityFrameworkCore
         public static void EntitySaved<TId>(this ILogger logger, IEntity<TId> entity)
             where TId : IEquatable<TId>
         {
-            if (entity is IHasConcurrencyToken concurrentEntity)
+            if (entity is IHasChangeToken concurrentEntity)
             {
                 _concurrentEntitySaved(
                     logger,
                     entity.GetType(),
                     entity.Id,
-                    concurrentEntity.ConcurrencyToken);
+                    concurrentEntity.ChangeToken);
             }
             else
             {
@@ -145,13 +145,13 @@ namespace AppCore.Data.EntityFrameworkCore
         public static void EntityDeleting<TId>(this ILogger logger, IEntity<TId> entity)
             where TId : IEquatable<TId>
         {
-            if (entity is IHasConcurrencyToken concurrentEntity)
+            if (entity is IHasChangeToken concurrentEntity)
             {
                 _concurrentEntityDeleting(
                     logger,
                     entity.GetType(),
                     entity.Id,
-                    concurrentEntity.ConcurrencyToken);
+                    concurrentEntity.ChangeToken);
             }
             else
             {

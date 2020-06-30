@@ -110,14 +110,14 @@ namespace AppCore.Data.EntityFrameworkCore
             return queryable;
         }
 
-        private void UpdateConcurrencyToken(EntityEntry<TDbEntity> entry, TEntity entity)
+        private void UpdateChangeToken(EntityEntry<TDbEntity> entry, TEntity entity)
         {
-            if (entity is IHasConcurrencyToken concurrentEntity)
+            if (entity is IHasChangeToken concurrentEntity)
             {
                 PropertyEntry<TDbEntity, string> concurrencyToken =
                     entry.Property<string>(_modelProperties.ConcurrencyTokenPropertyName);
 
-                concurrencyToken.OriginalValue = concurrentEntity.ConcurrencyToken;
+                concurrencyToken.OriginalValue = concurrentEntity.ChangeToken;
                 if (entry.State != EntityState.Deleted)
                 {
                     concurrencyToken.CurrentValue = _tokenGenerator.Generate();
@@ -169,7 +169,7 @@ namespace AppCore.Data.EntityFrameworkCore
             {
                 EntityEntry<TDbEntity> dbEntry = await CreateCoreAsync(entity, dbEntity, cancellationToken);
                 dbEntity = dbEntry.Entity;
-                UpdateConcurrencyToken(dbEntry, entity);
+                UpdateChangeToken(dbEntry, entity);
                 await Provider.SaveChangesAsync(cancellationToken);
             }
 
@@ -193,7 +193,7 @@ namespace AppCore.Data.EntityFrameworkCore
             Ensure.Arg.NotNull(entity, nameof(entity));
 
             if (entity.IsTransient())
-                throw new InvalidOperationException("The entity cannot be updated because the primary has the default value.");
+                throw new InvalidOperationException("The entity cannot be updated because the id property has the default value.");
 
             _logger.EntitySaving(entity);
 
@@ -209,7 +209,7 @@ namespace AppCore.Data.EntityFrameworkCore
             {
                 EntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(entity, dbEntity, cancellationToken);
                 dbEntity = dbEntry.Entity;
-                UpdateConcurrencyToken(dbEntry, entity);
+                UpdateChangeToken(dbEntry, entity);
                 await Provider.SaveChangesAsync(cancellationToken);
             }
 
@@ -240,7 +240,7 @@ namespace AppCore.Data.EntityFrameworkCore
             using (Provider.BeginChangeScope())
             {
                 EntityEntry<TDbEntity> dbEntry = await DeleteCoreAsync(entity, dbEntity, cancellationToken);
-                UpdateConcurrencyToken(dbEntry, entity);
+                UpdateChangeToken(dbEntry, entity);
                 await Provider.SaveChangesAsync(cancellationToken);
             }
 
