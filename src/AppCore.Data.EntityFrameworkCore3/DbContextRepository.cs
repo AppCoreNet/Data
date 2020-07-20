@@ -49,6 +49,13 @@ namespace AppCore.Data.EntityFrameworkCore
 
         IDataProvider IRepository<TId, TEntity>.Provider => Provider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextRepository{TId,TEntity,TDbContext,TDbEntity}"/> class.
+        /// </summary>
+        /// <param name="provider">The data provider.</param>
+        /// <param name="tokenGenerator">The token generator used for generating change tokens.</param>
+        /// <param name="entityMapper">The entity mapper.</param>
+        /// <param name="logger">The logger.</param>
         public DbContextRepository(
             IDbContextDataProvider<TDbContext> provider,
             ITokenGenerator tokenGenerator,
@@ -72,11 +79,23 @@ namespace AppCore.Data.EntityFrameworkCore
             Set = context.Set<TDbEntity>();
         }
 
+        /// <summary>
+        /// Can be overridden to get the primary key from the specified entity id.
+        /// </summary>
+        /// <param name="id">The unique entity id.</param>
+        /// <returns>The primary key values.</returns>
         protected virtual object[] GetPrimaryKey(TId id)
         {
             return EntityModelProperties.GetIdValues(id);
         }
 
+        /// <summary>
+        /// Can be overridden to apply the query expression used when searching for entities by
+        /// it's primary key.
+        /// </summary>
+        /// <param name="queryable">The queryable.</param>
+        /// <param name="id">The unique entity id.</param>
+        /// <returns>The queryable filtered by primary key.</returns>
         protected virtual IQueryable<TDbEntity> ApplyPrimaryKeyExpression(IQueryable<TDbEntity> queryable, TId id)
         {
             object[] primaryKey = GetPrimaryKey(id);
