@@ -1,7 +1,6 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +12,6 @@ namespace AppCore.Data
     /// <typeparam name="TId">The type of the entity id.</typeparam>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public interface IRepository<in TId, TEntity>
-        where TId : IEquatable<TId>
         where TEntity : IEntity<TId>
     {
         /// <summary>

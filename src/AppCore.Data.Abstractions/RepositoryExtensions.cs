@@ -1,7 +1,6 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCore.Diagnostics;
@@ -28,8 +27,7 @@ namespace AppCore.Data
             TId id,
             CancellationToken cancellationToken = default
         )
-            where TId : IEquatable<TId>
-            where TEntity : class, IEntity<TId>
+            where TEntity : IEntity<TId>
         {
             Ensure.Arg.NotNull(repository, nameof(repository));
             Ensure.Arg.NotNull(id, nameof(id));

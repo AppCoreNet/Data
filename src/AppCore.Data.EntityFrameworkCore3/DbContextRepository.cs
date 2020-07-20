@@ -20,7 +20,6 @@ namespace AppCore.Data.EntityFrameworkCore
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     /// <typeparam name="TDbEntity">The type of the database entity.</typeparam>
     public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IRepository<TId, TEntity>
-        where TId : IEquatable<TId>
         where TEntity : IEntity<TId>
         where TDbContext : DbContext
         where TDbEntity : class
