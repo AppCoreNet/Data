@@ -30,6 +30,15 @@ namespace AppCore.Data
         Task<TEntity> FindAsync(TId id, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Loads the entity with the specified unique identifier.
+        /// </summary>
+        /// <param name="id">The entity id.</param>
+        /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
+        /// <exception cref="EntityNotFoundException">The entity was not found.</exception>
+        /// <returns>The entity.</returns>
+        Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Updates the specified entity.
         /// </summary>
         /// <param name="entity">The entity to store.</param>

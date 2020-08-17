@@ -104,7 +104,7 @@ namespace AppCore.Data.EntityFrameworkCore
             {
                 string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[0];
                 object keyValue = primaryKey[0];
-                return queryable.Where(e => EF.Property<object>(e, primaryKeyPropertyName).Equals(keyValue));
+                return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName).Equals(keyValue));
             }
 
             for (int i = 0; i < primaryKey.Length; i++)
@@ -158,12 +158,24 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public async Task<TEntity> FindAsync(TId id, CancellationToken cancellationToken)
+        public virtual async Task<TEntity> FindAsync(TId id, CancellationToken cancellationToken)
         {
             Ensure.Arg.NotNull(id, nameof(id));
 
             TDbEntity dbEntity = await FindCoreAsync(id, cancellationToken);
             return _mapper.Map<TEntity>(dbEntity);
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken)
+        {
+            TEntity entity = await FindAsync(id, cancellationToken);
+            if (entity == null)
+            {
+                throw new EntityNotFoundException(typeof(TEntity), id);
+            }
+
+            return entity;
         }
 
         protected virtual ValueTask<EntityEntry<TDbEntity>> CreateCoreAsync(
@@ -175,7 +187,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
         
         /// <inheritdoc />
-        public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
+        public virtual async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
         {
             Ensure.Arg.NotNull(entity, nameof(entity));
 
@@ -206,7 +218,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken)
+        public virtual async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken)
         {
             Ensure.Arg.NotNull(entity, nameof(entity));
 
@@ -246,7 +258,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken)
+        public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken)
         {
             Ensure.Arg.NotNull(entity, nameof(entity));
 
