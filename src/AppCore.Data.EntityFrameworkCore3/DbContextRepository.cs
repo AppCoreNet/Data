@@ -72,7 +72,11 @@ namespace AppCore.Data.EntityFrameworkCore
             _mapper = entityMapper;
             _logger = logger;
 
-            _modelProperties = DbModelProperties.Get(typeof(TDbContext), typeof(TDbEntity), context.Model, typeof(TEntity));
+            _modelProperties = DbModelProperties.Get(
+                typeof(TDbContext),
+                typeof(TDbEntity),
+                context.Model,
+                typeof(TEntity));
 
             Provider = provider;
             Context = context;
@@ -130,15 +134,33 @@ namespace AppCore.Data.EntityFrameworkCore
 
         private void UpdateChangeToken(EntityEntry<TDbEntity> entry, TEntity entity)
         {
-            if (entity is IHasChangeToken concurrentEntity)
+            if (_modelProperties.HasConcurrencyToken)
             {
                 PropertyEntry<TDbEntity, string> concurrencyToken =
                     entry.Property<string>(_modelProperties.ConcurrencyTokenPropertyName);
 
-                concurrencyToken.OriginalValue = concurrentEntity.ChangeToken;
-                if (entry.State != EntityState.Deleted)
+                if (entity is IHasChangeTokenEx expectedChangeToken)
                 {
-                    concurrencyToken.CurrentValue = _tokenGenerator.Generate();
+                    concurrencyToken.OriginalValue = expectedChangeToken.ExpectedChangeToken;
+                    if (entry.State != EntityState.Deleted)
+                    {
+                        string changeToken = expectedChangeToken.ChangeToken;
+                        if (string.IsNullOrWhiteSpace(changeToken)
+                            || string.Equals(changeToken, expectedChangeToken.ExpectedChangeToken))
+                        {
+                            changeToken = _tokenGenerator.Generate();
+                        }
+
+                        concurrencyToken.CurrentValue = changeToken;
+                    }
+                }
+                else if (entity is IHasChangeToken changeToken)
+                {
+                    concurrencyToken.OriginalValue = changeToken.ChangeToken;
+                    if (entry.State != EntityState.Deleted)
+                    {
+                        concurrencyToken.CurrentValue = _tokenGenerator.Generate();
+                    }
                 }
             }
         }

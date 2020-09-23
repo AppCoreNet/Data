@@ -30,8 +30,11 @@ namespace AppCore.Data.EntityFrameworkCore
                                       .Properties.Select(p => p.Name)
                                       .ToList();
 
-            IProperty concurrencyToken = modelEntityType.FindProperty(nameof(IHasChangeToken.ChangeToken));
-            if ((concurrencyToken?.IsConcurrencyToken).GetValueOrDefault())
+            IProperty concurrencyToken =
+                modelEntityType.GetProperties()
+                               .FirstOrDefault(p => p.IsConcurrencyToken);
+
+            if (concurrencyToken != null)
             {
                 HasConcurrencyToken = true;
                 ConcurrencyTokenPropertyName = concurrencyToken.Name;
@@ -44,12 +47,13 @@ namespace AppCore.Data.EntityFrameworkCore
             {
                 var properties = new DbModelProperties(model, t.Item2);
 
-                if (typeof(IHasChangeToken).IsAssignableFrom(entityType))
+                if (typeof(IHasChangeToken).IsAssignableFrom(entityType)
+                    || typeof(IHasChangeTokenEx).IsAssignableFrom(entityType))
                 {
                     if (!properties.HasConcurrencyToken)
                     {
                         throw new ArgumentException(
-                            "The entity implements 'IHasChangeToken' but no matching property was found in the database model.");
+                            "The entity implements 'IHasChangeToken' or 'IHasChangeTokenEx' but no matching property was found in the database model.");
                     }
                 }
                 else if (properties.HasConcurrencyToken)
