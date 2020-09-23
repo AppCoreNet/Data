@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
@@ -7,6 +7,8 @@ namespace AppCore.Data.EntityFrameworkCore
         public DbSet<DbEntityWithSimpleId> SimpleEntities => Set<DbEntityWithSimpleId>();
 
         public DbSet<DbEntityWithComplexId> ComplexEntities => Set<DbEntityWithComplexId>();
+
+        public DbSet<DbEntityWithChangeToken> ChangeTokenEntities => Set<DbEntityWithChangeToken>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -19,6 +21,10 @@ namespace AppCore.Data.EntityFrameworkCore
 
             modelBuilder.Entity<DbEntityWithComplexId>()
                         .HasKey(e => new {e.Id, e.Version});
+
+            modelBuilder.Entity<DbEntityWithChangeToken>()
+                        .Property(p => p.ChangeToken)
+                        .IsConcurrencyToken();
         }
     }
 }
