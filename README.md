@@ -2,6 +2,9 @@ AppCore .NET Data
 -----------------
 
 [![Build Status](https://dev.azure.com/AppCoreNet/Data/_apis/build/status/AppCoreNet.Data%20CI?branchName=dev)](https://dev.azure.com/AppCoreNet/Data/_build/latest?definitionId=17&branchName=dev)
+![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/AppCoreNet/Data/17?compact_message)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/AppCoreNet/Data/17/dev)
+![Nuget](https://img.shields.io/nuget/v/AppCore.Data.Abstractions)
 
 This repository includes projects containing abstractions and implementations of the persistence framework.
 
