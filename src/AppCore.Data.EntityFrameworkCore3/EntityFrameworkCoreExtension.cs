@@ -1,41 +1,35 @@
 // Licensed under the MIT License.
-// Copyright (c) 2020 the AppCore .NET project.
+// Copyright (c) 2020-2021 the AppCore .NET project.
 
-using System;
-using System.Collections.Generic;
+using AppCore.Data.EntityFrameworkCore;
 using AppCore.DependencyInjection;
 using AppCore.DependencyInjection.Facilities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AppCore.Data.EntityFrameworkCore
+// ReSharper disable once CheckNamespace
+namespace AppCore.Data
 {
-    public class EntityFrameworkCoreExtension<TTag, TDbContext> : FacilityExtension<IDataFacility>
+    public class EntityFrameworkCoreExtension<TTag, TDbContext> : FacilityExtension
         where TDbContext : DbContext
     {
-        private readonly IList<Action<IComponentRegistry, IDataFacility>> _registrationCallbacks =
-            new List<Action<IComponentRegistry, IDataFacility>>();
-
-        protected override void RegisterComponents(IComponentRegistry registry, IDataFacility facility)
+        /// <inheritdoc />
+        protected override void Build(IComponentRegistry registry)
         {
-            registry.Register<IDbContextDataProvider<TDbContext>>()
-                    .Add<DbContextDataProvider<TTag, TDbContext>>()
-                    .PerScope()
-                    .IfNoneRegistered();
+            base.Build(registry);
 
-            registry.Register<IDataProvider>()
-                    .Add(c => c.Resolve<IDbContextDataProvider<TDbContext>>())
-                    .PerScope()
-                    .IfNotRegistered();
+            registry.TryAdd(
+                ComponentRegistration
+                    .Scoped<IDbContextDataProvider<TDbContext>, DbContextDataProvider<TTag, TDbContext>>());
 
-            registry.Register<ITransactionManager>()
-                    .Add(c => c.Resolve<IDbContextDataProvider<TDbContext>>().TransactionManager)
-                    .PerScope()
-                    .IfNotRegistered();
+            registry.TryAddEnumerable(
+                ComponentRegistration.Scoped<IDataProvider>(
+                    Factory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())));
 
-            foreach (Action<IComponentRegistry, IDataFacility> registrationCallback in _registrationCallbacks)
-            {
-                registrationCallback(registry, facility);
-            }
+            registry.TryAddEnumerable(
+                ComponentRegistration.Scoped<ITransactionManager>(
+                    Factory.Create(
+                        c => c.Resolve<IDbContextDataProvider<TDbContext>>()
+                              .TransactionManager)));
         }
 
         /*

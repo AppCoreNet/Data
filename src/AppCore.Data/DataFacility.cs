@@ -1,5 +1,5 @@
 // Licensed under the MIT License.
-// Copyright (c) 2020 the AppCore .NET project.
+// Copyright (c) 2020-2021 the AppCore .NET project.
 
 using AppCore.Data;
 using AppCore.DependencyInjection.Facilities;
@@ -10,25 +10,17 @@ namespace AppCore.DependencyInjection
     /// <summary>
     /// Represents the data facility.
     /// </summary>
-    public sealed class DataFacility : Facility, IDataFacility
+    public sealed class DataFacility : Facility
     {
         /// <inheritdoc />
-        protected override void RegisterComponents(IComponentRegistry registry)
+        protected override void Build(IComponentRegistry registry)
         {
-            registry.Register<ITokenGenerator>()
-                    .Add<TokenGenerator>()
-                    .PerContainer()
-                    .IfNoneRegistered();
+            base.Build(registry);
 
-            registry.Register(typeof(IDataProvider<>))
-                    .Add(typeof(DataProvider<>))
-                    .PerScope()
-                    .IfNotRegistered();
-
-            registry.Register(typeof(ITransactionManager<>))
-                    .Add(typeof(TransactionManager<>))
-                    .PerScope()
-                    .IfNotRegistered();
+            registry.TryAdd(ComponentRegistration.Singleton<ITokenGenerator, TokenGenerator>());
+            registry.TryAddEnumerable(ComponentRegistration.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)));
+            registry.TryAddEnumerable(
+                ComponentRegistration.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>)));
         }
     }
 }
