@@ -9,6 +9,11 @@ using Microsoft.EntityFrameworkCore;
 // ReSharper disable once CheckNamespace
 namespace AppCore.Data
 {
+    /// <summary>
+    /// Provides the EntityFramework Core extension for the <see cref="DataFacility"/>.
+    /// </summary>
+    /// <typeparam name="TTag">The data provider tag.</typeparam>
+    /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     public class EntityFrameworkCoreExtension<TTag, TDbContext> : FacilityExtension
         where TDbContext : DbContext
     {
@@ -26,25 +31,21 @@ namespace AppCore.Data
                     Factory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())));
 
             registry.TryAddEnumerable(
-                ComponentRegistration.Scoped<ITransactionManager>(
+                ComponentRegistration.Scoped(
                     Factory.Create(
                         c => c.Resolve<IDbContextDataProvider<TDbContext>>()
                               .TransactionManager)));
         }
 
-        /*
-        public void RegisterRepository<TEntity>()
-            where TEntity : class, IEntity
+        public EntityFrameworkCoreExtension<TTag, TDbContext> WithRepository<TId, TEntity, TDbEntity>()
+            where TEntity : IEntity<TId>
+            where TDbEntity : class
         {
-            _registrationCallbacks.Add(
-                (r, f) =>
-                {
-                    r.Register<IRepository<TEntity>>()
-                     .Add(c => c.Resolve<IDataProvider<TTag>>().Repository<TEntity>())
-                     .PerScope()
-                     .IfNoneRegistered();
-                });
+            ConfigureRegistry(
+                r => r.TryAdd(
+                    ComponentRegistration.Scoped<IRepository<TId, TEntity>, DbContextRepository<TId, TEntity, TDbContext, TDbEntity>>()));
+
+            return this;
         }
-        */
     }
 }
