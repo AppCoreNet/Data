@@ -17,6 +17,7 @@ namespace AppCore.DependencyInjection
         {
             base.Build(registry);
 
+            registry.AddFacility<LoggingFacility>();
             registry.TryAdd(ComponentRegistration.Singleton<ITokenGenerator, TokenGenerator>());
             registry.TryAddEnumerable(ComponentRegistration.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)));
             registry.TryAddEnumerable(
