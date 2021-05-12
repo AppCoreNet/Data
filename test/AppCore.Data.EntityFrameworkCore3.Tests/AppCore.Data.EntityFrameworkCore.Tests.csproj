@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AppCore.Data.EntityFrameworkCore3\AppCore.Data.EntityFrameworkCore3.csproj" />
+    <ProjectReference Include="..\..\src\AppCore.Data.EntityFrameworkCore3\AppCore.Data.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
