@@ -28,9 +28,7 @@ namespace AppCore.DependencyInjection
             where TDbContext : DbContext
         {
             Ensure.Arg.NotNull(facility, nameof(facility));
-
-            var extension = facility.AddExtension<EntityFrameworkCoreExtension<TTag, TDbContext>>();
-            configure?.Invoke(extension);
+            facility.AddExtension(configure);
             return facility;
         }
 

@@ -28,11 +28,11 @@ namespace AppCore.Data
 
             registry.TryAddEnumerable(
                 ComponentRegistration.Scoped<IDataProvider>(
-                    Factory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())));
+                    ComponentFactory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())));
 
             registry.TryAddEnumerable(
                 ComponentRegistration.Scoped(
-                    Factory.Create(
+                    ComponentFactory.Create(
                         c => c.Resolve<IDbContextDataProvider<TDbContext>>()
                               .TransactionManager)));
         }
