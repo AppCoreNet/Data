@@ -3,6 +3,7 @@
 
 using System;
 using AppCore.Data;
+using AppCore.DependencyInjection.Facilities;
 using AppCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 

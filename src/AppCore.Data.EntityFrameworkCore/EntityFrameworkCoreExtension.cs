@@ -1,13 +1,12 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
+using AppCore.Data;
 using AppCore.Data.EntityFrameworkCore;
-using AppCore.DependencyInjection;
-using AppCore.DependencyInjection.Facilities;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Data
+namespace AppCore.DependencyInjection.Facilities
 {
     /// <summary>
     /// Provides the EntityFramework Core extension for the <see cref="DataFacility"/>.
@@ -27,14 +26,16 @@ namespace AppCore.Data
                     .Scoped<IDbContextDataProvider<TDbContext>, DbContextDataProvider<TTag, TDbContext>>());
 
             registry.TryAddEnumerable(
-                ComponentRegistration.Scoped<IDataProvider>(
-                    ComponentFactory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())));
+                new[]
+                {
+                    ComponentRegistration.Scoped<IDataProvider>(
+                        ComponentFactory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())),
 
-            registry.TryAddEnumerable(
-                ComponentRegistration.Scoped(
-                    ComponentFactory.Create(
-                        c => c.Resolve<IDbContextDataProvider<TDbContext>>()
-                              .TransactionManager)));
+                    ComponentRegistration.Scoped(
+                        ComponentFactory.Create(
+                            c => c.Resolve<IDbContextDataProvider<TDbContext>>()
+                                  .TransactionManager))
+                });
         }
 
         public EntityFrameworkCoreExtension<TTag, TDbContext> WithRepository<TId, TEntity, TDbEntity>()

@@ -1,10 +1,10 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
-using AppCore.DependencyInjection;
-using AppCore.DependencyInjection.Facilities;
+using AppCore.Data;
 
-namespace AppCore.Data
+// ReSharper disable once CheckNamespace
+namespace AppCore.DependencyInjection.Facilities
 {
     /// <summary>
     /// Represents the data facility.
@@ -17,10 +17,14 @@ namespace AppCore.Data
             base.Build(registry);
 
             registry.AddLogging();
+
             registry.TryAdd(ComponentRegistration.Singleton<ITokenGenerator, TokenGenerator>());
-            registry.TryAddEnumerable(ComponentRegistration.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)));
             registry.TryAddEnumerable(
-                ComponentRegistration.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>)));
+                new[]
+                {
+                    ComponentRegistration.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)),
+                    ComponentRegistration.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
+                });
         }
     }
 }
