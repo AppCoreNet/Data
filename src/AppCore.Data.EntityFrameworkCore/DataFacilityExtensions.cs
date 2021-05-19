@@ -3,7 +3,6 @@
 
 using System;
 using AppCore.Data;
-using AppCore.DependencyInjection.Facilities;
 using AppCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +12,7 @@ namespace AppCore.DependencyInjection
     /// <summary>
     /// Provides extension methods to register EntityFramework Core with the <see cref="DataFacility"/>.
     /// </summary>
-    public static class EntityFrameworkCoreFacilityExtensions
+    public static class DataFacilityExtensions
     {
         /// <summary>
         /// Registers an EntityFramework Core data provider with the <see cref="DataFacility"/>.
@@ -25,7 +24,7 @@ namespace AppCore.DependencyInjection
         /// <returns>The <see cref="DataFacility"/>.</returns>
         public static DataFacility UseEntityFrameworkCore<TTag, TDbContext>(
             this DataFacility facility,
-            Action<EntityFrameworkCoreExtension<TTag, TDbContext>> configure = null)
+            Action<EntityFrameworkCoreFacilityExtension<TTag, TDbContext>> configure = null)
             where TDbContext : DbContext
         {
             Ensure.Arg.NotNull(facility, nameof(facility));
@@ -42,7 +41,7 @@ namespace AppCore.DependencyInjection
         /// <returns>The <see cref="DataFacility"/>.</returns>
         public static DataFacility UseEntityFrameworkCore<TDbContext>(
             this DataFacility facility,
-            Action<EntityFrameworkCoreExtension<DefaultDataProvider, TDbContext>> configure = null)
+            Action<EntityFrameworkCoreFacilityExtension<DefaultDataProvider, TDbContext>> configure = null)
             where TDbContext : DbContext
         {
             return facility.UseEntityFrameworkCore<DefaultDataProvider, TDbContext>(configure);

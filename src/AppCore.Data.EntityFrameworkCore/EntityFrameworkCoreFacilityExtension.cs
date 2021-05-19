@@ -1,19 +1,22 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
-using AppCore.Data;
 using AppCore.Data.EntityFrameworkCore;
+using AppCore.DependencyInjection;
+using AppCore.DependencyInjection.Facilities;
 using Microsoft.EntityFrameworkCore;
+using ComponentRegistration = AppCore.DependencyInjection.ComponentRegistration;
+using IComponentRegistry = AppCore.DependencyInjection.IComponentRegistry;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.DependencyInjection.Facilities
+namespace AppCore.Data
 {
     /// <summary>
     /// Provides the EntityFramework Core extension for the <see cref="DataFacility"/>.
     /// </summary>
     /// <typeparam name="TTag">The data provider tag.</typeparam>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    public class EntityFrameworkCoreExtension<TTag, TDbContext> : FacilityExtension
+    public class EntityFrameworkCoreFacilityExtension<TTag, TDbContext> : FacilityExtension
         where TDbContext : DbContext
     {
         /// <inheritdoc />
@@ -38,7 +41,7 @@ namespace AppCore.DependencyInjection.Facilities
                 });
         }
 
-        public EntityFrameworkCoreExtension<TTag, TDbContext> WithRepository<TId, TEntity, TDbEntity>()
+        public EntityFrameworkCoreFacilityExtension<TTag, TDbContext> WithRepository<TId, TEntity, TDbEntity>()
             where TEntity : IEntity<TId>
             where TDbEntity : class
         {

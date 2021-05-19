@@ -2,7 +2,7 @@
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
 using System;
-using AppCore.DependencyInjection.Facilities;
+using AppCore.Data;
 
 // ReSharper disable once CheckNamespace
 namespace AppCore.DependencyInjection
