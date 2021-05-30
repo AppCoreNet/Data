@@ -10,20 +10,20 @@ using Microsoft.EntityFrameworkCore;
 namespace AppCore.DependencyInjection
 {
     /// <summary>
-    /// Provides extension methods to register EntityFramework Core with the <see cref="DataFacility"/>.
+    /// Provides extension methods to register EntityFramework Core with the <see cref="DataProviderFacility"/>.
     /// </summary>
-    public static class DataFacilityExtensions
+    public static class DataProviderFacilityExtensions
     {
         /// <summary>
-        /// Registers an EntityFramework Core data provider with the <see cref="DataFacility"/>.
+        /// Registers an EntityFramework Core data provider with the <see cref="DataProviderFacility"/>.
         /// </summary>
         /// <typeparam name="TTag">The data provider tag.</typeparam>
         /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-        /// <param name="facility">The <see cref="DataFacility"/>.</param>
+        /// <param name="facility">The <see cref="DataProviderFacility"/>.</param>
         /// <param name="configure">Delegate used to configure the extension.</param>
-        /// <returns>The <see cref="DataFacility"/>.</returns>
-        public static DataFacility UseEntityFrameworkCore<TTag, TDbContext>(
-            this DataFacility facility,
+        /// <returns>The <see cref="DataProviderFacility"/>.</returns>
+        public static DataProviderFacility UseEntityFrameworkCore<TTag, TDbContext>(
+            this DataProviderFacility facility,
             Action<EntityFrameworkCoreFacilityExtension<TTag, TDbContext>> configure = null)
             where TDbContext : DbContext
         {
@@ -33,14 +33,14 @@ namespace AppCore.DependencyInjection
         }
 
         /// <summary>
-        /// Register an EntityFramework Core data provider with the <see cref="DataFacility"/> as the <see cref="DefaultDataProvider"/>.
+        /// Register an EntityFramework Core data provider with the <see cref="DataProviderFacility"/> as the <see cref="DefaultDataProvider"/>.
         /// </summary>
         /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-        /// <param name="facility">The <see cref="DataFacility"/>.</param>
+        /// <param name="facility">The <see cref="DataProviderFacility"/>.</param>
         /// <param name="configure">Delegate used to configure the extension.</param>
-        /// <returns>The <see cref="DataFacility"/>.</returns>
-        public static DataFacility UseEntityFrameworkCore<TDbContext>(
-            this DataFacility facility,
+        /// <returns>The <see cref="DataProviderFacility"/>.</returns>
+        public static DataProviderFacility UseEntityFrameworkCore<TDbContext>(
+            this DataProviderFacility facility,
             Action<EntityFrameworkCoreFacilityExtension<DefaultDataProvider, TDbContext>> configure = null)
             where TDbContext : DbContext
         {

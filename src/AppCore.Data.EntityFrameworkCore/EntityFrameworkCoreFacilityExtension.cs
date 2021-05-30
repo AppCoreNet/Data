@@ -12,7 +12,7 @@ using IComponentRegistry = AppCore.DependencyInjection.IComponentRegistry;
 namespace AppCore.Data
 {
     /// <summary>
-    /// Provides the EntityFramework Core extension for the <see cref="DataFacility"/>.
+    /// Provides the EntityFramework Core extension for the <see cref="DataProviderFacility"/>.
     /// </summary>
     /// <typeparam name="TTag">The data provider tag.</typeparam>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>

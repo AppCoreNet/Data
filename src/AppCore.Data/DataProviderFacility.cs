@@ -9,7 +9,7 @@ namespace AppCore.Data
     /// <summary>
     /// Represents the data facility.
     /// </summary>
-    public sealed class DataFacility : Facility
+    public sealed class DataProviderFacility : Facility
     {
         /// <inheritdoc />
         protected override void Build(IComponentRegistry registry)

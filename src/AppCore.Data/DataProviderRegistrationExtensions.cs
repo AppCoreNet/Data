@@ -8,19 +8,19 @@ using AppCore.Data;
 namespace AppCore.DependencyInjection
 {
     /// <summary>
-    /// Provides extension methods to register the <see cref="DataFacility"/>.
+    /// Provides extension methods to register the <see cref="DataProviderFacility"/>.
     /// </summary>
-    public static class DataRegistrationExtensions
+    public static class DataProviderRegistrationExtensions
     {
         /// <summary>
-        /// Adds the <see cref="DataFacility"/> to the <see cref="IComponentRegistry"/>.
+        /// Adds the <see cref="DataProviderFacility"/> to the <see cref="IComponentRegistry"/>.
         /// </summary>
         /// <param name="registry">The <see cref="IComponentRegistry"/>.</param>
         /// <param name="configure">The configuration delegate.</param>
         /// <returns>The <see cref="IComponentRegistry"/>.</returns>
-        public static IComponentRegistry AddData(
+        public static IComponentRegistry AddDataProvider(
             this IComponentRegistry registry,
-            Action<DataFacility> configure = null)
+            Action<DataProviderFacility> configure = null)
         {
             return registry.AddFacility(configure);
         }
