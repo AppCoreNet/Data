@@ -2,6 +2,5 @@
   <PropertyGroup>
     <AppCore_Shared_Version>0.3.0-alpha*</AppCore_Shared_Version>
     <AppCore_DI_Version>0.3.0-alpha*</AppCore_DI_Version>
-    <AppCore_Logging_Version>0.3.0-alpha*</AppCore_Logging_Version>
   </PropertyGroup>
 </Project>
