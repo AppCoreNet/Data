@@ -19,7 +19,7 @@ Package                                    | Description
 -------------------------------------------|------------------------------------------------------------------------------------------------------
 `AppCore.Data`                             | Provides persistence framework default implementations.
 `AppCore.Data.Abstractions`                | Provides the public API of the persistence framework.
-`AppCore.Data.EntityFrameworkCore3`        | Adds support for Entity Framework Core 3.1.
+`AppCore.Data.EntityFrameworkCore`         | Adds support for Entity Framework Core 3.1.
 
 ## Contributing
 

@@ -2,11 +2,10 @@
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
 using AppCore.Data.EntityFrameworkCore;
-using AppCore.DependencyInjection;
 using AppCore.DependencyInjection.Facilities;
 using Microsoft.EntityFrameworkCore;
-using ComponentRegistration = AppCore.DependencyInjection.ComponentRegistration;
-using IComponentRegistry = AppCore.DependencyInjection.IComponentRegistry;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace AppCore.Data
@@ -20,34 +19,32 @@ namespace AppCore.Data
         where TDbContext : DbContext
     {
         /// <inheritdoc />
-        protected override void Build(IComponentRegistry registry)
+        protected override void ConfigureServices(IServiceCollection services)
         {
-            base.Build(registry);
+            base.ConfigureServices(services);
 
-            registry.TryAdd(
-                ComponentRegistration
-                    .Scoped<IDbContextDataProvider<TDbContext>, DbContextDataProvider<TTag, TDbContext>>());
+            services.TryAddScoped<IDbContextDataProvider<TDbContext>, DbContextDataProvider<TTag, TDbContext>>();
 
-            registry.TryAddEnumerable(
+            services.TryAddEnumerable(
                 new[]
                 {
-                    ComponentRegistration.Scoped<IDataProvider>(
-                        ComponentFactory.Create(c => c.Resolve<IDbContextDataProvider<TDbContext>>())),
-
-                    ComponentRegistration.Scoped(
-                        ComponentFactory.Create(
-                            c => c.Resolve<IDbContextDataProvider<TDbContext>>()
-                                  .TransactionManager))
+                    ServiceDescriptor.Scoped<IDataProvider>(
+                        sp => sp.GetRequiredService<IDbContextDataProvider<TDbContext>>()),
+                    ServiceDescriptor.Scoped(
+                        sp => sp.GetRequiredService<IDbContextDataProvider<TDbContext>>()
+                                .TransactionManager)
                 });
         }
-
+        
         public EntityFrameworkCoreFacilityExtension<TTag, TDbContext> WithRepository<TId, TEntity, TDbEntity>()
             where TEntity : IEntity<TId>
             where TDbEntity : class
         {
-            ConfigureRegistry(
-                r => r.TryAdd(
-                    ComponentRegistration.Scoped<IRepository<TId, TEntity>, DbContextRepository<TId, TEntity, TDbContext, TDbEntity>>()));
+            AddCallback(
+                services =>
+                    services
+                        .TryAddScoped<IRepository<TId, TEntity>,
+                            DbContextRepository<TId, TEntity, TDbContext, TDbEntity>>());
 
             return this;
         }

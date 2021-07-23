@@ -1,8 +1,9 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
-using AppCore.DependencyInjection;
 using AppCore.DependencyInjection.Facilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AppCore.Data
 {
@@ -12,19 +13,16 @@ namespace AppCore.Data
     public sealed class DataProviderFacility : Facility
     {
         /// <inheritdoc />
-        protected override void Build(IComponentRegistry registry)
+        protected override void ConfigureServices(IServiceCollection services)
         {
-            base.Build(registry);
+            base.ConfigureServices(services);
 
-            registry.AddLogging();
-
-            registry.TryAdd(ComponentRegistration.Singleton<ITokenGenerator, TokenGenerator>());
-            registry.TryAddEnumerable(
-                new[]
-                {
-                    ComponentRegistration.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)),
-                    ComponentRegistration.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
-                });
+            services.TryAddSingleton<ITokenGenerator, TokenGenerator>();
+            services.TryAddEnumerable(new []
+            {
+                ServiceDescriptor.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)),
+                ServiceDescriptor.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
+            });
         }
     }
 }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <Description>Adds EntityFramework Core 3 support to AppCore .NET persistence.</Description>
     <RootNamespace>AppCore.Data.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>

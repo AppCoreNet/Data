@@ -1,4 +1,4 @@
-using AppCore.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
