@@ -7,7 +7,7 @@ using AppCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace AppCore.DependencyInjection
 {
     /// <summary>
     /// Provides extension methods to register EntityFramework Core with the <see cref="DataProviderFacility"/>.
@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.DependencyInjection
             Action<EntityFrameworkCoreFacilityExtension<DefaultDataProvider, TDbContext>> configure = null)
             where TDbContext : DbContext
         {
-            return facility.UseEntityFrameworkCore<DefaultDataProvider, TDbContext>(configure);
+            return UseEntityFrameworkCore<DefaultDataProvider, TDbContext>(facility, configure);
         }
     }
 }

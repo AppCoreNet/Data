@@ -1,11 +1,13 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
+using AppCore.Data;
 using AppCore.DependencyInjection.Facilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace AppCore.Data
+// ReSharper disable once CheckNamespace
+namespace AppCore.DependencyInjection
 {
     /// <summary>
     /// Represents the data facility.

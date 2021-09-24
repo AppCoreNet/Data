@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using AppCore.Data;
 using AppCore.Data.EntityFrameworkCore;
 using AppCore.DependencyInjection.Facilities;
 using AppCore.Diagnostics;
@@ -11,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Data
+namespace AppCore.DependencyInjection
 {
     /// <summary>
     /// Provides the EntityFramework Core extension for the <see cref="DataProviderFacility"/>.
@@ -83,7 +84,7 @@ namespace AppCore.Data
             where TEntity : IEntity<TId>
             where TDbEntity : class
         {
-            AddCallback(
+            ConfigureServices(
                 services =>
                     services
                         .TryAddScoped<IRepository<TId, TEntity>,
