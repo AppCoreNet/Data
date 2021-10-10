@@ -2,7 +2,6 @@
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
 using System;
-using System.Collections.Generic;
 using AppCore.Data;
 using AppCore.Data.EntityFrameworkCore;
 using AppCore.DependencyInjection.Facilities;
@@ -23,7 +22,7 @@ namespace AppCore.DependencyInjection
         where TDbContext : DbContext
     {
         private int? _poolSize;
-        private readonly List<Action<IServiceProvider, DbContextOptionsBuilder>> _options = new();
+        private Action<IServiceProvider, DbContextOptionsBuilder> _options;
 
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceCollection services)
@@ -45,21 +44,11 @@ namespace AppCore.DependencyInjection
 
             if (_poolSize.HasValue)
             {
-                services.AddDbContextPool<TDbContext>(o => { }, (int) _poolSize);
-
-                foreach (Action<IServiceProvider, DbContextOptionsBuilder> options in _options)
-                {
-                    services.AddDbContextPool<TDbContext>(options, (int)_poolSize);
-                }
+                services.AddDbContextPool<TDbContext>(_options, (int) _poolSize);
             }
             else
             {
-                services.AddDbContext<TDbContext>();
-
-                foreach (Action<IServiceProvider, DbContextOptionsBuilder> options in _options)
-                {
-                    services.AddDbContext<TDbContext>(options);
-                }
+                services.AddDbContext<TDbContext>(_options);
             }
         }
 
@@ -72,7 +61,7 @@ namespace AppCore.DependencyInjection
         public EntityFrameworkCoreFacilityExtension<TTag, TDbContext> WithOptions(Action<IServiceProvider, DbContextOptionsBuilder> options)
         {
             Ensure.Arg.NotNull(options, nameof(options));
-            _options.Add(options);
+            _options = options;
             return this;
         }
 
