@@ -35,11 +35,12 @@ namespace AppCore.DependencyInjection
             services.TryAddEnumerable(
                 new[]
                 {
-                    ServiceDescriptor.Scoped<IDataProvider>(
+                    ServiceDescriptor.Scoped<IDataProvider, IDbContextDataProvider<TDbContext>>(
                         sp => sp.GetRequiredService<IDbContextDataProvider<TDbContext>>()),
-                    ServiceDescriptor.Scoped(
-                        sp => sp.GetRequiredService<IDbContextDataProvider<TDbContext>>()
-                                .TransactionManager)
+                    ServiceDescriptor.Scoped<ITransactionManager, DbContextTransactionManager>(
+                        sp => (DbContextTransactionManager)
+                            sp.GetRequiredService<IDbContextDataProvider<TDbContext>>()
+                              .TransactionManager)
                 });
 
             if (_poolSize.HasValue)
