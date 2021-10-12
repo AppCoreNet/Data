@@ -4,9 +4,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AppCore.Logging;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net5;netcoreapp3.1;net461</TargetFrameworks>
     <Description>Adds EntityFramework Core 3 support to AppCore .NET persistence.</Description>
     <RootNamespace>AppCore.Data.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
@@ -15,8 +15,18 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="AppCore.Logging.Abstractions" Version="$(AppCore_DI_Version)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[3.1.0,4.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[3.1.0,4.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net5'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[5.0.0,7.0.0)" />
   </ItemGroup>
 
   <ItemGroup>

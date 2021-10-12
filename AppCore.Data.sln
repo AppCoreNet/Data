@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.Abstractions",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data", "src\AppCore.Data\AppCore.Data.csproj", "{2C53E3E5-928F-4D96-8ADF-140F589C1887}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore3", "src\AppCore.Data.EntityFrameworkCore3\AppCore.Data.EntityFrameworkCore3.csproj", "{EE52F420-0C7E-4F83-A171-3A1A7B5F5B4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore", "src\AppCore.Data.EntityFrameworkCore\AppCore.Data.EntityFrameworkCore.csproj", "{EE52F420-0C7E-4F83-A171-3A1A7B5F5B4F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.Tests", "test\AppCore.Data.Tests\AppCore.Data.Tests.csproj", "{2F1C1FB9-22F0-4109-85C4-09A59A60465E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore3.Tests", "test\AppCore.Data.EntityFrameworkCore3.Tests\AppCore.Data.EntityFrameworkCore3.Tests.csproj", "{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore.Tests", "test\AppCore.Data.EntityFrameworkCore.Tests\AppCore.Data.EntityFrameworkCore.Tests.csproj", "{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

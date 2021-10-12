@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard1.2;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <Description>Provides default AppCore .NET persistence implementations.</Description>
   </PropertyGroup>
 

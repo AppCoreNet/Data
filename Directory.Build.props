@@ -5,7 +5,7 @@
     <Product>AppCore .NET Project Template</Product>
     <Copyright>Copyright (c) 2018-2020 the AppCore .NET project</Copyright>
     <Version>1.0.0</Version>
-    <PackageLicenseUrl>https://github.com/AppCoreNet/Template/blob/dev/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/AppCoreNet/Template</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <LangVersion>latest</LangVersion>

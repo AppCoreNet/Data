@@ -1,6 +1,5 @@
-#module "nuget:?package=Cake.DotNetTool.Module&version=0.4.0"
-#tool "dotnet:?package=GitVersion.Tool&version=5.3.5"
-#tool "nuget:?package=ReportGenerator&version=4.6.1"
+#tool "dotnet:?package=GitVersion.Tool&version=5.6.4"
+#tool "dotnet:?package=dotnet-reportgenerator-globaltool&version=4.8.7"
 
 public static partial class BuildConstants
 {
@@ -171,7 +170,7 @@ Task("DotNetCore.Test")
             },
         Configuration = p.Configuration,
         ResultsDirectory = testResultsDir,
-        Logger = "trx",
+        Loggers = new string[] { "trx" },
         NoRestore = true,
         NoBuild = true
     });

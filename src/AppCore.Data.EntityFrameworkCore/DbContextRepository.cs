@@ -6,9 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCore.Diagnostics;
-using AppCore.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {

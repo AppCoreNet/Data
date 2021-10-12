@@ -1,11 +1,11 @@
-﻿using AppCore.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
-    public class TestContextSimpleIdRepository
-        : DbContextRepository<int, EntityWithSimpleId, TestContext, DbEntityWithSimpleId>
+    public class TestContextChangeTokenExRepository
+        : DbContextRepository<int, EntityWithChangeTokenEx, TestContext, DbEntityWithChangeToken>
     {
-        public TestContextSimpleIdRepository(
+        public TestContextChangeTokenExRepository(
             IDbContextDataProvider<TestContext> provider,
             ITokenGenerator tokenGenerator,
             IEntityMapper entityMapper,

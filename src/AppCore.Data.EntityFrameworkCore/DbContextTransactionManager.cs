@@ -5,10 +5,10 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCore.Diagnostics;
-using AppCore.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
