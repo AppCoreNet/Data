@@ -12,13 +12,15 @@ namespace AppCore.Data.EntityFrameworkCore
 
         public static readonly EventId SavedChanges = new EventId(1, "saved_changes");
 
-        public static readonly EventId SaveChangesDeferred = new EventId(2, "saved_changes_delayer");
+        public static readonly EventId SaveChangesDeferred = new EventId(2, "saving_changes_delayed");
 
         public static readonly EventId TransactionInit = new EventId(3, "transaction_init");
 
         public static readonly EventId TransactionCommit = new EventId(4, "transaction_commit");
 
         public static readonly EventId TransactionRollback = new EventId(5, "transaction_rollback");
+
+        public static readonly EventId TransactionDisposed = new EventId(5, "transaction_disposed");
 
         // DbContextRepository
         public static readonly EventId EntitySaving = new EventId(0, "entity_saving");

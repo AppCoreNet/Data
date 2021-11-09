@@ -41,7 +41,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
                     GetIdValues = id =>
                     {
-                        var result = new object[idPropertyGetters.Length];
+                        object[] result = new object[idPropertyGetters.Length];
                         for (int i = 0; i < idPropertyGetters.Length; i++)
                         {
                             result[i] = idPropertyGetters[i](id);

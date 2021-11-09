@@ -72,7 +72,7 @@ namespace AppCore.Data.EntityFrameworkCore
         /// <inheritdoc />
         public async Task SaveChangesAsync(CancellationToken cancellationToken)
         {
-            // if more than one changes scope is active, save is a no-op
+            // if more than one change scope is active, save is a no-op
             if (_pendingChanges.Count > 1)
             {
                 _logger.SaveChangesDeferred(_dbContext.GetType());
@@ -81,11 +81,10 @@ namespace AppCore.Data.EntityFrameworkCore
 
             _logger.SavingChanges(_dbContext.GetType());
 
-            bool transactionPending = _dbContext.Database.CurrentTransaction != null;
             int entityCount;
             try
             {
-                entityCount = await _dbContext.SaveChangesAsync(!transactionPending, cancellationToken);
+                entityCount = await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateConcurrencyException error)
             {

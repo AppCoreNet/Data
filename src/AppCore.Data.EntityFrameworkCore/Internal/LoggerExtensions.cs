@@ -34,10 +34,9 @@ namespace AppCore.Data.EntityFrameworkCore
             LoggerMessage.Define<Guid, Type>(LogLevel.Debug, LogEventIds.TransactionRollback,
                                              "Rolled back transaction {transactionId} for context {dbContextType}.");
 
-        internal static void SaveChangesDeferred(this ILogger logger, Type dbContextType)
-        {
-            _saveChangesDeferred(logger, dbContextType, null);
-        }
+        private static readonly Action<ILogger, Guid, Type, Exception> _transactionDisposed =
+            LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionDisposed,
+                                             "Disposed transaction {transactionId} for context {dbContextType}.");
 
         internal static void SavingChanges(this ILogger logger, Type dbContextType)
         {
@@ -47,6 +46,11 @@ namespace AppCore.Data.EntityFrameworkCore
         internal static void SavedChanges(this ILogger logger, Type dbContextType, int entityCount)
         {
             _savedChanges(logger, entityCount, dbContextType, null);
+        }
+
+        internal static void SaveChangesDeferred(this ILogger logger, Type dbContextType)
+        {
+            _saveChangesDeferred(logger, dbContextType, null);
         }
 
         internal static void TransactionInit(this ILogger logger, Type dbContextType, Guid transactionId)
@@ -62,6 +66,11 @@ namespace AppCore.Data.EntityFrameworkCore
         internal static void TransactionRollback(this ILogger logger, Type dbContextType, Guid transactionId)
         {
             _transactionRollback(logger, transactionId, dbContextType, null);
+        }
+
+        internal static void TransactionDisposed(this ILogger logger, Type dbContextType, Guid transactionId)
+        {
+            _transactionDisposed(logger, transactionId, dbContextType, null);
         }
 
         // DbContextRepository

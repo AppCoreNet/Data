@@ -1,4 +1,4 @@
-﻿// Licensed under the MIT License.
+// Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System.Data;
@@ -32,6 +32,13 @@ namespace AppCore.Data
             IsolationLevel isolationLevel,
             CancellationToken cancellationToken = default
         );
+
+        /// <summary>
+        /// Begins a new transaction in the context of the data provider.
+        /// </summary>
+        /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
+        /// <returns>The created transaction.</returns>
+        ITransaction BeginTransaction(IsolationLevel isolationLevel);
     }
 
     /// <summary>
