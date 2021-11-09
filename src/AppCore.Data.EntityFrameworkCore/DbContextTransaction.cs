@@ -1,6 +1,8 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCore.Diagnostics;
@@ -35,13 +37,14 @@ namespace AppCore.Data.EntityFrameworkCore
         public void Dispose()
         {
             Transaction.Dispose();
-            _logger.TransactionRollback(DbContext.GetType(), Transaction.TransactionId);
+            _logger.TransactionDisposed(DbContext.GetType(), Transaction.TransactionId);
         }
 
         /// <inheritdoc />
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return Transaction.DisposeAsync();
+            await Transaction.DisposeAsync();
+            _logger.TransactionDisposed(DbContext.GetType(), Transaction.TransactionId);
         }
 
         /// <inheritdoc />
