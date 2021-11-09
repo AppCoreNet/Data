@@ -68,5 +68,13 @@ namespace AppCore.Data.EntityFrameworkCore
             IDbContextTransaction transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
             return _currentTransaction = new DbContextTransaction(dbContext, transaction, _logger);
         }
+
+        /// <inheritdoc />
+        public ITransaction BeginTransaction(IsolationLevel isolationLevel)
+        {
+            DbContext dbContext = _provider.GetContext();
+            IDbContextTransaction transaction = dbContext.Database.BeginTransaction();
+            return _currentTransaction = new DbContextTransaction(dbContext, transaction, _logger);
+        }
     }
 }
