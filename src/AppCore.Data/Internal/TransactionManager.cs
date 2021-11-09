@@ -41,5 +41,10 @@ namespace AppCore.Data
         {
             return Manager.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
+
+        public ITransaction BeginTransaction(IsolationLevel isolationLevel)
+        {
+            return Manager.BeginTransaction(isolationLevel);
+        }
     }
 }
