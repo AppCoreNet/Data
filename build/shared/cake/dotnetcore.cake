@@ -20,10 +20,15 @@ public class BuildParametersDotNetCore
     
     public string TestSolution { get; set; }
     public string TestProjectsPattern { get; set; } = "**/test/**/*.csproj";
+    public string TestFilter { get; set; }
     
     public bool CollectCoverage { get; set; } = true;
     public bool CollectTestAssemblyCoverage { get; set; } = false;
 }
+
+BuildParametersInit.Add((p,c) => {
+    p.DotNetCore.TestFilter = c.Argument("test-filter", "");
+});
 
 public bool DotNetCoreNewSolution(string solutionFile, FilePathCollection projectFiles)
 {
@@ -169,6 +174,7 @@ Task("DotNetCore.Test")
                 return args;
             },
         Configuration = p.Configuration,
+        Filter = p.DotNetCore.TestFilter,
         ResultsDirectory = testResultsDir,
         Loggers = new string[] { "trx" },
         NoRestore = true,
