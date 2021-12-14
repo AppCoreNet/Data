@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net5</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5;net6</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Unix'">$(TargetFrameworks);net461</TargetFrameworks>
     <RootNamespace>AppCore.Data.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
@@ -14,5 +14,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net461'" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net5'" Version="5.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net6'" Version="6.0.0" />
   </ItemGroup>
 </Project>
