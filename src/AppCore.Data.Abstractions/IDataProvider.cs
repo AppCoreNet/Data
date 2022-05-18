@@ -31,7 +31,7 @@ namespace AppCore.Data
         /// </remarks>
         /// <param name="afterSaveCallback">A callback which is invoked after changes have been saved.</param>
         /// <returns>The change scope which must be disposed.</returns>
-        IDisposable BeginChangeScope(Action afterSaveCallback = null);
+        IDisposable BeginChangeScope(Action? afterSaveCallback = null);
 
         /// <summary>
         /// Saves all changes made to the data provider.

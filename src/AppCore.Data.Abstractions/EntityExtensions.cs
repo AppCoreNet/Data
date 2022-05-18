@@ -20,7 +20,7 @@ namespace AppCore.Data
         public static bool IsTransient<TId>(this IEntity<TId> entity)
         {
             Ensure.Arg.NotNull(entity, nameof(entity));
-            return EqualityComparer<TId>.Default.Equals(entity.Id, default);
+            return EqualityComparer<TId>.Default.Equals(entity.Id, default!);
         }
     }
 }

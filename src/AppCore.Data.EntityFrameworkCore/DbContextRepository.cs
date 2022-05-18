@@ -30,8 +30,8 @@ namespace AppCore.Data.EntityFrameworkCore
         /// </summary>
         /// <typeparam name="TQuery">The type of the query.</typeparam>
         /// <typeparam name="TResult">The type of the result.</typeparam>
-        public abstract class ScalarQueryHandler<TQuery, TResult> : DbContextScalarQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-            where TQuery : IQuery<TEntity, TResult>
+        public abstract class ScalarQueryHandler<TQuery, TResult> : DbContextScalarQueryHandler<TQuery, TEntity, TResult?, TDbContext, TDbEntity>
+            where TQuery : IQuery<TEntity, TResult?>
         {
             /// <summary>
             /// Initializes a new instance of the <see cref="ScalarQueryHandler{TQuery,TResult}"/> class.
@@ -150,7 +150,7 @@ namespace AppCore.Data.EntityFrameworkCore
         /// </summary>
         /// <param name="id">The unique entity id.</param>
         /// <returns>The primary key values.</returns>
-        protected virtual object[] GetPrimaryKey(TId id)
+        protected virtual object?[] GetPrimaryKey(TId id)
         {
             return EntityModelProperties.GetIdValues(id);
         }
@@ -164,13 +164,13 @@ namespace AppCore.Data.EntityFrameworkCore
         /// <returns>The queryable filtered by primary key.</returns>
         protected virtual IQueryable<TDbEntity> ApplyPrimaryKeyExpression(IQueryable<TDbEntity> queryable, TId id)
         {
-            object[] primaryKey = GetPrimaryKey(id);
+            object?[] primaryKey = GetPrimaryKey(id);
 
             if (primaryKey.Length == 1)
             {
                 string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[0];
-                object keyValue = primaryKey[0];
-                return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName).Equals(keyValue));
+                object? keyValue = primaryKey[0];
+                return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName)!.Equals(keyValue));
             }
 
             for (int i = 0; i < primaryKey.Length; i++)
@@ -181,7 +181,7 @@ namespace AppCore.Data.EntityFrameworkCore
                 if (!string.Equals(idPropertyName, primaryKeyPropertyName, StringComparison.OrdinalIgnoreCase))
                     throw new NotSupportedException("Entity.Id property names do not match the primary key property names.");
 
-                object keyValue = primaryKey[i];
+                object? keyValue = primaryKey[i];
                 queryable = queryable.Where(
                     e => EF.Property<object>(e, primaryKeyPropertyName).Equals(keyValue));
             }
@@ -203,15 +203,15 @@ namespace AppCore.Data.EntityFrameworkCore
         {
             if (_modelProperties.HasConcurrencyToken)
             {
-                PropertyEntry<TDbEntity, string> concurrencyToken =
-                    entry.Property<string>(_modelProperties.ConcurrencyTokenPropertyName);
+                PropertyEntry<TDbEntity, string?> concurrencyToken =
+                    entry.Property<string?>(_modelProperties.ConcurrencyTokenPropertyName!);
 
                 if (entity is IHasChangeTokenEx expectedChangeToken)
                 {
                     concurrencyToken.OriginalValue = expectedChangeToken.ExpectedChangeToken;
                     if (entry.State != EntityState.Deleted)
                     {
-                        string changeToken = expectedChangeToken.ChangeToken;
+                        string? changeToken = expectedChangeToken.ChangeToken;
                         if (string.IsNullOrWhiteSpace(changeToken)
                             || string.Equals(changeToken, expectedChangeToken.ExpectedChangeToken))
                         {
@@ -248,9 +248,9 @@ namespace AppCore.Data.EntityFrameworkCore
             return await queryHandler.ExecuteAsync(query, cancellationToken);
         }
 
-        protected virtual async Task<TDbEntity> FindCoreAsync(TId id, CancellationToken cancellationToken)
+        protected virtual async Task<TDbEntity?> FindCoreAsync(TId id, CancellationToken cancellationToken)
         {
-            TDbEntity dbEntity = await GetQueryable(id)
+            TDbEntity? dbEntity = await GetQueryable(id)
                                        .AsNoTracking()
                                        .FirstOrDefaultAsync(cancellationToken);
 
@@ -258,21 +258,23 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> FindAsync(TId id, CancellationToken cancellationToken)
+        public virtual async Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken)
         {
             Ensure.Arg.NotNull(id, nameof(id));
 
-            TDbEntity dbEntity = await FindCoreAsync(id, cancellationToken);
-            return _mapper.Map<TEntity>(dbEntity);
+            TDbEntity? dbEntity = await FindCoreAsync(id, cancellationToken);
+            return dbEntity != null
+                ? _mapper.Map<TEntity>(dbEntity)
+                : default;
         }
 
         /// <inheritdoc />
         public virtual async Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken)
         {
-            TEntity entity = await FindAsync(id, cancellationToken);
+            TEntity? entity = await FindAsync(id, cancellationToken);
             if (entity == null)
             {
-                throw new EntityNotFoundException(typeof(TEntity), id);
+                throw new EntityNotFoundException(typeof(TEntity), id!);
             }
 
             return entity;
@@ -327,11 +329,11 @@ namespace AppCore.Data.EntityFrameworkCore
 
             _logger.EntitySaving(entity);
 
-            TDbEntity dbEntity = await GetQueryable(entity.Id)
+            TDbEntity? dbEntity = await GetQueryable(entity.Id)
                                        .FirstOrDefaultAsync(cancellationToken);
 
             if (dbEntity == null)
-                throw new EntityNotFoundException(typeof(TEntity), entity.Id);
+                throw new EntityNotFoundException(typeof(TEntity), entity.Id!);
 
             _mapper.Map(entity, dbEntity);
 

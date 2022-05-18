@@ -20,7 +20,7 @@ namespace AppCore.Data
         /// <summary>
         /// Gets the currently active <see cref="ITransaction"/>. Might be <c>null</c>.
         /// </summary>
-        ITransaction CurrentTransaction { get; }
+        ITransaction? CurrentTransaction { get; }
 
         /// <summary>
         /// Begins a new transaction in the context of the data provider.

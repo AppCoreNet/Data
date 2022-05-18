@@ -4,7 +4,7 @@ namespace AppCore.Data.EntityFrameworkCore
     {
         public VersionId Id { get; set; }
 
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         object IEntity.Id => Id;
     }

@@ -18,8 +18,8 @@ namespace AppCore.Data.EntityFrameworkCore
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
     public abstract class DbContextScalarQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-        : DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-        where TQuery : IQuery<TEntity, TResult>
+        : DbContextQueryHandler<TQuery, TEntity, TResult?, TDbContext, TDbEntity>
+        where TQuery : IQuery<TEntity, TResult?>
         where TEntity : IEntity
         where TDbContext : DbContext
         where TDbEntity : class
@@ -51,7 +51,7 @@ namespace AppCore.Data.EntityFrameworkCore
         protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
 
         /// <inheritdoc />
-        protected override async Task<TResult> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
+        protected override async Task<TResult?> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
         {
             queryable = ApplyQuery(queryable, query);
             IQueryable<TResult> result = ApplyProjection(queryable, query);

@@ -14,7 +14,7 @@ namespace AppCore.Data
         /// Initializes a new instance of the <see cref="EntityUpdateException"/> class.
         /// </summary>
         /// <param name="innerException">The inner exception.</param>
-        public EntityUpdateException(Exception innerException)
+        public EntityUpdateException(Exception? innerException)
             : base("One or more entities could not be updated.", innerException)
         {
         }

@@ -19,7 +19,7 @@ namespace AppCore.Data
             return Id == other.Id && Version == other.Version;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is VersionId other && Equals(other);
         }

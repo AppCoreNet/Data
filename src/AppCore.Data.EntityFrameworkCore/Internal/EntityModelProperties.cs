@@ -11,7 +11,7 @@ namespace AppCore.Data.EntityFrameworkCore
     internal class EntityModelProperties<TId, TEntity>
         where TEntity : IEntity<TId>
     {
-        public Func<TId, object[]> GetIdValues { get; }
+        public Func<TId, object?[]> GetIdValues { get; }
 
         public IReadOnlyList<string> IdPropertyNames { get; }
 
@@ -34,14 +34,14 @@ namespace AppCore.Data.EntityFrameworkCore
                                                   .ToList()
                                                   .AsReadOnly();
 
-                    Func<TId, object>[] idPropertyGetters =
+                    Func<TId, object?>[] idPropertyGetters =
                         idProperties
-                              .Select(p => new Func<TId, object>(o => p.GetValue(o)))
+                              .Select(p => new Func<TId, object?>(o => p.GetValue(o)))
                               .ToArray();
 
                     GetIdValues = id =>
                     {
-                        object[] result = new object[idPropertyGetters.Length];
+                        object?[] result = new object[idPropertyGetters.Length];
                         for (int i = 0; i < idPropertyGetters.Length; i++)
                         {
                             result[i] = idPropertyGetters[i](id);
@@ -54,7 +54,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
                 default:
                     IdPropertyNames = new List<string>().AsReadOnly();
-                    GetIdValues = id => new object[] { id };
+                    GetIdValues = id => new object?[] { id };
                     break;
             }
         }

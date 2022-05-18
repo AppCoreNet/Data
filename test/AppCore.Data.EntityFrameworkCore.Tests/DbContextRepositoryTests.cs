@@ -22,7 +22,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         private static TestContextSimpleIdRepository CreateSimpleIdRepository(
-            DbContextDataProvider<DefaultDataProvider, TestContext> provider, IDbContextQueryHandlerProvider queryHandlerProvider = null)
+            DbContextDataProvider<DefaultDataProvider, TestContext> provider, IDbContextQueryHandlerProvider? queryHandlerProvider = null)
         {
             var entityMapper = Substitute.For<IEntityMapper>();
             entityMapper.Map<EntityWithSimpleId>(Arg.Any<DbEntityWithSimpleId>())
@@ -168,7 +168,7 @@ namespace AppCore.Data.EntityFrameworkCore
             await testContext.SaveChangesAsync();
 
             TestContextSimpleIdRepository repository = CreateSimpleIdRepository(provider);
-            EntityWithSimpleId result = await repository.FindAsync(dbEntity.Id, CancellationToken.None);
+            EntityWithSimpleId? result = await repository.FindAsync(dbEntity.Id, CancellationToken.None);
 
             result.Should()
                   .BeEquivalentTo(dbEntity);
@@ -191,11 +191,14 @@ namespace AppCore.Data.EntityFrameworkCore
             await testContext.SaveChangesAsync();
 
             TestContextComplexIdRepository repository = CreateComplexIdRepository(provider);
-            EntityWithComplexId result = await repository.FindAsync(
+            EntityWithComplexId? result = await repository.FindAsync(
                 new VersionId(dbEntity.Id, dbEntity.Version),
                 CancellationToken.None);
 
-            result.Id.Should()
+            result.Should()
+                  .NotBeNull();
+
+            result!.Id.Should()
                   .Be(new VersionId(dbEntity.Id, dbEntity.Version));
 
             result.Should()

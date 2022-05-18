@@ -29,13 +29,13 @@ namespace AppCore.Data
                         ?? throw new InvalidOperationException($"Data provider with name '{typeof(TTag)}' is not registered.");
         }
 
-        private static IDataProvider FindProvider(IEnumerable<IDataProvider> providers)
+        private static IDataProvider? FindProvider(IEnumerable<IDataProvider> providers)
         {
             string name = typeof(TTag).FullName;
             return providers.FirstOrDefault(p => string.Equals(name, p.Name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public IDisposable BeginChangeScope(Action afterSaveCallback = null)
+        public IDisposable BeginChangeScope(Action? afterSaveCallback = null)
         {
             return Provider.BeginChangeScope(afterSaveCallback);
         }

@@ -4,6 +4,6 @@ namespace AppCore.Data.EntityFrameworkCore
     {
         public int Id { get; set; }
 
-        public string ChangeToken { get; set; }
+        public string? ChangeToken { get; set; }
     }
 }

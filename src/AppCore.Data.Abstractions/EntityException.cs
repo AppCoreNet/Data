@@ -15,7 +15,7 @@ namespace AppCore.Data
         /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">The inner exception.</param>
-        protected EntityException(string message, Exception innerException)
+        protected EntityException(string message, Exception? innerException)
           : base(message, innerException)
         {
         }

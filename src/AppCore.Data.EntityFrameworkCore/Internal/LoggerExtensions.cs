@@ -10,15 +10,15 @@ namespace AppCore.Data.EntityFrameworkCore
     {
         // DbContextDataProvider
 
-        private static readonly Action<ILogger, Type, Exception> _savingChanges =
+        private static readonly Action<ILogger, Type, Exception?> _savingChanges =
             LoggerMessage.Define<Type>(LogLevel.Trace, LogEventIds.SavingChanges,
                 "Saving changes for context {dbContextType} ...");
 
-        private static readonly Action<ILogger, int, Type, Exception> _savedChanges =
+        private static readonly Action<ILogger, int, Type, Exception?> _savedChanges =
             LoggerMessage.Define<int,Type>(LogLevel.Debug, LogEventIds.SavedChanges,
                                            "Saved {entityCount} changes for context {dbContextType}.");
 
-        private static readonly Action<ILogger, Type, Exception> _saveChangesDeferred =
+        private static readonly Action<ILogger, Type, Exception?> _saveChangesDeferred =
             LoggerMessage.Define<Type>(LogLevel.Trace, LogEventIds.SaveChangesDeferred,
                                        "Deferred saving changes for context {dbContextType}.");
 
@@ -39,19 +39,19 @@ namespace AppCore.Data.EntityFrameworkCore
 
         // DbContextTransactionManager
 
-        private static readonly Action<ILogger, Guid, Type, Exception> _transactionInit =
+        private static readonly Action<ILogger, Guid, Type, Exception?> _transactionInit =
             LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionInit,
                                              "Initialized transaction {transactionId} for context {dbContextType}.");
 
-        private static readonly Action<ILogger, Guid, Type, Exception> _transactionCommit =
+        private static readonly Action<ILogger, Guid, Type, Exception?> _transactionCommit =
             LoggerMessage.Define<Guid, Type>(LogLevel.Debug, LogEventIds.TransactionCommit,
                                              "Committed transaction {transactionId} for context {dbContextType}.");
 
-        private static readonly Action<ILogger, Guid, Type, Exception> _transactionRollback =
+        private static readonly Action<ILogger, Guid, Type, Exception?> _transactionRollback =
             LoggerMessage.Define<Guid, Type>(LogLevel.Debug, LogEventIds.TransactionRollback,
                                              "Rolled back transaction {transactionId} for context {dbContextType}.");
 
-        private static readonly Action<ILogger, Guid, Type, Exception> _transactionDisposed =
+        private static readonly Action<ILogger, Guid, Type, Exception?> _transactionDisposed =
             LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionDisposed,
                                              "Disposed transaction {transactionId} for context {dbContextType}.");
 
@@ -77,44 +77,44 @@ namespace AppCore.Data.EntityFrameworkCore
 
         // DbContextRepository
 
-        private static readonly Action<ILogger, Type, object, Exception> _entitySaving =
-            LoggerMessage.Define<Type, object>(
+        private static readonly Action<ILogger, Type, object?, Exception?> _entitySaving =
+            LoggerMessage.Define<Type, object?>(
                 LogLevel.Debug,
                 LogEventIds.EntitySaving,
                 "Saving entity {entityType} with id {entityId} ...");
 
-        private static readonly Action<ILogger, Type, object, string, Exception> _concurrentEntitySaving =
-            LoggerMessage.Define<Type, object, string>(
+        private static readonly Action<ILogger, Type, object?, string?, Exception?> _concurrentEntitySaving =
+            LoggerMessage.Define<Type, object?, string?>(
                 LogLevel.Debug,
                 LogEventIds.EntitySaving,
                 "Saving entity {entityType} with id {entityId} and token {entityConcurrencyToken} ...");
 
-        private static readonly Action<ILogger, Type, object, Exception> _entitySaved =
-            LoggerMessage.Define<Type, object>(
+        private static readonly Action<ILogger, Type, object?, Exception?> _entitySaved =
+            LoggerMessage.Define<Type, object?>(
                 LogLevel.Information,
                 LogEventIds.EntitySaved,
                 "Entity {entityType} with id {entityId} saved.");
 
-        private static readonly Action<ILogger, Type, object, string, Exception> _concurrentEntitySaved =
-            LoggerMessage.Define<Type, object, string>(
+        private static readonly Action<ILogger, Type, object?, string?, Exception?> _concurrentEntitySaved =
+            LoggerMessage.Define<Type, object?, string?>(
                 LogLevel.Information,
                 LogEventIds.EntitySaved,
                 "Entity {entityType} with id {entityId} and token {entityConcurrencyToken} saved.");
 
-        private static readonly Action<ILogger, Type, object, Exception> _entityDeleting =
-            LoggerMessage.Define<Type, object>(
+        private static readonly Action<ILogger, Type, object?, Exception?> _entityDeleting =
+            LoggerMessage.Define<Type, object?>(
                 LogLevel.Debug,
                 LogEventIds.EntityDeleting,
                 "Deleting entity {entityType} with id {entityId} ...");
 
-        private static readonly Action<ILogger, Type, object, string, Exception> _concurrentEntityDeleting =
-            LoggerMessage.Define<Type, object, string>(
+        private static readonly Action<ILogger, Type, object?, string?, Exception?> _concurrentEntityDeleting =
+            LoggerMessage.Define<Type, object?, string?>(
                 LogLevel.Debug,
                 LogEventIds.EntityDeleting,
                 "Deleting entity {entityType} with id {entityId} and token {entityConcurrencyToken} ...");
 
-        private static readonly Action<ILogger, Type, object, Exception> _entityDeleted =
-            LoggerMessage.Define<Type, object>(
+        private static readonly Action<ILogger, Type, object?, Exception?> _entityDeleted =
+            LoggerMessage.Define<Type, object?>(
                 LogLevel.Information,
                 LogEventIds.EntityDeleted,
                 "Entity {entityType} with id {entityId} deleted.");
@@ -177,13 +177,13 @@ namespace AppCore.Data.EntityFrameworkCore
 
         // DbContextQueryHandler
 
-        private static readonly Action<ILogger, Type, Exception> _queryExecuting =
+        private static readonly Action<ILogger, Type, Exception?> _queryExecuting =
             LoggerMessage.Define<Type>(
                 LogLevel.Debug,
                 LogEventIds.QueryExecuting,
                 "Executing query {queryType} ...");
 
-        private static readonly Action<ILogger, Type, double, Exception> _queryExecuted =
+        private static readonly Action<ILogger, Type, double, Exception?> _queryExecuted =
             LoggerMessage.Define<Type, double>(
                 LogLevel.Information,
                 LogEventIds.QueryExecuted,

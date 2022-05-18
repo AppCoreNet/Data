@@ -35,7 +35,7 @@ namespace AppCore.Data.EntityFrameworkCore
             IEnumerable<IDbContextQueryHandler<TEntity, TResult>> handlers =
                 _serviceProvider.GetServices<IDbContextQueryHandler<TEntity, TResult>>();
 
-            IDbContextQueryHandler<TEntity, TResult> handler =
+            IDbContextQueryHandler<TEntity, TResult>? handler =
                 handlers.FirstOrDefault(h => queryType.IsAssignableFrom(h.QueryType));
 
             if (handler == null)

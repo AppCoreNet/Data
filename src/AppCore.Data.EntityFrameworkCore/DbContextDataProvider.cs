@@ -59,7 +59,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public IDisposable BeginChangeScope(Action afterSaveCallback = null)
+        public IDisposable BeginChangeScope(Action? afterSaveCallback = null)
         {
             if (afterSaveCallback != null)
                 _afterSaveCallbacks.Add(afterSaveCallback);
@@ -152,7 +152,7 @@ namespace AppCore.Data.EntityFrameworkCore
         where TDbContext : DbContext
     {
         /// <inheritdoc />
-        public override string Name => typeof(TTag).FullName;
+        public override string Name => typeof(TTag).FullName!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DbContextDataProvider{TTag,TDbContext}"/> class.

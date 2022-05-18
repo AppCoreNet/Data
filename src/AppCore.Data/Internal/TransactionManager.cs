@@ -15,10 +15,10 @@ namespace AppCore.Data
     {
         // Internal to support testing
         internal ITransactionManager Manager { get; }
-        
+
         public IDataProvider Provider => Manager.Provider;
 
-        public ITransaction CurrentTransaction => Manager.CurrentTransaction;
+        public ITransaction? CurrentTransaction => Manager.CurrentTransaction;
 
         public TransactionManager(IEnumerable<ITransactionManager> managers)
         {
@@ -28,7 +28,7 @@ namespace AppCore.Data
                        ?? throw new InvalidOperationException($"Data provider '{typeof(TTag)}' is not registered.");
         }
 
-        private static ITransactionManager FindTransactionManager(IEnumerable<ITransactionManager> managers)
+        private static ITransactionManager? FindTransactionManager(IEnumerable<ITransactionManager> managers)
         {
             string name = typeof(TTag).FullName;
             return managers.FirstOrDefault(

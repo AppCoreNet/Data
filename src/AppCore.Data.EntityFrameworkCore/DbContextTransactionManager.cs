@@ -19,10 +19,10 @@ namespace AppCore.Data.EntityFrameworkCore
     {
         private readonly IDbContextDataProvider _provider;
         private readonly ILogger<DbContextTransactionManager> _logger;
-        private DbContextTransaction _currentTransaction;
+        private DbContextTransaction? _currentTransaction;
 
         /// <inheritdoc />
-        public ITransaction CurrentTransaction
+        public ITransaction? CurrentTransaction
         {
             get
             {

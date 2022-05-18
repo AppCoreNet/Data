@@ -14,7 +14,7 @@ namespace AppCore.Data
         /// Initializes a new instance of the <see cref="EntityConcurrencyException"/> class.
         /// </summary>
         /// <param name="innerException">The inner exception.</param>
-        public EntityConcurrencyException(Exception innerException)
+        public EntityConcurrencyException(Exception? innerException)
             : base("Entities may have been modified or deleted since they were loaded.",
                 innerException)
         {

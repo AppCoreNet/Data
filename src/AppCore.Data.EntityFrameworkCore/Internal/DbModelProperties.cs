@@ -19,18 +19,18 @@ namespace AppCore.Data.EntityFrameworkCore
 
         public bool HasConcurrencyToken { get; }
 
-        public string ConcurrencyTokenPropertyName { get; }
+        public string? ConcurrencyTokenPropertyName { get; }
 
         private DbModelProperties(IModel model, Type dbEntityType)
         {
-            IEntityType modelEntityType = model.FindEntityType(dbEntityType);
+            IEntityType? modelEntityType = model.FindEntityType(dbEntityType)!;
 
             PrimaryKeyPropertyNames = modelEntityType
-                                      .FindPrimaryKey()
+                                      .FindPrimaryKey()!
                                       .Properties.Select(p => p.Name)
                                       .ToList();
 
-            IProperty concurrencyToken =
+            IProperty? concurrencyToken =
                 modelEntityType.GetProperties()
                                .FirstOrDefault(p => p.IsConcurrencyToken);
 

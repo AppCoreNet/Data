@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace AppCore.Data
 {
     /// <summary>
     /// Generate YouTube-like hashes from one or many numbers. Use hashids when you do not want to expose your database ids to the user.
     /// </summary>
-    internal class Hashids 
+    internal class Hashids
     {
         public const string DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         public const string DEFAULT_SEPS = "cfhistuCFHISTU";
@@ -140,7 +142,7 @@ namespace AppCore.Data
         }
 
         /// <summary>
-        /// Decodes the provided hashed string into an array of longs 
+        /// Decodes the provided hashed string into an array of longs
         /// </summary>
         /// <param name="hash">the hashed string</param>
         /// <returns>the numbers</returns>
@@ -215,11 +217,11 @@ namespace AppCore.Data
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private void SetupSeps()
         {
-            // seps should contain only characters present in alphabet; 
+            // seps should contain only characters present in alphabet;
             seps = new string(seps.ToCharArray().Intersect(alphabet.ToCharArray()).ToArray());
 
             // alphabet should not contain seps.
@@ -252,7 +254,7 @@ namespace AppCore.Data
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private void SetupGuards()
         {
@@ -417,7 +419,7 @@ namespace AppCore.Data
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="alphabet"></param>
         /// <param name="salt"></param>

@@ -15,6 +15,6 @@ namespace AppCore.Data
         /// The property contains the current change token after the entity has been loaded.
         /// After the entity has been saved the change token will have a updated value.
         /// </remarks>
-        string ChangeToken { get; }
+        string? ChangeToken { get; }
     }
 }

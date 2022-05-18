@@ -40,7 +40,7 @@ namespace AppCore.Data
         /// <returns>
         ///     The task representing the asynchronous operation. The result contains the entity or <c>null</c> if it was not found.
         /// </returns>
-        Task<TEntity> FindAsync(TId id, CancellationToken cancellationToken = default);
+        Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Loads the entity with the specified unique identifier.
