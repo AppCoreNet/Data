@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
+    /// <summary>
+    /// Provides a base class for <see cref="DbContext"/> based data provider.
+    /// </summary>
     public abstract class DbContextDataProvider : IDbContextDataProvider
     {
         private readonly DbContext _dbContext;
@@ -40,14 +43,19 @@ namespace AppCore.Data.EntityFrameworkCore
         /// <inheritdoc />
         public ITransactionManager TransactionManager => _transactionManager;
 
-        protected DbContextDataProvider(DbContext dbContext, ILogger<DbContextDataProvider> logger)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextDataProvider"/> class.
+        /// </summary>
+        /// <param name="dbContext">The <see cref="DbContext"/>.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+        protected DbContextDataProvider(DbContext dbContext, ILoggerFactory loggerFactory)
         {
             Ensure.Arg.NotNull(dbContext, nameof(dbContext));
-            Ensure.Arg.NotNull(logger, nameof(logger));
+            Ensure.Arg.NotNull(loggerFactory, nameof(loggerFactory));
 
             _dbContext = dbContext;
-            _logger = logger;
-            _transactionManager = new DbContextTransactionManager(this, logger);
+            _logger = loggerFactory.CreateLogger<DbContextDataProvider>();
+            _transactionManager = new DbContextTransactionManager(this, loggerFactory);
         }
 
         /// <inheritdoc />
@@ -111,11 +119,20 @@ namespace AppCore.Data.EntityFrameworkCore
         }
     }
 
+    /// <summary>
+    /// Provides a base class for <see cref="DbContext"/> based data provider.
+    /// </summary>
+    /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     public abstract class DbContextDataProvider<TDbContext> : DbContextDataProvider, IDbContextDataProvider<TDbContext>
         where TDbContext : DbContext
     {
-        protected DbContextDataProvider(TDbContext dbContext, ILogger<DbContextDataProvider> logger)
-            : base(dbContext, logger)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
+        /// </summary>
+        /// <param name="dbContext">The <see cref="DbContext"/>.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+        protected DbContextDataProvider(TDbContext dbContext, ILoggerFactory loggerFactory)
+            : base(dbContext, loggerFactory)
         {
         }
 
@@ -126,14 +143,24 @@ namespace AppCore.Data.EntityFrameworkCore
         }
     }
 
+    /// <summary>
+    /// Provides a base class for <see cref="DbContext"/> based data provider.
+    /// </summary>
+    /// <typeparam name="TTag">The tag of the data provider.</typeparam>
+    /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     public sealed class DbContextDataProvider<TTag, TDbContext> : DbContextDataProvider<TDbContext>
         where TDbContext : DbContext
     {
         /// <inheritdoc />
         public override string Name => typeof(TTag).FullName;
-        
-        public DbContextDataProvider(TDbContext dbContext, ILogger<DbContextDataProvider> logger)
-            : base(dbContext, logger)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextDataProvider{TTag,TDbContext}"/> class.
+        /// </summary>
+        /// <param name="dbContext">The <see cref="DbContext"/>.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+        public DbContextDataProvider(TDbContext dbContext, ILoggerFactory loggerFactory)
+            : base(dbContext, loggerFactory)
         {
         }
     }

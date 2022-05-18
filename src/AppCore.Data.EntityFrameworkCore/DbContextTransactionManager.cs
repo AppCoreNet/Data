@@ -12,10 +12,13 @@ using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
+    /// <summary>
+    /// Provides a transaction manager using a <see cref="DbContext"/>.
+    /// </summary>
     public sealed class DbContextTransactionManager : ITransactionManager
     {
         private readonly IDbContextDataProvider _provider;
-        private readonly ILogger<DbContextDataProvider> _logger;
+        private readonly ILogger<DbContextTransactionManager> _logger;
         private DbContextTransaction _currentTransaction;
 
         /// <inheritdoc />
@@ -50,13 +53,18 @@ namespace AppCore.Data.EntityFrameworkCore
         /// <inheritdoc />
         public IDataProvider Provider => _provider;
 
-        public DbContextTransactionManager(IDbContextDataProvider provider, ILogger<DbContextDataProvider> logger)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextTransactionManager"/> class.
+        /// </summary>
+        /// <param name="provider">The <see cref="IDbContextDataProvider"/>.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+        public DbContextTransactionManager(IDbContextDataProvider provider, ILoggerFactory loggerFactory)
         {
             Ensure.Arg.NotNull(provider, nameof(provider));
-            Ensure.Arg.NotNull(logger, nameof(logger));
+            Ensure.Arg.NotNull(loggerFactory, nameof(loggerFactory));
 
             _provider = provider;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<DbContextTransactionManager>();
         }
 
         /// <inheritdoc />

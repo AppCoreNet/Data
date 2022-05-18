@@ -20,6 +20,19 @@ namespace AppCore.Data
         IDataProvider Provider { get; }
 
         /// <summary>
+        /// Executes the specified <paramref name="query"/> and returns the result.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="query">The query which should be executed.</param>
+        /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
+        /// <returns>
+        ///     The task representing the asynchronous operation. The result contains the result.
+        /// </returns>
+        Task<TResult> QueryAsync<TResult>(
+            IQuery<TEntity, TResult> query,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Tries to load the entity with the specified unique id.
         /// </summary>
         /// <param name="id">The unique id of the entity.</param>

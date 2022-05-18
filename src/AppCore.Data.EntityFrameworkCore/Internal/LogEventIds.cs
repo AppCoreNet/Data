@@ -20,7 +20,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
         public static readonly EventId TransactionRollback = new EventId(5, "transaction_rollback");
 
-        public static readonly EventId TransactionDisposed = new EventId(5, "transaction_disposed");
+        public static readonly EventId TransactionDisposed = new EventId(6, "transaction_disposed");
 
         // DbContextRepository
         public static readonly EventId EntitySaving = new EventId(0, "entity_saving");
@@ -30,5 +30,10 @@ namespace AppCore.Data.EntityFrameworkCore
         public static readonly EventId EntityDeleting = new EventId(2, "entity_deleting");
 
         public static readonly EventId EntityDeleted = new EventId(3, "entity_deleted");
+
+        // DbContextQueryHandler
+        public static readonly EventId QueryExecuting = new EventId(0, "query_executing");
+
+        public static readonly EventId QueryExecuted = new EventId(1, "query_executed");
     }
 }

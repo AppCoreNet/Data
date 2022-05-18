@@ -18,11 +18,11 @@ namespace AppCore.Data.EntityFrameworkCore
         {
             return new DbContextDataProvider<DefaultDataProvider, TestContext>(
                 new TestContext(),
-                Substitute.For<ILogger<DbContextDataProvider>>());
+                Substitute.For<ILoggerFactory>());
         }
 
         private static TestContextSimpleIdRepository CreateSimpleIdRepository(
-            DbContextDataProvider<DefaultDataProvider, TestContext> provider)
+            DbContextDataProvider<DefaultDataProvider, TestContext> provider, IDbContextQueryHandlerProvider queryHandlerProvider = null)
         {
             var entityMapper = Substitute.For<IEntityMapper>();
             entityMapper.Map<EntityWithSimpleId>(Arg.Any<DbEntityWithSimpleId>())
@@ -39,6 +39,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextSimpleIdRepository(
                 provider,
+                queryHandlerProvider ?? Substitute.For<IDbContextQueryHandlerProvider>(),
                 Substitute.For<ITokenGenerator>(),
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -62,6 +63,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextComplexIdRepository(
                 provider,
+                Substitute.For<IDbContextQueryHandlerProvider>(),
                 Substitute.For<ITokenGenerator>(),
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -98,6 +100,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextChangeTokenRepository(
                 provider,
+                Substitute.For<IDbContextQueryHandlerProvider>(),
                 generator,
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -134,6 +137,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextChangeTokenExRepository(
                 provider,
+                Substitute.For<IDbContextQueryHandlerProvider>(),
                 generator,
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -343,6 +347,30 @@ namespace AppCore.Data.EntityFrameworkCore
                 () => repository.UpdateAsync(
                     new EntityWithChangeTokenEx {Id = dbEntity.Id, ExpectedChangeToken = "abc"},
                     CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task QueryInvokesQueryHandler()
+        {
+            var queryHandler = Substitute.For<IDbContextQueryHandler<EntityWithSimpleId, EntityWithSimpleId>>();
+            queryHandler.QueryType.Returns(typeof(EntityWithSimpleIdByIdQuery));
+
+            var queryHandlerProvider = Substitute.For<IDbContextQueryHandlerProvider>();
+            queryHandlerProvider
+                .GetHandler<EntityWithSimpleId, EntityWithSimpleId>(
+                    Arg.Is(typeof(EntityWithSimpleIdByIdQuery)))
+                .Returns(queryHandler);
+
+            var query = new EntityWithSimpleIdByIdQuery();
+
+            DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
+            TestContextSimpleIdRepository repository = CreateSimpleIdRepository(provider, queryHandlerProvider);
+
+            await repository.QueryAsync(query, CancellationToken.None);
+
+            await queryHandler
+                  .Received(1)
+                  .ExecuteAsync(Arg.Is(query), Arg.Any<CancellationToken>());
         }
     }
 }

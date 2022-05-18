@@ -1,8 +1,6 @@
 // Licensed under the MIT License.
-// Copyright (c) 2020 the AppCore .NET project.
+// Copyright (c) 2020-2022 the AppCore .NET project.
 
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCore.Diagnostics;
@@ -12,15 +10,24 @@ using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
+    /// <summary>
+    /// Provides a <see cref="DbContext"/> transaction scope.
+    /// </summary>
     public sealed class DbContextTransaction : ITransaction
     {
-        private readonly ILogger<DbContextDataProvider> _logger;
+        private readonly ILogger _logger;
 
         private DbContext DbContext { get; }
 
         internal IDbContextTransaction Transaction { get; }
 
-        public DbContextTransaction(DbContext dbContext, IDbContextTransaction transaction, ILogger<DbContextDataProvider> logger)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextTransaction"/> class.
+        /// </summary>
+        /// <param name="dbContext">The <see cref="T:DbContext"/>.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="logger">The logger.</param>
+        public DbContextTransaction(DbContext dbContext, IDbContextTransaction transaction, ILogger logger)
         {
             Ensure.Arg.NotNull(dbContext, nameof(dbContext));
             Ensure.Arg.NotNull(transaction, nameof(transaction));

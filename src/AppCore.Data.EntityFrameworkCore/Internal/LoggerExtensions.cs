@@ -22,6 +22,23 @@ namespace AppCore.Data.EntityFrameworkCore
             LoggerMessage.Define<Type>(LogLevel.Trace, LogEventIds.SaveChangesDeferred,
                                        "Deferred saving changes for context {dbContextType}.");
 
+        internal static void SavingChanges(this ILogger logger, Type dbContextType)
+        {
+            _savingChanges(logger, dbContextType, null);
+        }
+
+        internal static void SavedChanges(this ILogger logger, Type dbContextType, int entityCount)
+        {
+            _savedChanges(logger, entityCount, dbContextType, null);
+        }
+
+        internal static void SaveChangesDeferred(this ILogger logger, Type dbContextType)
+        {
+            _saveChangesDeferred(logger, dbContextType, null);
+        }
+
+        // DbContextTransactionManager
+
         private static readonly Action<ILogger, Guid, Type, Exception> _transactionInit =
             LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionInit,
                                              "Initialized transaction {transactionId} for context {dbContextType}.");
@@ -37,21 +54,6 @@ namespace AppCore.Data.EntityFrameworkCore
         private static readonly Action<ILogger, Guid, Type, Exception> _transactionDisposed =
             LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionDisposed,
                                              "Disposed transaction {transactionId} for context {dbContextType}.");
-
-        internal static void SavingChanges(this ILogger logger, Type dbContextType)
-        {
-            _savingChanges(logger, dbContextType, null);
-        }
-
-        internal static void SavedChanges(this ILogger logger, Type dbContextType, int entityCount)
-        {
-            _savedChanges(logger, entityCount, dbContextType, null);
-        }
-
-        internal static void SaveChangesDeferred(this ILogger logger, Type dbContextType)
-        {
-            _saveChangesDeferred(logger, dbContextType, null);
-        }
 
         internal static void TransactionInit(this ILogger logger, Type dbContextType, Guid transactionId)
         {
@@ -171,6 +173,30 @@ namespace AppCore.Data.EntityFrameworkCore
         public static void EntityDeleted<TId>(this ILogger logger, IEntity<TId> entity)
         {
             _entityDeleted(logger, entity.GetType(), entity.Id, null);
+        }
+
+        // DbContextQueryHandler
+
+        private static readonly Action<ILogger, Type, Exception> _queryExecuting =
+            LoggerMessage.Define<Type>(
+                LogLevel.Debug,
+                LogEventIds.QueryExecuting,
+                "Executing query {queryType} ...");
+
+        private static readonly Action<ILogger, Type, double, Exception> _queryExecuted =
+            LoggerMessage.Define<Type, double>(
+                LogLevel.Information,
+                LogEventIds.QueryExecuted,
+                "Executed query {queryType} in {queryExecutionTime}s");
+
+        public static void QueryExecuting(this ILogger logger, Type queryType)
+        {
+            _queryExecuting(logger, queryType, null);
+        }
+
+        public static void QueryExecuted(this ILogger logger, Type queryType, TimeSpan duration)
+        {
+            _queryExecuted(logger, queryType, duration.TotalSeconds, null);
         }
     }
 }

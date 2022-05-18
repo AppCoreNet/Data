@@ -7,10 +7,11 @@ namespace AppCore.Data.EntityFrameworkCore
     {
         public TestContextChangeTokenExRepository(
             IDbContextDataProvider<TestContext> provider,
+            IDbContextQueryHandlerProvider queryHandlerProvider,
             ITokenGenerator tokenGenerator,
             IEntityMapper entityMapper,
             ILogger logger)
-            : base(provider, tokenGenerator, entityMapper, logger)
+            : base(provider, queryHandlerProvider, tokenGenerator, entityMapper, logger)
         {
         }
     }

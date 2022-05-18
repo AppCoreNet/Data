@@ -1,7 +1,8 @@
 // Licensed under the MIT License.
-// Copyright (c) 2020 the AppCore .NET project.
+// Copyright (c) 2020-2022 the AppCore .NET project.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,9 +25,67 @@ namespace AppCore.Data.EntityFrameworkCore
         where TDbContext : DbContext
         where TDbEntity : class
     {
+        /// <summary>
+        /// Provides a base class for scalar query handlers of this repository.
+        /// </summary>
+        /// <typeparam name="TQuery">The type of the query.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        public abstract class ScalarQueryHandler<TQuery, TResult> : DbContextScalarQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+            where TQuery : IQuery<TEntity, TResult>
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ScalarQueryHandler{TQuery,TResult}"/> class.
+            /// </summary>
+            /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
+            /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+            protected ScalarQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
+                : base(provider, loggerFactory)
+            {
+            }
+        }
+
+        /// <summary>
+        /// Provides a base class for vector query handlers of this repository.
+        /// </summary>
+        /// <typeparam name="TQuery">The type of the query.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        public abstract class VectorQueryHandler<TQuery, TResult> : DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+            where TQuery : IQuery<TEntity, IReadOnlyCollection<TResult>>
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="VectorQueryHandler{TQuery,TResult}"/> class.
+            /// </summary>
+            /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
+            /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+            protected VectorQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
+                : base(provider, loggerFactory)
+            {
+            }
+        }
+
+        /// <summary>
+        /// Provides a base class for paged query handlers of this repository.
+        /// </summary>
+        /// <typeparam name="TQuery">The type of the query.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        public abstract class PagedQueryHandler<TQuery, TResult> : DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+            where TQuery : IPagedQuery<TEntity, TResult>
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="PagedQueryHandler{TQuery,TResult}"/> class.
+            /// </summary>
+            /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
+            /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+            protected PagedQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
+                : base(provider, loggerFactory)
+            {
+            }
+        }
+
         private static readonly EntityModelProperties<TId, TEntity> EntityModelProperties =
             new EntityModelProperties<TId, TEntity>();
 
+        private readonly IDbContextQueryHandlerProvider _queryHandlerProvider;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly IEntityMapper _mapper;
         private readonly ILogger _logger;
@@ -53,11 +112,13 @@ namespace AppCore.Data.EntityFrameworkCore
         /// Initializes a new instance of the <see cref="DbContextRepository{TId,TEntity,TDbContext,TDbEntity}"/> class.
         /// </summary>
         /// <param name="provider">The data provider.</param>
+        /// <param name="queryHandlerProvider">The query handler provider.</param>
         /// <param name="tokenGenerator">The token generator used for generating change tokens.</param>
         /// <param name="entityMapper">The entity mapper.</param>
         /// <param name="logger">The logger.</param>
         public DbContextRepository(
             IDbContextDataProvider<TDbContext> provider,
+            IDbContextQueryHandlerProvider queryHandlerProvider,
             ITokenGenerator tokenGenerator,
             IEntityMapper entityMapper,
             ILogger logger)
@@ -68,6 +129,7 @@ namespace AppCore.Data.EntityFrameworkCore
             Ensure.Arg.NotNull(logger, nameof(logger));
 
             TDbContext context = provider.GetContext();
+            _queryHandlerProvider = queryHandlerProvider;
             _tokenGenerator = tokenGenerator;
             _mapper = entityMapper;
             _logger = logger;
@@ -127,6 +189,11 @@ namespace AppCore.Data.EntityFrameworkCore
             return queryable;
         }
 
+        /// <summary>
+        /// Can be overridden to apply includes to the query.
+        /// </summary>
+        /// <param name="queryable">The <see cref="IQueryable{T}"/>.</param>
+        /// <returns>The queryable.</returns>
         protected virtual IQueryable<TDbEntity> ApplyIncludes(IQueryable<TDbEntity> queryable)
         {
             return queryable;
@@ -170,6 +237,17 @@ namespace AppCore.Data.EntityFrameworkCore
             return ApplyPrimaryKeyExpression(ApplyIncludes(Set), id);
         }
 
+        /// <inheritdoc />
+        public async Task<TResult> QueryAsync<TResult>(IQuery<TEntity, TResult> query, CancellationToken cancellationToken)
+        {
+            Ensure.Arg.NotNull(query, nameof(query));
+
+            IDbContextQueryHandler<TEntity, TResult> queryHandler =
+                _queryHandlerProvider.GetHandler<TEntity, TResult>(query.GetType());
+
+            return await queryHandler.ExecuteAsync(query, cancellationToken);
+        }
+
         protected virtual async Task<TDbEntity> FindCoreAsync(TId id, CancellationToken cancellationToken)
         {
             TDbEntity dbEntity = await GetQueryable(id)
@@ -207,7 +285,7 @@ namespace AppCore.Data.EntityFrameworkCore
         {
             return new ValueTask<EntityEntry<TDbEntity>>(Set.Add(dbEntity));
         }
-        
+
         /// <inheritdoc />
         public virtual async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
         {
