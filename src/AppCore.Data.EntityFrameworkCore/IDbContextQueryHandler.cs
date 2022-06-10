@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppCore.Data.EntityFrameworkCore
 {
@@ -12,8 +13,10 @@ namespace AppCore.Data.EntityFrameworkCore
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    public interface IDbContextQueryHandler<TEntity, TResult>
+    /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
+    public interface IDbContextQueryHandler<TEntity, TResult, TDbContext>
         where TEntity : IEntity
+        where TDbContext : DbContext
     {
         /// <summary>
         /// Gets the type of the query which is handled.

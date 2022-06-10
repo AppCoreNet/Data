@@ -1,8 +1,9 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
+using System;
 using AppCore.Data;
-using AppCore.DependencyInjection.Facilities;
+using AppCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -10,14 +11,20 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace AppCore.DependencyInjection
 {
     /// <summary>
-    /// Represents the data facility.
+    /// Provides extension methods to register the data services.
     /// </summary>
-    public sealed class DataProviderFacility : Facility
+    public static class AppCoreBuilderExtensions
     {
-        /// <inheritdoc />
-        protected override void ConfigureServices(IServiceCollection services)
+        /// <summary>
+        /// Adds the data services to the <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="builder">The <see cref="IAppCoreBuilder"/>.</param>
+        /// <returns>The <see cref="IDataProvidersBuilder"/>.</returns>
+        public static IDataProvidersBuilder AddDataProviders(this IAppCoreBuilder builder)
         {
-            base.ConfigureServices(services);
+            Ensure.Arg.NotNull(builder);
+
+            IServiceCollection services = builder.Services;
 
             services.TryAddSingleton<ITokenGenerator, TokenGenerator>();
             services.TryAddEnumerable(new []
@@ -25,6 +32,8 @@ namespace AppCore.DependencyInjection
                 ServiceDescriptor.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)),
                 ServiceDescriptor.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
             });
+
+            return new DataProvidersBuilder(services);
         }
     }
 }

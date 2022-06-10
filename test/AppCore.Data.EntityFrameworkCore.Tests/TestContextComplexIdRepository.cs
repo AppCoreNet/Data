@@ -7,7 +7,7 @@ namespace AppCore.Data.EntityFrameworkCore
     {
         public TestContextComplexIdRepository(
             IDbContextDataProvider<TestContext> provider,
-            IDbContextQueryHandlerProvider queryHandlerProvider,
+            IDbContextQueryHandlerProvider<TestContext> queryHandlerProvider,
             ITokenGenerator tokenGenerator,
             IEntityMapper entityMapper,
             ILogger logger)

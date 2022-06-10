@@ -82,10 +82,8 @@ namespace AppCore.Data.EntityFrameworkCore
             }
         }
 
-        private static readonly EntityModelProperties<TId, TEntity> EntityModelProperties =
-            new EntityModelProperties<TId, TEntity>();
-
-        private readonly IDbContextQueryHandlerProvider _queryHandlerProvider;
+        private static readonly EntityModelProperties<TId, TEntity> _entityModelProperties = new();
+        private readonly IDbContextQueryHandlerProvider<TDbContext> _queryHandlerProvider;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly IEntityMapper _mapper;
         private readonly ILogger _logger;
@@ -118,7 +116,7 @@ namespace AppCore.Data.EntityFrameworkCore
         /// <param name="logger">The logger.</param>
         public DbContextRepository(
             IDbContextDataProvider<TDbContext> provider,
-            IDbContextQueryHandlerProvider queryHandlerProvider,
+            IDbContextQueryHandlerProvider<TDbContext> queryHandlerProvider,
             ITokenGenerator tokenGenerator,
             IEntityMapper entityMapper,
             ILogger logger)
@@ -152,7 +150,7 @@ namespace AppCore.Data.EntityFrameworkCore
         /// <returns>The primary key values.</returns>
         protected virtual object?[] GetPrimaryKey(TId id)
         {
-            return EntityModelProperties.GetIdValues(id);
+            return _entityModelProperties.GetIdValues(id);
         }
 
         /// <summary>
@@ -175,7 +173,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             for (int i = 0; i < primaryKey.Length; i++)
             {
-                string idPropertyName = EntityModelProperties.IdPropertyNames[i];
+                string idPropertyName = _entityModelProperties.IdPropertyNames[i];
                 string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[i];
 
                 if (!string.Equals(idPropertyName, primaryKeyPropertyName, StringComparison.OrdinalIgnoreCase))
@@ -242,12 +240,18 @@ namespace AppCore.Data.EntityFrameworkCore
         {
             Ensure.Arg.NotNull(query, nameof(query));
 
-            IDbContextQueryHandler<TEntity, TResult> queryHandler =
+            IDbContextQueryHandler<TEntity, TResult, TDbContext> queryHandler =
                 _queryHandlerProvider.GetHandler<TEntity, TResult>(query.GetType());
 
             return await queryHandler.ExecuteAsync(query, cancellationToken);
         }
 
+        /// <summary>
+        /// Provides the core logic to find an entity by it's unique identifier.
+        /// </summary>
+        /// <param name="id">The entity identifier.</param>
+        /// <param name="cancellationToken">Optional <see cref="CancellationToken"/>.</param>
+        /// <returns>The entity if found, otherwise <c>null</c>.</returns>
         protected virtual async Task<TDbEntity?> FindCoreAsync(TId id, CancellationToken cancellationToken)
         {
             TDbEntity? dbEntity = await GetQueryable(id)
@@ -280,6 +284,13 @@ namespace AppCore.Data.EntityFrameworkCore
             return entity;
         }
 
+        /// <summary>
+        /// Provides the core logic to create an entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="dbEntity">The database entity.</param>
+        /// <param name="cancellationToken">Optional <see cref="CancellationToken"/>.</param>
+        /// <returns>The created entity.</returns>
         protected virtual ValueTask<EntityEntry<TDbEntity>> CreateCoreAsync(
             TEntity entity,
             TDbEntity dbEntity,
@@ -311,6 +322,13 @@ namespace AppCore.Data.EntityFrameworkCore
             return entity;
         }
 
+        /// <summary>
+        /// Provides the core logic to update an entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="dbEntity">The database entity.</param>
+        /// <param name="cancellationToken">Optional <see cref="CancellationToken"/>.</param>
+        /// <returns>The updated entity.</returns>
         protected virtual ValueTask<EntityEntry<TDbEntity>> UpdateCoreAsync(
             TEntity entity,
             TDbEntity dbEntity,
@@ -351,6 +369,13 @@ namespace AppCore.Data.EntityFrameworkCore
             return entity;
         }
 
+        /// <summary>
+        /// Provides the core logic to delete an entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="dbEntity">The database entity.</param>
+        /// <param name="cancellationToken">Optional <see cref="CancellationToken"/>.</param>
+        /// <returns>The deleted entity.</returns>
         protected virtual ValueTask<EntityEntry<TDbEntity>> DeleteCoreAsync(
             TEntity entity,
             TDbEntity dbEntity,

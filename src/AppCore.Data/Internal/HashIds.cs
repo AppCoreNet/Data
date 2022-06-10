@@ -16,35 +16,35 @@ namespace AppCore.Data
     /// </summary>
     internal class Hashids
     {
-        public const string DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        public const string DEFAULT_SEPS = "cfhistuCFHISTU";
+        public const string DefaultAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        public const string DefaultSeps = "cfhistuCFHISTU";
 
-        private const int MIN_ALPHABET_LENGTH = 16;
-        private const double SEP_DIV = 3.5;
-        private const double GUARD_DIV = 12.0;
+        private const int MinAlphabetLength = 16;
+        private const double SepDiv = 3.5;
+        private const double GuardDiv = 12.0;
 
-        private string alphabet;
-        private string salt;
-        private string seps;
-        private string guards;
-        private int minHashLength;
+        private string _alphabet;
+        private string _salt;
+        private string _seps;
+        private string _guards;
+        private int _minHashLength;
 
-        private Regex guardsRegex;
-        private Regex sepsRegex;
+        private Regex _guardsRegex;
+        private Regex _sepsRegex;
 
         //  Creates the Regex in the first usage, speed up first use of non hex methods
 #if NETSTANDARD1_2
         private static Lazy<Regex> hexValidator = new Lazy<Regex>(() => new Regex("^[0-9a-fA-F]+$"));
         private static Lazy<Regex> hexSplitter = new Lazy<Regex>(() => new Regex(@"[\w\W]{1,12}"));
 #else
-        private static Lazy<Regex> hexValidator = new Lazy<Regex>(() => new Regex("^[0-9a-fA-F]+$", RegexOptions.Compiled));
-        private static Lazy<Regex> hexSplitter = new Lazy<Regex>(() => new Regex(@"[\w\W]{1,12}", RegexOptions.Compiled));
+        private static Lazy<Regex> _hexValidator = new Lazy<Regex>(() => new Regex("^[0-9a-fA-F]+$", RegexOptions.Compiled));
+        private static Lazy<Regex> _hexSplitter = new Lazy<Regex>(() => new Regex(@"[\w\W]{1,12}", RegexOptions.Compiled));
 #endif
 
         /// <summary>
         /// Instantiates a new Hashids with the default setup.
         /// </summary>
-        public Hashids() : this(string.Empty, 0, DEFAULT_ALPHABET, DEFAULT_SEPS)
+        public Hashids() : this(string.Empty, 0, DefaultAlphabet, DefaultSeps)
         {}
 
         /// <summary>
@@ -54,17 +54,17 @@ namespace AppCore.Data
         /// <param name="minHashLength"></param>
         /// <param name="alphabet"></param>
         /// <param name="seps"></param>
-        public Hashids(string salt = "", int minHashLength = 0, string alphabet = DEFAULT_ALPHABET, string seps = DEFAULT_SEPS)
+        public Hashids(string salt = "", int minHashLength = 0, string alphabet = DefaultAlphabet, string seps = DefaultSeps)
         {
             if (string.IsNullOrWhiteSpace(alphabet))
                 throw new ArgumentNullException("alphabet");
 
-            this.salt = salt;
-            this.alphabet = new string(alphabet.ToCharArray().Distinct().ToArray());
-            this.seps = seps;
-            this.minHashLength = minHashLength;
+            this._salt = salt;
+            this._alphabet = new string(alphabet.ToCharArray().Distinct().ToArray());
+            this._seps = seps;
+            this._minHashLength = minHashLength;
 
-            if (this.alphabet.Length < 16)
+            if (this._alphabet.Length < 16)
                 throw new ArgumentException("alphabet must contain atleast 4 unique characters.", "alphabet");
 
             this.SetupSeps();
@@ -110,15 +110,15 @@ namespace AppCore.Data
         /// <returns></returns>
         public virtual string EncodeHex(string hex)
         {
-            if (!hexValidator.Value.IsMatch(hex))
+            if (!_hexValidator.Value.IsMatch(hex))
                 return string.Empty;
 
             var numbers = new List<long>();
-            var matches = hexSplitter.Value.Matches(hex);
+            MatchCollection matches = _hexSplitter.Value.Matches(hex);
 
             foreach (Match match in matches)
             {
-                var number = Convert.ToInt64(string.Concat("1", match.Value), 16);
+                long number = Convert.ToInt64(string.Concat("1", match.Value), 16);
                 numbers.Add(number);
             }
 
@@ -133,9 +133,9 @@ namespace AppCore.Data
         public virtual string DecodeHex(string hash)
         {
             var ret = new StringBuilder();
-            var numbers = this.DecodeLong(hash);
+            long[] numbers = this.DecodeLong(hash);
 
-            foreach (var number in numbers)
+            foreach (long number in numbers)
                 ret.Append(string.Format("{0:X}", number).Substring(1));
 
             return ret.ToString();
@@ -222,35 +222,35 @@ namespace AppCore.Data
         private void SetupSeps()
         {
             // seps should contain only characters present in alphabet;
-            seps = new string(seps.ToCharArray().Intersect(alphabet.ToCharArray()).ToArray());
+            _seps = new string(_seps.ToCharArray().Intersect(_alphabet.ToCharArray()).ToArray());
 
             // alphabet should not contain seps.
-            alphabet = new string(alphabet.ToCharArray().Except(seps.ToCharArray()).ToArray());
+            _alphabet = new string(_alphabet.ToCharArray().Except(_seps.ToCharArray()).ToArray());
 
-            seps = ConsistentShuffle(seps, salt);
+            _seps = ConsistentShuffle(_seps, _salt);
 
-            if (seps.Length == 0 || alphabet.Length / seps.Length > SEP_DIV)
+            if (_seps.Length == 0 || _alphabet.Length / _seps.Length > SepDiv)
             {
-                var sepsLength = (int)Math.Ceiling(alphabet.Length / SEP_DIV);
+                int sepsLength = (int)Math.Ceiling(_alphabet.Length / SepDiv);
                 if (sepsLength == 1)
                     sepsLength = 2;
 
-                if (sepsLength > seps.Length)
+                if (sepsLength > _seps.Length)
                 {
-                    var diff = sepsLength - seps.Length;
-                    seps += alphabet.Substring(0, diff);
-                    alphabet = alphabet.Substring(diff);
+                    int diff = sepsLength - _seps.Length;
+                    _seps += _alphabet.Substring(0, diff);
+                    _alphabet = _alphabet.Substring(diff);
                 }
 
-                else seps = seps.Substring(0, sepsLength);
+                else _seps = _seps.Substring(0, sepsLength);
             }
 
 #if NETSTANDARD1_2
             sepsRegex = new Regex(string.Concat("[", seps, "]"));
 #else
-            sepsRegex = new Regex(string.Concat("[", seps, "]"), RegexOptions.Compiled);
+            _sepsRegex = new Regex(string.Concat("[", _seps, "]"), RegexOptions.Compiled);
 #endif
-            alphabet = ConsistentShuffle(alphabet, salt);
+            _alphabet = ConsistentShuffle(_alphabet, _salt);
         }
 
         /// <summary>
@@ -258,24 +258,24 @@ namespace AppCore.Data
         /// </summary>
         private void SetupGuards()
         {
-            var guardCount = (int)Math.Ceiling(alphabet.Length / GUARD_DIV);
+            int guardCount = (int)Math.Ceiling(_alphabet.Length / GuardDiv);
 
-            if (alphabet.Length < 3)
+            if (_alphabet.Length < 3)
             {
-                guards = seps.Substring(0, guardCount);
-                seps = seps.Substring(guardCount);
+                _guards = _seps.Substring(0, guardCount);
+                _seps = _seps.Substring(guardCount);
             }
 
             else
             {
-                guards = alphabet.Substring(0, guardCount);
-                alphabet = alphabet.Substring(guardCount);
+                _guards = _alphabet.Substring(0, guardCount);
+                _alphabet = _alphabet.Substring(guardCount);
             }
 
 #if NETSTANDARD1_2
             guardsRegex = new Regex(string.Concat("[", guards, "]"));
 #else
-            guardsRegex = new Regex(string.Concat("[", guards, "]"), RegexOptions.Compiled);
+            _guardsRegex = new Regex(string.Concat("[", _guards, "]"), RegexOptions.Compiled);
 #endif
         }
 
@@ -290,62 +290,62 @@ namespace AppCore.Data
                 return string.Empty;
 
             var ret = new StringBuilder();
-            var alphabet = this.alphabet;
+            string alphabet = this._alphabet;
 
             long numbersHashInt = 0;
-            for (var i = 0; i < numbers.Length; i++)
+            for (int i = 0; i < numbers.Length; i++)
                 numbersHashInt += (int)(numbers[i] % (i + 100));
 
-            var lottery = alphabet[(int)(numbersHashInt % alphabet.Length)];
+            char lottery = alphabet[(int)(numbersHashInt % alphabet.Length)];
             ret.Append(lottery.ToString());
 
-            for (var i = 0; i < numbers.Length; i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                var number = numbers[i];
-                var buffer = lottery + this.salt + alphabet;
+                long number = numbers[i];
+                string buffer = lottery + this._salt + alphabet;
 
                 alphabet = ConsistentShuffle(alphabet, buffer.Substring(0, alphabet.Length));
-                var last = this.Hash(number, alphabet);
+                string last = this.Hash(number, alphabet);
 
                 ret.Append(last);
 
                 if (i + 1 < numbers.Length)
                 {
                     number %= ((int)last[0] + i);
-                    var sepsIndex = ((int)number % this.seps.Length);
+                    int sepsIndex = ((int)number % this._seps.Length);
 
-                    ret.Append(this.seps[sepsIndex]);
+                    ret.Append(this._seps[sepsIndex]);
                 }
             }
 
-            if (ret.Length < this.minHashLength)
+            if (ret.Length < this._minHashLength)
             {
-                var guardIndex = ((int)(numbersHashInt + (int)ret[0]) % this.guards.Length);
-                var guard = this.guards[guardIndex];
+                int guardIndex = ((int)(numbersHashInt + (int)ret[0]) % this._guards.Length);
+                char guard = this._guards[guardIndex];
 
                 ret.Insert(0, guard);
 
-                if (ret.Length < this.minHashLength)
+                if (ret.Length < this._minHashLength)
                 {
-                    guardIndex = ((int)(numbersHashInt + (int)ret[2]) % this.guards.Length);
-                    guard = this.guards[guardIndex];
+                    guardIndex = ((int)(numbersHashInt + (int)ret[2]) % this._guards.Length);
+                    guard = this._guards[guardIndex];
 
                     ret.Append(guard);
                 }
             }
 
-            var halfLength = (int)(alphabet.Length / 2);
-            while (ret.Length < this.minHashLength)
+            int halfLength = (int)(alphabet.Length / 2);
+            while (ret.Length < this._minHashLength)
             {
                 alphabet = ConsistentShuffle(alphabet, alphabet);
                 ret.Insert(0, alphabet.Substring(halfLength));
                 ret.Append(alphabet.Substring(0, halfLength));
 
-                var excess = ret.Length - this.minHashLength;
+                int excess = ret.Length - this._minHashLength;
                 if (excess > 0)
                 {
                     ret.Remove(0, excess / 2);
-                    ret.Remove(this.minHashLength, ret.Length - this.minHashLength);
+                    ret.Remove(this._minHashLength, ret.Length - this._minHashLength);
                 }
             }
 
@@ -369,9 +369,9 @@ namespace AppCore.Data
         {
             long number = 0;
 
-            for (var i = 0; i < input.Length; i++)
+            for (int i = 0; i < input.Length; i++)
             {
-                var pos = alphabet.IndexOf(input[i]);
+                int pos = alphabet.IndexOf(input[i]);
                 number += (long)(pos * Math.Pow(alphabet.Length, input.Length - i - 1));
             }
 
@@ -383,12 +383,12 @@ namespace AppCore.Data
             if (string.IsNullOrWhiteSpace(hash))
                 return new long[0];
 
-            var alphabet = new string(this.alphabet.ToCharArray());
+            string alphabet = new string(this._alphabet.ToCharArray());
             var ret = new List<long>();
             int i = 0;
 
-            var hashBreakdown = guardsRegex.Replace(hash, " ");
-            var hashArray = hashBreakdown.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string hashBreakdown = _guardsRegex.Replace(hash, " ");
+            string[] hashArray = hashBreakdown.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (hashArray.Length == 3 || hashArray.Length == 2)
                 i = 1;
@@ -396,16 +396,16 @@ namespace AppCore.Data
             hashBreakdown = hashArray[i];
             if (hashBreakdown[0] != default(char))
             {
-                var lottery = hashBreakdown[0];
+                char lottery = hashBreakdown[0];
                 hashBreakdown = hashBreakdown.Substring(1);
 
-                hashBreakdown = sepsRegex.Replace(hashBreakdown, " ");
+                hashBreakdown = _sepsRegex.Replace(hashBreakdown, " ");
                 hashArray = hashBreakdown.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                for (var j = 0; j < hashArray.Length; j++)
+                for (int j = 0; j < hashArray.Length; j++)
                 {
-                    var subHash = hashArray[j];
-                    var buffer = lottery + this.salt + alphabet;
+                    string subHash = hashArray[j];
+                    string buffer = lottery + this._salt + alphabet;
 
                     alphabet = ConsistentShuffle(alphabet, buffer.Substring(0, alphabet.Length));
                     ret.Add(Unhash(subHash, alphabet));
@@ -430,14 +430,14 @@ namespace AppCore.Data
                 return alphabet;
 
             int n;
-            var letters = alphabet.ToCharArray();
+            char[] letters = alphabet.ToCharArray();
             for (int i = letters.Length - 1, v = 0, p = 0; i > 0; i--, v++)
             {
                 v %= salt.Length;
                 p += (n = salt[v]);
-                var j = (n + v + p) % i;
+                int j = (n + v + p) % i;
                 // swap characters at positions i and j
-                var temp = letters[j];
+                char temp = letters[j];
                 letters[j] = letters[i];
                 letters[i] = temp;
             }

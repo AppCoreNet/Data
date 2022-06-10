@@ -22,7 +22,7 @@ namespace AppCore.Data.EntityFrameworkCore
         }
 
         private static TestContextSimpleIdRepository CreateSimpleIdRepository(
-            DbContextDataProvider<DefaultDataProvider, TestContext> provider, IDbContextQueryHandlerProvider? queryHandlerProvider = null)
+            DbContextDataProvider<DefaultDataProvider, TestContext> provider, IDbContextQueryHandlerProvider<TestContext>? queryHandlerProvider = null)
         {
             var entityMapper = Substitute.For<IEntityMapper>();
             entityMapper.Map<EntityWithSimpleId>(Arg.Any<DbEntityWithSimpleId>())
@@ -39,7 +39,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextSimpleIdRepository(
                 provider,
-                queryHandlerProvider ?? Substitute.For<IDbContextQueryHandlerProvider>(),
+                queryHandlerProvider ?? Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
                 Substitute.For<ITokenGenerator>(),
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -63,7 +63,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextComplexIdRepository(
                 provider,
-                Substitute.For<IDbContextQueryHandlerProvider>(),
+                Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
                 Substitute.For<ITokenGenerator>(),
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -100,7 +100,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextChangeTokenRepository(
                 provider,
-                Substitute.For<IDbContextQueryHandlerProvider>(),
+                Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
                 generator,
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -137,7 +137,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
             return new TestContextChangeTokenExRepository(
                 provider,
-                Substitute.For<IDbContextQueryHandlerProvider>(),
+                Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
                 generator,
                 entityMapper,
                 Substitute.For<ILogger>());
@@ -355,10 +355,10 @@ namespace AppCore.Data.EntityFrameworkCore
         [Fact]
         public async Task QueryInvokesQueryHandler()
         {
-            var queryHandler = Substitute.For<IDbContextQueryHandler<EntityWithSimpleId, EntityWithSimpleId>>();
+            var queryHandler = Substitute.For<IDbContextQueryHandler<EntityWithSimpleId, EntityWithSimpleId, TestContext>>();
             queryHandler.QueryType.Returns(typeof(EntityWithSimpleIdByIdQuery));
 
-            var queryHandlerProvider = Substitute.For<IDbContextQueryHandlerProvider>();
+            var queryHandlerProvider = Substitute.For<IDbContextQueryHandlerProvider<TestContext>>();
             queryHandlerProvider
                 .GetHandler<EntityWithSimpleId, EntityWithSimpleId>(
                     Arg.Is(typeof(EntityWithSimpleIdByIdQuery)))

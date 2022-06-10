@@ -24,13 +24,13 @@ namespace AppCore.Data.EntityFrameworkCore
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
     /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
     public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-        : IDbContextQueryHandler<TEntity, TResult>
+        : IDbContextQueryHandler<TEntity, TResult, TDbContext>
         where TQuery : IQuery<TEntity, TResult>
         where TEntity : IEntity
         where TDbContext : DbContext
         where TDbEntity : class
     {
-        Type IDbContextQueryHandler<TEntity, TResult>.QueryType => typeof(TQuery);
+        Type IDbContextQueryHandler<TEntity, TResult, TDbContext>.QueryType => typeof(TQuery);
 
         /// <summary>
         /// Gets the <see cref="IDbContextDataProvider{TDbContext}"/> used by the query.
@@ -111,7 +111,7 @@ namespace AppCore.Data.EntityFrameworkCore
             return result;
         }
 
-        Task<TResult> IDbContextQueryHandler<TEntity,TResult>.ExecuteAsync(IQuery<TEntity, TResult> query, CancellationToken cancellationToken)
+        Task<TResult> IDbContextQueryHandler<TEntity,TResult,TDbContext>.ExecuteAsync(IQuery<TEntity, TResult> query, CancellationToken cancellationToken)
         {
             return ExecuteAsync((TQuery)query, cancellationToken);
         }

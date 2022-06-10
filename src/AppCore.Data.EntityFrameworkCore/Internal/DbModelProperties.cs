@@ -12,8 +12,7 @@ namespace AppCore.Data.EntityFrameworkCore
 {
     internal class DbModelProperties
     {
-        private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> Properties =
-            new ConcurrentDictionary<(Type, Type), DbModelProperties>();
+        private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> _properties = new();
 
         public IReadOnlyList<string> PrimaryKeyPropertyNames { get; }
 
@@ -43,7 +42,7 @@ namespace AppCore.Data.EntityFrameworkCore
 
         public static DbModelProperties Get(Type dbContextType, Type dbEntityType, IModel model, Type entityType)
         {
-            return Properties.GetOrAdd((dbContextType, dbEntityType), t =>
+            return _properties.GetOrAdd((dbContextType, dbEntityType), t =>
             {
                 var properties = new DbModelProperties(model, t.Item2);
 
