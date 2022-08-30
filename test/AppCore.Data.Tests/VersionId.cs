@@ -1,42 +1,41 @@
 ﻿using System;
 
-namespace AppCore.Data
+namespace AppCore.Data;
+
+public readonly struct VersionId : IEquatable<VersionId>
 {
-    public readonly struct VersionId : IEquatable<VersionId>
+    public int Id { get; }
+
+    public int Version { get; }
+
+    public VersionId(int id, int version)
     {
-        public int Id { get; }
+        Id = id;
+        Version = version;
+    }
 
-        public int Version { get; }
+    public bool Equals(VersionId other)
+    {
+        return Id == other.Id && Version == other.Version;
+    }
 
-        public VersionId(int id, int version)
-        {
-            Id = id;
-            Version = version;
-        }
+    public override bool Equals(object? obj)
+    {
+        return obj is VersionId other && Equals(other);
+    }
 
-        public bool Equals(VersionId other)
-        {
-            return Id == other.Id && Version == other.Version;
-        }
+    public override int GetHashCode()
+    {
+        return Id + Version;
+    }
 
-        public override bool Equals(object? obj)
-        {
-            return obj is VersionId other && Equals(other);
-        }
+    public static bool operator ==(VersionId left, VersionId right)
+    {
+        return left.Equals(right);
+    }
 
-        public override int GetHashCode()
-        {
-            return Id + Version;
-        }
-
-        public static bool operator ==(VersionId left, VersionId right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(VersionId left, VersionId right)
-        {
-            return !left.Equals(right);
-        }
+    public static bool operator !=(VersionId left, VersionId right)
+    {
+        return !left.Equals(right);
     }
 }

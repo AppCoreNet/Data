@@ -8,35 +8,34 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Extensions.DependencyInjection
+namespace AppCore.Extensions.DependencyInjection;
+
+/// <summary>
+/// Provides extension methods to register the data services.
+/// </summary>
+public static class DataProviderAppCoreBuilderExtensions
 {
     /// <summary>
-    /// Provides extension methods to register the data services.
+    /// Adds the data services to the <see cref="IServiceCollection"/>.
     /// </summary>
-    public static class DataProviderAppCoreBuilderExtensions
+    /// <param name="builder">The <see cref="IAppCoreBuilder"/>.</param>
+    /// <param name="configure">Delegate to configure the <see cref="IDataProviderBuilder"/>.</param>
+    /// <returns>The <see cref="IAppCoreBuilder"/>.</returns>
+    public static IAppCoreBuilder AddDataProvider(this IAppCoreBuilder builder, Action<IDataProviderBuilder>? configure = null)
     {
-        /// <summary>
-        /// Adds the data services to the <see cref="IServiceCollection"/>.
-        /// </summary>
-        /// <param name="builder">The <see cref="IAppCoreBuilder"/>.</param>
-        /// <param name="configure">Delegate to configure the <see cref="IDataProviderBuilder"/>.</param>
-        /// <returns>The <see cref="IAppCoreBuilder"/>.</returns>
-        public static IAppCoreBuilder AddDataProvider(this IAppCoreBuilder builder, Action<IDataProviderBuilder>? configure = null)
+        Ensure.Arg.NotNull(builder);
+
+        IServiceCollection services = builder.Services;
+
+        services.TryAddSingleton<ITokenGenerator, TokenGenerator>();
+        services.TryAddEnumerable(new []
         {
-            Ensure.Arg.NotNull(builder);
+            ServiceDescriptor.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)),
+            ServiceDescriptor.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
+        });
 
-            IServiceCollection services = builder.Services;
+        configure?.Invoke(new DataProviderBuilder(services));
 
-            services.TryAddSingleton<ITokenGenerator, TokenGenerator>();
-            services.TryAddEnumerable(new []
-            {
-                ServiceDescriptor.Scoped(typeof(IDataProvider<>), typeof(DataProvider<>)),
-                ServiceDescriptor.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
-            });
-
-            configure?.Invoke(new DataProviderBuilder(services));
-
-            return builder;
-        }
+        return builder;
     }
 }

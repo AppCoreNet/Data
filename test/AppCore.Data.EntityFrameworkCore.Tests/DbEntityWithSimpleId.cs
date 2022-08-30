@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AppCore.Data.EntityFrameworkCore
-{
-    public class DbEntityWithSimpleId
-    {
-        public int Id { get; set; }
+namespace AppCore.Data.EntityFrameworkCore;
 
-        public string? Value { get; set; }
-    }
+public class DbEntityWithSimpleId
+{
+    public int Id { get; set; }
+
+    public string? Value { get; set; }
 }

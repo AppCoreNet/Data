@@ -3,18 +3,17 @@
 
 using System.Collections.Generic;
 
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+internal sealed class PagedResult<TResult> : IPagedResult<TResult>
 {
-    internal sealed class PagedResult<TResult> : IPagedResult<TResult>
+    public long? TotalCount { get; }
+
+    public IReadOnlyCollection<TResult> Items { get; }
+
+    public PagedResult(IReadOnlyCollection<TResult> items, long? totalCount)
     {
-        public long? TotalCount { get; }
-
-        public IReadOnlyCollection<TResult> Items { get; }
-
-        public PagedResult(IReadOnlyCollection<TResult> items, long? totalCount)
-        {
-            TotalCount = totalCount;
-            Items = items;
-        }
+        TotalCount = totalCount;
+        Items = items;
     }
 }

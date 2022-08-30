@@ -1,7 +1,6 @@
-﻿namespace AppCore.Data.EntityFrameworkCore
+﻿namespace AppCore.Data.EntityFrameworkCore;
+
+public class EntityWithSimpleIdByIdQuery : IQuery<EntityWithSimpleId, EntityWithSimpleId>
 {
-    public class EntityWithSimpleIdByIdQuery : IQuery<EntityWithSimpleId, EntityWithSimpleId>
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
 }

@@ -7,80 +7,79 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+/// <summary>
+/// Provides a base class for <see cref="DbContext"/> based query handlers which return a page of the result set.
+/// </summary>
+/// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
+/// <typeparam name="TEntity">The type of the <see cref="IEntity"/></typeparam>
+/// <typeparam name="TResult">The type of the result.</typeparam>
+/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
+/// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
+public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+    : DbContextQueryHandler<TQuery, TEntity, IPagedResult<TResult>, TDbContext, TDbEntity>
+    where TQuery : IPagedQuery<TEntity, TResult>
+    where TEntity : IEntity
+    where TDbContext : DbContext
+    where TDbEntity : class
 {
     /// <summary>
-    /// Provides a base class for <see cref="DbContext"/> based query handlers which return a page of the result set.
+    /// Initializes a new instance of the <see cref="DbContextPagedQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
-    /// <typeparam name="TEntity">The type of the <see cref="IEntity"/></typeparam>
-    /// <typeparam name="TResult">The type of the result.</typeparam>
-    /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
-    public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-        : DbContextQueryHandler<TQuery, TEntity, IPagedResult<TResult>, TDbContext, TDbEntity>
-        where TQuery : IPagedQuery<TEntity, TResult>
-        where TEntity : IEntity
-        where TDbContext : DbContext
-        where TDbEntity : class
+    /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
+    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+    protected DbContextPagedQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
+        : base(provider, loggerFactory)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DbContextPagedQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
-        /// </summary>
-        /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-        protected DbContextPagedQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
-            : base(provider, loggerFactory)
-        {
-        }
+    }
 
-        /// <summary>
-        /// Must be implemented to apply the query to the <see cref="IQueryable{T}"/>.
-        /// </summary>
-        /// <param name="queryable">The <see cref="IQueryable{T}"/>.</param>
-        /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> to apply.</param>
-        /// <returns>The <see cref="IQueryable{T}"/>.</returns>
-        protected abstract IQueryable<TDbEntity> ApplyQuery(IQueryable<TDbEntity> queryable, TQuery query);
+    /// <summary>
+    /// Must be implemented to apply the query to the <see cref="IQueryable{T}"/>.
+    /// </summary>
+    /// <param name="queryable">The <see cref="IQueryable{T}"/>.</param>
+    /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> to apply.</param>
+    /// <returns>The <see cref="IQueryable{T}"/>.</returns>
+    protected abstract IQueryable<TDbEntity> ApplyQuery(IQueryable<TDbEntity> queryable, TQuery query);
 
-        /// <summary>
-        /// Must be implemented to project the result from <typeparamref name="TEntity"/> to <typeparamref name="TResult"/>.
-        /// </summary>
-        /// <param name="queryable">The <see cref="IQueryable{T}"/> which must be projected.</param>
-        /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> which is executed.</param>
-        /// <returns>The projected <see cref="IQueryable{T}"/>.</returns>
-        protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
+    /// <summary>
+    /// Must be implemented to project the result from <typeparamref name="TEntity"/> to <typeparamref name="TResult"/>.
+    /// </summary>
+    /// <param name="queryable">The <see cref="IQueryable{T}"/> which must be projected.</param>
+    /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> which is executed.</param>
+    /// <returns>The projected <see cref="IQueryable{T}"/>.</returns>
+    protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
 
-        /// <summary>
-        /// Can be overriden to customize the paging.
-        /// </summary>
-        /// <param name="queryable">The <see cref="IQueryable{T}"/> which must be paged.</param>
-        /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> which is executed.</param>
-        /// <returns>The projected <see cref="IQueryable{T}"/>.</returns>
-        protected virtual IQueryable<TDbEntity> ApplyPaging(IQueryable<TDbEntity> queryable, TQuery query)
-        {
-            if (query.Offset > 0)
-                queryable = queryable.Skip((int)query.Offset);
+    /// <summary>
+    /// Can be overriden to customize the paging.
+    /// </summary>
+    /// <param name="queryable">The <see cref="IQueryable{T}"/> which must be paged.</param>
+    /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> which is executed.</param>
+    /// <returns>The projected <see cref="IQueryable{T}"/>.</returns>
+    protected virtual IQueryable<TDbEntity> ApplyPaging(IQueryable<TDbEntity> queryable, TQuery query)
+    {
+        if (query.Offset > 0)
+            queryable = queryable.Skip((int)query.Offset);
 
-            return queryable.Take(query.Limit);
-        }
+        return queryable.Take(query.Limit);
+    }
 
-        /// <inheritdoc />
-        protected override async Task<IPagedResult<TResult>> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
-        {
-            queryable = ApplyQuery(queryable, query);
+    /// <inheritdoc />
+    protected override async Task<IPagedResult<TResult>> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
+    {
+        queryable = ApplyQuery(queryable, query);
 
-            long? totalCount = query.TotalCount
-                ? await queryable.LongCountAsync(cancellationToken)
-                                 .ConfigureAwait(false)
-                : null;
+        long? totalCount = query.TotalCount
+            ? await queryable.LongCountAsync(cancellationToken)
+                             .ConfigureAwait(false)
+            : null;
 
-            queryable = ApplyPaging(queryable, query);
-            IQueryable<TResult> projectedQueryable = ApplyProjection(queryable, query);
+        queryable = ApplyPaging(queryable, query);
+        IQueryable<TResult> projectedQueryable = ApplyProjection(queryable, query);
 
-            TResult[] result = await projectedQueryable.ToArrayAsync(cancellationToken)
-                                                       .ConfigureAwait(false);
+        TResult[] result = await projectedQueryable.ToArrayAsync(cancellationToken)
+                                                   .ConfigureAwait(false);
 
-            return new PagedResult<TResult>(result, totalCount);
-        }
+        return new PagedResult<TResult>(result, totalCount);
     }
 }

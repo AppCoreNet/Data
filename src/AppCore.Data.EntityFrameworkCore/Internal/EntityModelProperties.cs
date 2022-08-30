@@ -6,57 +6,56 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+internal class EntityModelProperties<TId, TEntity>
+    where TEntity : IEntity<TId>
 {
-    internal class EntityModelProperties<TId, TEntity>
-        where TEntity : IEntity<TId>
+    public Func<TId, object?[]> GetIdValues { get; }
+
+    public IReadOnlyList<string> IdPropertyNames { get; }
+
+    public EntityModelProperties()
     {
-        public Func<TId, object?[]> GetIdValues { get; }
+        Type entityType = typeof(TEntity);
 
-        public IReadOnlyList<string> IdPropertyNames { get; }
+        Type entityIfaceType =
+            entityType.GetInterfaces()
+                      .First(f => f.GetGenericTypeDefinition() == typeof(IEntity<>));
 
-        public EntityModelProperties()
+        Type idType = entityIfaceType.GenericTypeArguments[0];
+        switch (Type.GetTypeCode(idType))
         {
-            Type entityType = typeof(TEntity);
-
-            Type entityIfaceType =
-                entityType.GetInterfaces()
-                          .First(f => f.GetGenericTypeDefinition() == typeof(IEntity<>));
-
-            Type idType = entityIfaceType.GenericTypeArguments[0];
-            switch (Type.GetTypeCode(idType))
+            case TypeCode.Object:
             {
-                case TypeCode.Object:
+                PropertyInfo[] idProperties = idType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+                IdPropertyNames = idProperties.Select(p => p.Name)
+                                              .ToList()
+                                              .AsReadOnly();
+
+                Func<TId, object?>[] idPropertyGetters =
+                    idProperties
+                        .Select(p => new Func<TId, object?>(o => p.GetValue(o)))
+                        .ToArray();
+
+                GetIdValues = id =>
                 {
-                    PropertyInfo[] idProperties = idType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-
-                    IdPropertyNames = idProperties.Select(p => p.Name)
-                                                  .ToList()
-                                                  .AsReadOnly();
-
-                    Func<TId, object?>[] idPropertyGetters =
-                        idProperties
-                              .Select(p => new Func<TId, object?>(o => p.GetValue(o)))
-                              .ToArray();
-
-                    GetIdValues = id =>
+                    object?[] result = new object[idPropertyGetters.Length];
+                    for (int i = 0; i < idPropertyGetters.Length; i++)
                     {
-                        object?[] result = new object[idPropertyGetters.Length];
-                        for (int i = 0; i < idPropertyGetters.Length; i++)
-                        {
-                            result[i] = idPropertyGetters[i](id);
-                        }
+                        result[i] = idPropertyGetters[i](id);
+                    }
 
-                        return result;
-                    };
-                }
-                    break;
-
-                default:
-                    IdPropertyNames = new List<string>().AsReadOnly();
-                    GetIdValues = id => new object?[] { id };
-                    break;
+                    return result;
+                };
             }
+                break;
+
+            default:
+                IdPropertyNames = new List<string>().AsReadOnly();
+                GetIdValues = id => new object?[] { id };
+                break;
         }
     }
 }

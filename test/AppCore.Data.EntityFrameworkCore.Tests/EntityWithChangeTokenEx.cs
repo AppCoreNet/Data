@@ -1,13 +1,12 @@
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+public class EntityWithChangeTokenEx : IEntity<int>, IHasChangeTokenEx
 {
-    public class EntityWithChangeTokenEx : IEntity<int>, IHasChangeTokenEx
-    {
-        object IEntity.Id => Id;
+    object IEntity.Id => Id;
 
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string? ChangeToken { get; set; }
+    public string? ChangeToken { get; set; }
 
-        public string? ExpectedChangeToken { get; set; }
-    }
+    public string? ExpectedChangeToken { get; set; }
 }

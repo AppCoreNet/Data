@@ -3,29 +3,28 @@
 
 using System;
 
-namespace AppCore.Data
+namespace AppCore.Data;
+
+/// <summary>
+/// Exception which is thrown when entities could not be updated because of optimistic concurrency checks.
+/// </summary>
+public class EntityConcurrencyException : EntityException
 {
     /// <summary>
-    /// Exception which is thrown when entities could not be updated because of optimistic concurrency checks.
+    /// Initializes a new instance of the <see cref="EntityConcurrencyException"/> class.
     /// </summary>
-    public class EntityConcurrencyException : EntityException
+    /// <param name="innerException">The inner exception.</param>
+    public EntityConcurrencyException(Exception? innerException)
+        : base("Entities may have been modified or deleted since they were loaded.",
+               innerException)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityConcurrencyException"/> class.
-        /// </summary>
-        /// <param name="innerException">The inner exception.</param>
-        public EntityConcurrencyException(Exception? innerException)
-            : base("Entities may have been modified or deleted since they were loaded.",
-                innerException)
-        {
-        }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityConcurrencyException"/> class.
-        /// </summary>
-        public EntityConcurrencyException()
-            : this(null)
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EntityConcurrencyException"/> class.
+    /// </summary>
+    public EntityConcurrencyException()
+        : this(null)
+    {
     }
 }

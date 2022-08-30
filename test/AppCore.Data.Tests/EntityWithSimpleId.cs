@@ -1,9 +1,8 @@
-namespace AppCore.Data
-{
-    public class EntityWithSimpleId : IEntity<int>
-    {
-        public int Id { get; set; }
+namespace AppCore.Data;
 
-        object IEntity.Id => Id;
-    }
+public class EntityWithSimpleId : IEntity<int>
+{
+    public int Id { get; set; }
+
+    object IEntity.Id => Id;
 }

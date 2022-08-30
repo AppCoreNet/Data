@@ -3,22 +3,21 @@
 
 using System.Collections.Generic;
 
-namespace AppCore.Data
+namespace AppCore.Data;
+
+/// <summary>
+/// Represents the result of a paged query.
+/// </summary>
+/// <typeparam name="TResult">The type of the query result.</typeparam>
+public interface IPagedResult<out TResult>
 {
     /// <summary>
-    /// Represents the result of a paged query.
+    /// Gets the total count of items.
     /// </summary>
-    /// <typeparam name="TResult">The type of the query result.</typeparam>
-    public interface IPagedResult<out TResult>
-    {
-        /// <summary>
-        /// Gets the total count of items.
-        /// </summary>
-        long? TotalCount { get; }
+    long? TotalCount { get; }
 
-        /// <summary>
-        /// Get the result items.
-        /// </summary>
-        IReadOnlyCollection<TResult> Items { get; }
-    }
+    /// <summary>
+    /// Get the result items.
+    /// </summary>
+    IReadOnlyCollection<TResult> Items { get; }
 }

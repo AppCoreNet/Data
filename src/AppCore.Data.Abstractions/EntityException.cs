@@ -3,30 +3,29 @@
 
 using System;
 
-namespace AppCore.Data
+namespace AppCore.Data;
+
+/// <summary>
+/// Provides base class for exceptions related to entities.
+/// </summary>
+public abstract class EntityException : Exception
 {
     /// <summary>
-    /// Provides base class for exceptions related to entities.
+    /// Initializes a new instance of the <see cref="EntityException"/> class.
     /// </summary>
-    public abstract class EntityException : Exception
+    /// <param name="message">The exception message.</param>
+    /// <param name="innerException">The inner exception.</param>
+    protected EntityException(string message, Exception? innerException)
+        : base(message, innerException)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityException"/> class.
-        /// </summary>
-        /// <param name="message">The exception message.</param>
-        /// <param name="innerException">The inner exception.</param>
-        protected EntityException(string message, Exception? innerException)
-          : base(message, innerException)
-        {
-        }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityException"/> class.
-        /// </summary>
-        /// <param name="message">The exception message.</param>
-        protected EntityException(string message)
-            : this(message, null)
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EntityException"/> class.
+    /// </summary>
+    /// <param name="message">The exception message.</param>
+    protected EntityException(string message)
+        : this(message, null)
+    {
     }
 }

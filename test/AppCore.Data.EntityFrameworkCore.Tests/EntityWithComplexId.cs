@@ -1,11 +1,10 @@
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+public class EntityWithComplexId : IEntity<VersionId>
 {
-    public class EntityWithComplexId : IEntity<VersionId>
-    {
-        public VersionId Id { get; set; }
+    public VersionId Id { get; set; }
 
-        public string? Value { get; set; }
+    public string? Value { get; set; }
 
-        object IEntity.Id => Id;
-    }
+    object IEntity.Id => Id;
 }
