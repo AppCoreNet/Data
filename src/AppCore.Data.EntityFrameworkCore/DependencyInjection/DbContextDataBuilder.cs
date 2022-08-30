@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.DependencyInjection;
+namespace AppCore.Extensions.DependencyInjection;
 
 internal sealed class DbContextDataBuilder<TDbContext> : IDbContextDataBuilder<TDbContext>
     where TDbContext : DbContext
@@ -82,6 +82,13 @@ internal sealed class DbContextDataBuilder<TDbContext> : IDbContextDataBuilder<T
 
         Type queryHandlerServiceType = queryHandlerBaseType.MakeGenericType(entityType, resultType, queryDbContextType);
         Services.TryAddEnumerable(ServiceDescriptor.Transient(queryHandlerServiceType, queryHandlerType));
+        return this;
+    }
+
+    public IDbContextDataBuilder<TDbContext> AddEntityMapper<T>()
+        where T : class, IEntityMapper
+    {
+        Services.TryAddScoped<IEntityMapper, T>();
         return this;
     }
 }

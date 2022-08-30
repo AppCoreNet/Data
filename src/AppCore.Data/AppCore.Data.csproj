@@ -10,6 +10,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="AppCore.Extensions.DependencyInjection.Abstractions" Version="$(AppCore_Extensions_Version)" />
   </ItemGroup>
 
   <ItemGroup>

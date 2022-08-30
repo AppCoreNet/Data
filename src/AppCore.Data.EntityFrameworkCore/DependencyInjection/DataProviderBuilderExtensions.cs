@@ -9,21 +9,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.DependencyInjection
+namespace AppCore.Extensions.DependencyInjection
 {
     /// <summary>
     /// Provides extension methods to register a <see cref="DbContext"/> data provider.
     /// </summary>
-    public static class DataProvidersBuilderExtensions
+    public static class DataProviderBuilderExtensions
     {
         /// <summary>
         /// Registers a <see cref="DbContext"/> data provider with the <see cref="IServiceCollection"/>.
         /// </summary>
         /// <typeparam name="TTag">The data provider tag.</typeparam>
         /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-        /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+        /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
         /// <returns>The <see cref="IDbContextDataBuilder{TDbContext}"/>.</returns>
-        public static IDbContextDataBuilder<TDbContext> AddDbContextProvider<TTag, TDbContext>(this IDataProvidersBuilder builder)
+        public static IDbContextDataBuilder<TDbContext> AddDbContext<TTag, TDbContext>(this IDataProviderBuilder builder)
             where TDbContext : DbContext
         {
             Ensure.Arg.NotNull(builder);
@@ -50,26 +50,12 @@ namespace AppCore.DependencyInjection
         /// Registers a <see cref="DbContext"/> data provider with the <see cref="IServiceCollection"/>.
         /// </summary>
         /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-        /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+        /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
         /// <returns>The <see cref="IDbContextDataBuilder{TDbContext}"/>.</returns>
-        public static IDbContextDataBuilder<TDbContext> AddDbContextProvider<TDbContext>(this IDataProvidersBuilder builder)
+        public static IDbContextDataBuilder<TDbContext> AddDbContext<TDbContext>(this IDataProviderBuilder builder)
             where TDbContext : DbContext
         {
-            return AddDbContextProvider<DefaultDataProvider, TDbContext>(builder);
-        }
-
-        /// <summary>
-        /// Registers a <see cref="IEntityMapper"/> which maps entities to database entities.
-        /// </summary>
-        /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
-        /// <typeparam name="T">The type of the <see cref="IEntityMapper"/>.</typeparam>
-        /// <returns>The <see cref="IDataProvidersBuilder"/>.</returns>
-        public static IDataProvidersBuilder AddDbContextEntityMapper<T>(this IDataProvidersBuilder builder)
-            where T : class, IEntityMapper
-        {
-            Ensure.Arg.NotNull(builder);
-            builder.Services.TryAddScoped<IEntityMapper, T>();
-            return builder;
+            return AddDbContext<DefaultDataProvider, TDbContext>(builder);
         }
     }
 }

@@ -8,19 +8,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.DependencyInjection
+namespace AppCore.Extensions.DependencyInjection
 {
     /// <summary>
     /// Provides extension methods to register the data services.
     /// </summary>
-    public static class AppCoreBuilderExtensions
+    public static class DataProviderAppCoreBuilderExtensions
     {
         /// <summary>
         /// Adds the data services to the <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="builder">The <see cref="IAppCoreBuilder"/>.</param>
-        /// <returns>The <see cref="IDataProvidersBuilder"/>.</returns>
-        public static IDataProvidersBuilder AddDataProviders(this IAppCoreBuilder builder)
+        /// <param name="configure">Delegate to configure the <see cref="IDataProviderBuilder"/>.</param>
+        /// <returns>The <see cref="IAppCoreBuilder"/>.</returns>
+        public static IAppCoreBuilder AddDataProvider(this IAppCoreBuilder builder, Action<IDataProviderBuilder>? configure = null)
         {
             Ensure.Arg.NotNull(builder);
 
@@ -33,7 +34,9 @@ namespace AppCore.DependencyInjection
                 ServiceDescriptor.Scoped(typeof(ITransactionManager<>), typeof(TransactionManager<>))
             });
 
-            return new DataProvidersBuilder(services);
+            configure?.Invoke(new DataProviderBuilder(services));
+
+            return builder;
         }
     }
 }
