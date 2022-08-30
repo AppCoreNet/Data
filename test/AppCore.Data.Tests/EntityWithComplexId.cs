@@ -1,9 +1,8 @@
-namespace AppCore.Data
-{
-    public class EntityWithComplexId : IEntity<VersionId>
-    {
-        public VersionId Id { get; set; }
+namespace AppCore.Data;
 
-        object IEntity.Id => Id;
-    }
+public class EntityWithComplexId : IEntity<VersionId>
+{
+    public VersionId Id { get; set; }
+
+    object IEntity.Id => Id;
 }

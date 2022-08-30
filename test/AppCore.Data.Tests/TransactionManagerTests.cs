@@ -7,32 +7,31 @@ using FluentAssertions;
 using NSubstitute;
 using Xunit;
 
-namespace AppCore.Data
+namespace AppCore.Data;
+
+public class TransactionManagerTests
 {
-    public class TransactionManagerTests
+    private static ITransactionManager CreateManager()
     {
-        private static ITransactionManager CreateManager()
-        {
-            var manager = Substitute.For<ITransactionManager>();
-            manager.Provider.Name.Returns(typeof(DefaultDataProvider).FullName);
-            return manager;
-        }
+        var manager = Substitute.For<ITransactionManager>();
+        manager.Provider.Name.Returns(typeof(DefaultDataProvider).FullName);
+        return manager;
+    }
 
-        [Fact]
-        public void ThrowsForUnknownManager()
-        {
-            Assert.Throws<InvalidOperationException>(
-                () => new TransactionManager<DefaultDataProvider>(Enumerable.Empty<ITransactionManager>()));
-        }
+    [Fact]
+    public void ThrowsForUnknownManager()
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => new TransactionManager<DefaultDataProvider>(Enumerable.Empty<ITransactionManager>()));
+    }
 
-        [Fact]
-        public void ResolvesManagerByTypeName()
-        {
-            ITransactionManager manager = CreateManager();
+    [Fact]
+    public void ResolvesManagerByTypeName()
+    {
+        ITransactionManager manager = CreateManager();
 
-            var managerWithTag = new TransactionManager<DefaultDataProvider>(new[] {manager});
-            managerWithTag.Manager.Should()
-                          .BeSameAs(manager);
-        }
+        var managerWithTag = new TransactionManager<DefaultDataProvider>(new[] {manager});
+        managerWithTag.Manager.Should()
+                      .BeSameAs(manager);
     }
 }

@@ -1,17 +1,16 @@
 ﻿// Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
-namespace AppCore.Data
+namespace AppCore.Data;
+
+/// <summary>
+/// Represents a generator for arbitrary tokens.
+/// </summary>
+public interface ITokenGenerator
 {
     /// <summary>
-    /// Represents a generator for arbitrary tokens.
+    /// Generates a new token.
     /// </summary>
-    public interface ITokenGenerator
-    {
-        /// <summary>
-        /// Generates a new token.
-        /// </summary>
-        /// <returns>The token.</returns>
-        string Generate();
-    }
+    /// <returns>The token.</returns>
+    string Generate();
 }

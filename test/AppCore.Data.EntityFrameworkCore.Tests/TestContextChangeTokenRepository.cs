@@ -1,17 +1,17 @@
 using Microsoft.Extensions.Logging;
 
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+public class TestContextChangeTokenRepository
+    : DbContextRepository<int, EntityWithChangeToken, TestContext, DbEntityWithChangeToken>
 {
-    public class TestContextChangeTokenRepository
-        : DbContextRepository<int, EntityWithChangeToken, TestContext, DbEntityWithChangeToken>
+    public TestContextChangeTokenRepository(
+        IDbContextDataProvider<TestContext> provider,
+        IDbContextQueryHandlerProvider<TestContext> queryHandlerProvider,
+        ITokenGenerator tokenGenerator,
+        IEntityMapper entityMapper,
+        ILogger logger)
+        : base(provider, queryHandlerProvider, tokenGenerator, entityMapper, logger)
     {
-        public TestContextChangeTokenRepository(
-            IDbContextDataProvider<TestContext> provider,
-            ITokenGenerator tokenGenerator,
-            IEntityMapper entityMapper,
-            ILogger logger)
-            : base(provider, tokenGenerator, entityMapper, logger)
-        {
-        }
     }
 }

@@ -1,11 +1,10 @@
-namespace AppCore.Data.EntityFrameworkCore
+namespace AppCore.Data.EntityFrameworkCore;
+
+public class EntityWithSimpleId : IEntity<int>
 {
-    public class EntityWithSimpleId : IEntity<int>
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string Value { get; set; }
+    public string? Value { get; set; }
 
-        object IEntity.Id => Id;
-    }
+    object IEntity.Id => Id;
 }
