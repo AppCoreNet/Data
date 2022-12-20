@@ -31,6 +31,7 @@ public static class DataProviderBuilderExtensions
         IServiceCollection services = builder.Services;
 
         services.TryAddScoped<IDbContextDataProvider<TDbContext>, DbContextDataProvider<TTag, TDbContext>>();
+        services.TryAddScoped<IDbContextQueryHandlerProvider<TDbContext>, DbContextQueryHandlerProvider<TDbContext>>();
 
         services.TryAddEnumerable(
             new[]
