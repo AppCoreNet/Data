@@ -16,7 +16,7 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 /// Provides a base class for <see cref="DbContext"/> based query handlers.
 /// </summary>
 /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
-/// <typeparam name="TEntity">The type of the <see cref="IEntity"/></typeparam>
+/// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
@@ -33,7 +33,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     protected DbContextDataProvider<TDbContext> Provider { get; }
 
     /// <summary>
-    /// The <see cref="ILogger"/>.
+    /// Gets the <see cref="ILogger"/>.
     /// </summary>
     protected ILogger Logger { get; }
 
@@ -58,7 +58,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     /// <param name="query">The query.</param>
     /// <param name="cancellationToken">Token which can be used to cancel the process.</param>
     /// <returns>The queryable.</returns>
-    protected virtual ValueTask<IQueryable<TDbEntity>> GetQueryable(
+    protected virtual ValueTask<IQueryable<TDbEntity>> GetQueryableAsync(
         TQuery query,
         CancellationToken cancellationToken)
     {
@@ -77,7 +77,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> for which results must be queried.</param>
     /// <param name="cancellationToken">Token which can be used to cancel the process.</param>
     /// <returns>The result of the query.</returns>
-    protected abstract Task<TResult> QueryResult(
+    protected abstract Task<TResult> QueryResultAsync(
         IQueryable<TDbEntity> queryable,
         TQuery query,
         CancellationToken cancellationToken);
@@ -92,7 +92,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     {
         Ensure.Arg.NotNull(query);
 
-        IQueryable<TDbEntity> queryable = await GetQueryable(query, cancellationToken)
+        IQueryable<TDbEntity> queryable = await GetQueryableAsync(query, cancellationToken)
             .ConfigureAwait(false);
 
         Type queryType = query.GetType();
@@ -100,7 +100,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
 
         var stopwatch = new Stopwatch();
 
-        TResult result = await QueryResult(queryable, query, cancellationToken)
+        TResult result = await QueryResultAsync(queryable, query, cancellationToken)
             .ConfigureAwait(false);
 
         Logger.QueryExecuted(queryType, stopwatch.Elapsed);

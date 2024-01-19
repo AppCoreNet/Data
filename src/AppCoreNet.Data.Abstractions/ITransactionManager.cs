@@ -25,8 +25,7 @@ public interface ITransactionManager
     /// <returns>The created transaction.</returns>
     Task<ITransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Begins a new transaction in the context of the data provider.

@@ -46,7 +46,6 @@ internal sealed class DbContextDataProviderServiceResolver<TDbContext>
             entityMapper,
             tokenGenerator,
             queryHandlerFactory,
-            transactionManager
-        );
+            transactionManager);
     }
 }

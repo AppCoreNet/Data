@@ -15,8 +15,7 @@ public class EntityConcurrencyException : EntityException
     /// </summary>
     /// <param name="innerException">The inner exception.</param>
     public EntityConcurrencyException(Exception? innerException)
-        : base("Entities may have been modified or deleted since they were loaded.",
-               innerException)
+        : base("Entities may have been modified or deleted since they were loaded.", innerException)
     {
     }
 

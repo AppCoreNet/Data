@@ -17,7 +17,7 @@ public interface IPagedResult<out TResult>
     long? TotalCount { get; }
 
     /// <summary>
-    /// Get the result items.
+    /// Gets the result items.
     /// </summary>
     IReadOnlyCollection<TResult> Items { get; }
 }

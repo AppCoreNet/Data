@@ -9,18 +9,23 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 internal static class LoggerExtensions
 {
     // DbContextDataProvider
-
     private static readonly Action<ILogger, Type, Exception?> _savingChanges =
-        LoggerMessage.Define<Type>(LogLevel.Trace, LogEventIds.SavingChanges,
-                                   "Saving changes for context {dbContextType} ...");
+        LoggerMessage.Define<Type>(
+            LogLevel.Trace,
+            LogEventIds.SavingChanges,
+            "Saving changes for context {dbContextType} ...");
 
     private static readonly Action<ILogger, int, Type, Exception?> _savedChanges =
-        LoggerMessage.Define<int,Type>(LogLevel.Debug, LogEventIds.SavedChanges,
-                                       "Saved {entityCount} changes for context {dbContextType}.");
+        LoggerMessage.Define<int, Type>(
+            LogLevel.Debug,
+            LogEventIds.SavedChanges,
+            "Saved {entityCount} changes for context {dbContextType}.");
 
     private static readonly Action<ILogger, Type, Exception?> _saveChangesDeferred =
-        LoggerMessage.Define<Type>(LogLevel.Trace, LogEventIds.SaveChangesDeferred,
-                                   "Deferred saving changes for context {dbContextType}.");
+        LoggerMessage.Define<Type>(
+            LogLevel.Trace,
+            LogEventIds.SaveChangesDeferred,
+            "Deferred saving changes for context {dbContextType}.");
 
     internal static void SavingChanges(this ILogger logger, Type dbContextType)
     {
@@ -38,22 +43,29 @@ internal static class LoggerExtensions
     }
 
     // DbContextTransactionManager
-
     private static readonly Action<ILogger, Guid, Type, Exception?> _transactionInit =
-        LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionInit,
-                                         "Initialized transaction {transactionId} for context {dbContextType}.");
+        LoggerMessage.Define<Guid, Type>(
+            LogLevel.Trace,
+            LogEventIds.TransactionInit,
+            "Initialized transaction {transactionId} for context {dbContextType}.");
 
     private static readonly Action<ILogger, Guid, Type, Exception?> _transactionCommit =
-        LoggerMessage.Define<Guid, Type>(LogLevel.Debug, LogEventIds.TransactionCommit,
-                                         "Committed transaction {transactionId} for context {dbContextType}.");
+        LoggerMessage.Define<Guid, Type>(
+            LogLevel.Debug,
+            LogEventIds.TransactionCommit,
+            "Committed transaction {transactionId} for context {dbContextType}.");
 
     private static readonly Action<ILogger, Guid, Type, Exception?> _transactionRollback =
-        LoggerMessage.Define<Guid, Type>(LogLevel.Debug, LogEventIds.TransactionRollback,
-                                         "Rolled back transaction {transactionId} for context {dbContextType}.");
+        LoggerMessage.Define<Guid, Type>(
+            LogLevel.Debug,
+            LogEventIds.TransactionRollback,
+            "Rolled back transaction {transactionId} for context {dbContextType}.");
 
     private static readonly Action<ILogger, Guid, Type, Exception?> _transactionDisposed =
-        LoggerMessage.Define<Guid, Type>(LogLevel.Trace, LogEventIds.TransactionDisposed,
-                                         "Disposed transaction {transactionId} for context {dbContextType}.");
+        LoggerMessage.Define<Guid, Type>(
+            LogLevel.Trace,
+            LogEventIds.TransactionDisposed,
+            "Disposed transaction {transactionId} for context {dbContextType}.");
 
     internal static void TransactionInit(this ILogger logger, Type dbContextType, Guid transactionId)
     {
@@ -76,7 +88,6 @@ internal static class LoggerExtensions
     }
 
     // DbContextRepository
-
     private static readonly Action<ILogger, Type, object?, Exception?> _entitySaving =
         LoggerMessage.Define<Type, object?>(
             LogLevel.Debug,
@@ -176,7 +187,6 @@ internal static class LoggerExtensions
     }
 
     // DbContextQueryHandler
-
     private static readonly Action<ILogger, Type, Exception?> _queryExecuting =
         LoggerMessage.Define<Type>(
             LogLevel.Debug,

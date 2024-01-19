@@ -79,9 +79,9 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
                 typeof(TService),
                 sp =>
                 {
-                    var provider = (DbContextDataProvider<TDbContext>)
-                        sp.GetRequiredService<IDataProviderResolver>()
-                          .Resolve(Name);
+                    var provider =
+                        (DbContextDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
+                                                             .Resolve(Name);
 
                     return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
                 },

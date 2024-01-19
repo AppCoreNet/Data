@@ -14,8 +14,9 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 /// Provides a base class for <see cref="DbContext"/> based query handlers which return a vector.
 /// </summary>
 /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
-/// <typeparam name="TEntity">The type of the <see cref="IEntity"/></typeparam>
+/// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
+/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
 public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
     : DbContextQueryHandler<TQuery, TEntity, IReadOnlyCollection<TResult>, TDbContext, TDbEntity>
@@ -39,7 +40,7 @@ public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbC
     /// </summary>
     /// <param name="queryable">The <see cref="IQueryable{T}"/>.</param>
     /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> to apply.</param>
-    /// <returns>The <see cref="IQueryable{T}"/>.</returns>
+    /// <returns>The <see cref="IQueryable{T}"/> with applied query.</returns>
     protected abstract IQueryable<TDbEntity> ApplyQuery(IQueryable<TDbEntity> queryable, TQuery query);
 
     /// <summary>
@@ -51,7 +52,7 @@ public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbC
     protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
 
     /// <inheritdoc />
-    protected override async Task<IReadOnlyCollection<TResult>> QueryResult(
+    protected override async Task<IReadOnlyCollection<TResult>> QueryResultAsync(
         IQueryable<TDbEntity> queryable,
         TQuery query,
         CancellationToken cancellationToken)

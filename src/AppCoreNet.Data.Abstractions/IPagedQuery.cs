@@ -12,7 +12,7 @@ public interface IPagedQuery<TEntity, TResult> : IQuery<TEntity, IPagedResult<TR
     where TEntity : class, IEntity
 {
     /// <summary>
-    /// Whether to query the total count.
+    /// Gets a value indicating whether to query the total count.
     /// </summary>
     bool TotalCount { get; }
 

@@ -19,10 +19,10 @@ public sealed class DbContextDataProvider<TDbContext> : IDataProvider
     where TDbContext : DbContext
 {
     private readonly ILogger<DbContextDataProvider<TDbContext>> _logger;
-    private readonly Stack<IDisposable> _pendingChanges = new();
-    private readonly List<Action> _afterSaveCallbacks = new();
+    private readonly Stack<IDisposable> _pendingChanges = new ();
+    private readonly List<Action> _afterSaveCallbacks = new ();
 
-    private class PendingChanges : IDisposable
+    private sealed class PendingChanges : IDisposable
     {
         private readonly Action<IDisposable> _disposeCallback;
 

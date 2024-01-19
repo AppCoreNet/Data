@@ -13,7 +13,7 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 /// Provides a base class for <see cref="DbContext"/> based query handlers which return a page of the result set.
 /// </summary>
 /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
-/// <typeparam name="TEntity">The type of the <see cref="IEntity"/></typeparam>
+/// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
@@ -39,7 +39,7 @@ public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbCo
     /// </summary>
     /// <param name="queryable">The <see cref="IQueryable{T}"/>.</param>
     /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> to apply.</param>
-    /// <returns>The <see cref="IQueryable{T}"/>.</returns>
+    /// <returns>The <see cref="IQueryable{T}"/> with the query applied.</returns>
     protected abstract IQueryable<TDbEntity> ApplyQuery(IQueryable<TDbEntity> queryable, TQuery query);
 
     /// <summary>
@@ -65,7 +65,7 @@ public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbCo
     }
 
     /// <inheritdoc />
-    protected override async Task<IPagedResult<TResult>> QueryResult(
+    protected override async Task<IPagedResult<TResult>> QueryResultAsync(
         IQueryable<TDbEntity> queryable,
         TQuery query,
         CancellationToken cancellationToken)

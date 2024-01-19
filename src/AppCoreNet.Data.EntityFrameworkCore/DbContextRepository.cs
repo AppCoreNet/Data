@@ -82,7 +82,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         }
     }
 
-    private static readonly EntityModelProperties<TId, TEntity> _entityModelProperties = new();
+    private static readonly EntityModelProperties<TId, TEntity> _entityModelProperties = new ();
     private readonly ILogger _logger;
     private readonly DbModelProperties _modelProperties;
 
@@ -144,7 +144,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         {
             string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[0];
             object? keyValue = primaryKey[0];
-            return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName)!.Equals(keyValue));
+            return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName) !.Equals(keyValue));
         }
 
         for (int i = 0; i < primaryKey.Length; i++)

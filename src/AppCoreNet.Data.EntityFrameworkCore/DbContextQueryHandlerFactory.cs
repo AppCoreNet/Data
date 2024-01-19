@@ -13,6 +13,7 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 /// <summary>
 /// Provides query handler factory for <see cref="DbContext"/>.
 /// </summary>
+/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 public sealed class DbContextQueryHandlerFactory<TDbContext>
     where TDbContext : DbContext
 {
@@ -20,7 +21,7 @@ public sealed class DbContextQueryHandlerFactory<TDbContext>
     private readonly IEnumerable<Type> _queryHandlerTypes;
 
     /// <summary>
-    /// Initializes an instance of the <see cref="DbContextQueryHandlerFactory{TDbContext}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextQueryHandlerFactory{TDbContext}"/> class.
     /// </summary>
     /// <param name="serviceProvider">The <see cref="IServiceProvider"/>.</param>
     /// <param name="queryHandlerTypes">The types of the query handlers.</param>
@@ -57,8 +58,11 @@ public sealed class DbContextQueryHandlerFactory<TDbContext>
 
         foreach (Type handlerType in eligibleHandlers)
         {
-            var handler = (IDbContextQueryHandler<TEntity, TResult, TDbContext>)
-                ActivatorUtilities.CreateInstance(_serviceProvider, handlerType, provider);
+            var handler =
+                (IDbContextQueryHandler<TEntity, TResult, TDbContext>)ActivatorUtilities.CreateInstance(
+                    _serviceProvider,
+                    handlerType,
+                    provider);
 
             if (handler.CanExecute(query))
                 return handler;

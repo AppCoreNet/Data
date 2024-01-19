@@ -20,7 +20,7 @@ public static class DataProvidersServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
     /// <param name="configure">Delegate to configure the <see cref="IDataProvidersBuilder"/>.</param>
-    /// <returns>The <see cref="IServiceCollection"/>.</returns>
+    /// <returns>The <see cref="IServiceCollection"/> to chain the calls.</returns>
     public static IServiceCollection AddDataProviders(this IServiceCollection services, Action<IDataProvidersBuilder>? configure = null)
     {
         Ensure.Arg.NotNull(services);

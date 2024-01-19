@@ -12,7 +12,7 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 
 internal class DbModelProperties
 {
-    private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> _properties = new();
+    private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> _properties = new ();
 
     public IReadOnlyList<string> PrimaryKeyPropertyNames { get; }
 
@@ -22,10 +22,10 @@ internal class DbModelProperties
 
     private DbModelProperties(IModel model, Type dbEntityType)
     {
-        IEntityType? modelEntityType = model.FindEntityType(dbEntityType)!;
+        IEntityType? modelEntityType = model.FindEntityType(dbEntityType) !;
 
         PrimaryKeyPropertyNames = modelEntityType
-                                  .FindPrimaryKey()!
+                                  .FindPrimaryKey() !
                                   .Properties.Select(p => p.Name)
                                   .ToList();
 
@@ -62,7 +62,6 @@ internal class DbModelProperties
             }
 
             return properties;
-
         });
     }
 }

@@ -18,9 +18,10 @@ public static class DataProvidersBuilderExtensions
 {
     private static DataProviderResolverOptions GetOptions(IServiceCollection services)
     {
-        var options = (DataProviderResolverOptions?)
-            services.FirstOrDefault(sd => sd.ServiceType == typeof(DataProviderResolverOptions))
-                    ?.ImplementationInstance;
+        var options = (DataProviderResolverOptions?)services
+                                                    .FirstOrDefault(
+                                                        sd => sd.ServiceType == typeof(DataProviderResolverOptions))
+                                                    ?.ImplementationInstance;
 
         if (options == null)
         {
@@ -34,12 +35,12 @@ public static class DataProvidersBuilderExtensions
     /// <summary>
     /// Registers a data provider with a factory.
     /// </summary>
-    /// <param name="builder"></param>
+    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="lifetime">The lifetime of the data provider service.</param>
     /// <param name="factory">The factory method that creates the data provider.</param>
     /// <typeparam name="T">The type of the data provider.</typeparam>
-    /// <returns>The <see cref="IDataProvidersBuilder"/>.</returns>
+    /// <returns>The <see cref="IDataProvidersBuilder"/> to allow chaining.</returns>
     public static IDataProvidersBuilder AddProvider<T>(
         this IDataProvidersBuilder builder,
         string name,
@@ -80,11 +81,11 @@ public static class DataProvidersBuilderExtensions
     /// <summary>
     /// Registers a data provider.
     /// </summary>
-    /// <param name="builder"></param>
+    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="lifetime">The lifetime of the data provider service.</param>
     /// <typeparam name="T">The type of the data provider.</typeparam>
-    /// <returns>The <see cref="IDataProvidersBuilder"/>.</returns>
+    /// <returns>The <see cref="IDataProvidersBuilder"/> to allow chaining.</returns>
     public static IDataProvidersBuilder AddProvider<T>(
         this IDataProvidersBuilder builder,
         string name,

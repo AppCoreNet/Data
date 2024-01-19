@@ -29,6 +29,8 @@ public interface IDbContextQueryHandler<TEntity, TResult, TDbContext> : IDbConte
     /// <summary>
     /// Gets a value indicating whether the query can be executed.
     /// </summary>
+    /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> to test.</param>
+    /// <returns><c>true</c> if the query can be executed; otherwise, <c>false</c>.</returns>
     bool CanExecute(IQuery<TEntity, TResult> query);
 
     /// <summary>
