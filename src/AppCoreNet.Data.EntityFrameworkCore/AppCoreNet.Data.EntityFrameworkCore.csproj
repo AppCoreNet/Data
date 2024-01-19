@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppCore.Data\AppCore.Data.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data\AppCoreNet.Data.csproj" />
   </ItemGroup>
 
 </Project>

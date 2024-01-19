@@ -3,4 +3,4 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("AppCore.Data.EntityFrameworkCore.Tests")]
+[assembly: InternalsVisibleTo("AppCoreNet.Data.EntityFrameworkCore.Tests")]

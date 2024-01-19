@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.Abstractions", "src\AppCore.Data.Abstractions\AppCore.Data.Abstractions.csproj", "{1CDC4550-43F9-4EEA-B5BB-B32ED68026FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCoreNet.Data.Abstractions", "src\AppCoreNet.Data.Abstractions\AppCoreNet.Data.Abstractions.csproj", "{1CDC4550-43F9-4EEA-B5BB-B32ED68026FA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data", "src\AppCore.Data\AppCore.Data.csproj", "{2C53E3E5-928F-4D96-8ADF-140F589C1887}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCoreNet.Data", "src\AppCoreNet.Data\AppCoreNet.Data.csproj", "{2C53E3E5-928F-4D96-8ADF-140F589C1887}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore", "src\AppCore.Data.EntityFrameworkCore\AppCore.Data.EntityFrameworkCore.csproj", "{EE52F420-0C7E-4F83-A171-3A1A7B5F5B4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCoreNet.Data.EntityFrameworkCore", "src\AppCoreNet.Data.EntityFrameworkCore\AppCoreNet.Data.EntityFrameworkCore.csproj", "{EE52F420-0C7E-4F83-A171-3A1A7B5F5B4F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.Tests", "test\AppCore.Data.Tests\AppCore.Data.Tests.csproj", "{2F1C1FB9-22F0-4109-85C4-09A59A60465E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCoreNet.Data.Tests", "test\AppCoreNet.Data.Tests\AppCoreNet.Data.Tests.csproj", "{2F1C1FB9-22F0-4109-85C4-09A59A60465E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore.Tests", "test\AppCore.Data.EntityFrameworkCore.Tests\AppCore.Data.EntityFrameworkCore.Tests.csproj", "{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCoreNet.Data.EntityFrameworkCore.Tests", "test\AppCoreNet.Data.EntityFrameworkCore.Tests\AppCoreNet.Data.EntityFrameworkCore.Tests.csproj", "{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{86C2C994-B4CA-4364-9F38-EB6D3A485D20}"
 	ProjectSection(SolutionItems) = preProject

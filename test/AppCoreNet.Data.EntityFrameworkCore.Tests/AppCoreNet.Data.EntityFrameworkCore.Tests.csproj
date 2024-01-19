@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AppCore.Data.EntityFrameworkCore\AppCore.Data.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\AppCoreNet.Data.EntityFrameworkCore\AppCoreNet.Data.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>
