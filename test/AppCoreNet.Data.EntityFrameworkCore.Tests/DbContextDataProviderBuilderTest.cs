@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using System.Collections.Generic;
 using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;

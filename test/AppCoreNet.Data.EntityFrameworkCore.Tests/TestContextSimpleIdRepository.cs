@@ -1,3 +1,6 @@
+// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
 using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;

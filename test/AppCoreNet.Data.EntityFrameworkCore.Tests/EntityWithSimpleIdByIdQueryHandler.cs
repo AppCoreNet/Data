@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
