@@ -5,7 +5,7 @@ using System;
 using System.ComponentModel;
 using AppCore.Data;
 using AppCore.Data.EntityFrameworkCore;
-using AppCore.Diagnostics;
+using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

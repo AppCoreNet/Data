@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using AppCore.Diagnostics;
+using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AppCore.Data;

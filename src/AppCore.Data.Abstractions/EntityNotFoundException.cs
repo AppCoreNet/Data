@@ -2,7 +2,8 @@
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System;
-using AppCore.Diagnostics;
+using AppCoreNet;
+using AppCoreNet.Diagnostics;
 
 namespace AppCore.Data;
 

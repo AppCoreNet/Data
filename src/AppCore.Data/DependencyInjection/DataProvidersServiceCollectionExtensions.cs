@@ -3,7 +3,7 @@
 
 using System;
 using AppCore.Data;
-using AppCore.Diagnostics;
+using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

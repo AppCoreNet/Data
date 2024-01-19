@@ -27,7 +27,7 @@ If there is'nt any issue for the code you are willing to contribute please creat
 (please see above).
 
 - **Discussion**
-  
+
   For feature requests, some discussion on the issue will take place to determine
   if it's something that should be included or be a user-supplied extensions. It's very
   likely that the design of the new feature will also be discussed.
@@ -39,17 +39,17 @@ If there is'nt any issue for the code you are willing to contribute please creat
 - **Pull request**
 
   To submit changes to the code, create a [pull request](https://help.github.com/articles/using-pull-requests/)
-  targeting the branch where the issue should be resolved. 
+  targeting the branch where the issue should be resolved.
 
   For new features, the `dev` branch should be targeted.
-  For bug fixes, the `hotfixes/<version>` branch should be the target of the pull request. 
+  For bug fixes, the `hotfixes/<version>` branch should be the target of the pull request.
   See [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/)
   for a guide on how our branching model works.
 
   Pull requests need to pass the CI build and should include unit tests to verify the work.
 
 - **Code review**
-  
+
   Before the code is integrated, there will be a review by any of the project members. Some iteration may
   take place requiring updates to the pull reuqest. For example, adding tests, fixing some errors, ...
 
@@ -67,8 +67,8 @@ By contributing documentation or code to the AppCore project, you assert that:
 
 ## Coding
 
-The AppCore .NET project uses [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/)
-for handling releases. Please make sure your pull request targets the correct branch.
+The AppCore .NET project uses simple GitHub branching model for handling releases.
+Please make sure your pull request targets the correct branch.
 
 For versioning our libraries and packages we use [semantic versioning](https://semver.org/). Release versions
 are calculated from the branching history of the repository, using [GitVersion](https://gitversion.net/).

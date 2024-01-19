@@ -13,6 +13,30 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.Tests", "test\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Data.EntityFrameworkCore.Tests", "test\AppCore.Data.EntityFrameworkCore.Tests\AppCore.Data.EntityFrameworkCore.Tests.csproj", "{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{86C2C994-B4CA-4364-9F38-EB6D3A485D20}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		AppCoreNet.ruleset = AppCoreNet.ruleset
+		CONTRIBUTING.md = CONTRIBUTING.md
+		Directory.Build.props = Directory.Build.props
+		GitVersion.yml = GitVersion.yml
+		global.json = global.json
+		LICENSE = LICENSE
+		README.md = README.md
+		stylecop.json = stylecop.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{80A494A8-C591-4A8D-98DF-826D2D32ECA9}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C8F2D282-96F6-48F4-B707-79E7FF58974C}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,5 +69,12 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9B259C92-4976-41D0-9486-50E79F770D6E}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2C53E3E5-928F-4D96-8ADF-140F589C1887} = {80A494A8-C591-4A8D-98DF-826D2D32ECA9}
+		{1CDC4550-43F9-4EEA-B5BB-B32ED68026FA} = {80A494A8-C591-4A8D-98DF-826D2D32ECA9}
+		{EE52F420-0C7E-4F83-A171-3A1A7B5F5B4F} = {80A494A8-C591-4A8D-98DF-826D2D32ECA9}
+		{5E374BA2-6CA6-4EA7-B572-15DFD1DE11EB} = {C8F2D282-96F6-48F4-B707-79E7FF58974C}
+		{2F1C1FB9-22F0-4109-85C4-09A59A60465E} = {C8F2D282-96F6-48F4-B707-79E7FF58974C}
 	EndGlobalSection
 EndGlobal

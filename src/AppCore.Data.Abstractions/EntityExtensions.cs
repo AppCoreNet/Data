@@ -2,7 +2,7 @@
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System.Collections.Generic;
-using AppCore.Diagnostics;
+using AppCoreNet.Diagnostics;
 
 namespace AppCore.Data;
 

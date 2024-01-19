@@ -1,6 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <AppCore_Shared_Version>0.4.3</AppCore_Shared_Version>
-    <AppCore_Extensions_Version>0.4.0</AppCore_Extensions_Version>
-  </PropertyGroup>
-</Project>

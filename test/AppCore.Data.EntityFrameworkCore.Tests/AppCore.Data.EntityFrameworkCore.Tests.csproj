@@ -1,17 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net6</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Unix'">$(TargetFrameworks);net462</TargetFrameworks>
     <RootNamespace>AppCore.Data.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net462'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.32" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.26" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.1" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AppCore.Data.EntityFrameworkCore\AppCore.Data.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'netcoreapp3.1'" Version="3.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net6'" Version="6.0.0" />
-  </ItemGroup>
 </Project>

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
 using AppCore.Data;
-using AppCore.Diagnostics;
+using AppCoreNet;
+using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
