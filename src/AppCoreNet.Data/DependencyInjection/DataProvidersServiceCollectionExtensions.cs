@@ -2,13 +2,13 @@
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
 using System;
-using AppCore.Data;
+using AppCoreNet.Data;
 using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Extensions.DependencyInjection;
+namespace AppCoreNet.Extensions.DependencyInjection;
 
 /// <summary>
 /// Provides extension methods to register the data services.

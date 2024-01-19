@@ -3,15 +3,15 @@
 
 using System;
 using System.ComponentModel;
-using AppCore.Data;
-using AppCore.Data.EntityFrameworkCore;
+using AppCoreNet.Data;
+using AppCoreNet.Data.EntityFrameworkCore;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Extensions.DependencyInjection;
+namespace AppCoreNet.Extensions.DependencyInjection;
 
 /// <summary>
 /// Represents the builder for Entity Framework Core data providers.

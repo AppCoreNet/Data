@@ -1,4 +1,4 @@
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class EntityWithChangeToken : IEntity<int>, IHasChangeToken
 {

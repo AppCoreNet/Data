@@ -2,10 +2,9 @@
 // Copyright (c) 2020 the AppCore .NET project.
 
 using System;
-using AppCoreNet;
 using AppCoreNet.Diagnostics;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Exception which is thrown when a entity was not found.

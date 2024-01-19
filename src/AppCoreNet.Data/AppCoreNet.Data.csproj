@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <Description>Provides default AppCore .NET persistence implementations.</Description>
-    <RootNamespace>AppCore.Data</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

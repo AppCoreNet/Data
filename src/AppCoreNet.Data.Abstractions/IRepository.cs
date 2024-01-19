@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Represents a repository.

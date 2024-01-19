@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 internal sealed class PagedResult<TResult> : IPagedResult<TResult>
 {

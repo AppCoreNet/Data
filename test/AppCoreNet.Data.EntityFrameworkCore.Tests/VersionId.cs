@@ -1,6 +1,6 @@
 using System;
 
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public readonly struct VersionId : IEquatable<VersionId>
 {

@@ -1,4 +1,4 @@
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 public class EntityWithSimpleId : IEntity<int>
 {

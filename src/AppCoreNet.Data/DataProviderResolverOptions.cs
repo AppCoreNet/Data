@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 internal sealed class DataProviderResolverOptions
 {

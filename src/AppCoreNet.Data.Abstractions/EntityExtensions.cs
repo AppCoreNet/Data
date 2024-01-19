@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using AppCoreNet.Diagnostics;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Provides extension methods for the <see cref="IEntity{TId}"/> interface.

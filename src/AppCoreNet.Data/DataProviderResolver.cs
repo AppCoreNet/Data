@@ -3,7 +3,7 @@ using System.Linq;
 using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 internal sealed class DataProviderResolver : IDataProviderResolver
 {

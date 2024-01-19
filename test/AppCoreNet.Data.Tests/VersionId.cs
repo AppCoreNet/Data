@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 public readonly struct VersionId : IEquatable<VersionId>
 {

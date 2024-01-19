@@ -1,9 +1,7 @@
 ﻿// Licensed under the MIT License.
 // Copyright (c) 2022 the AppCore .NET project.
 
-using System.Collections.Generic;
-
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Represents a paged query.

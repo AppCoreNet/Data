@@ -3,7 +3,7 @@
 
 using System;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Provides arbitrary token generator based on https://hashids.org/.

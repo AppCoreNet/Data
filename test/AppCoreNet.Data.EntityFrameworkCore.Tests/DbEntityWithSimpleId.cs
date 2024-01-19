@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class DbEntityWithSimpleId
 {

@@ -5,7 +5,7 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Provides transaction management.

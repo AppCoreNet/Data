@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppCore.Extensions.DependencyInjection;
+using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit;
 
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class DbContextDataProviderBuilderTest
 {

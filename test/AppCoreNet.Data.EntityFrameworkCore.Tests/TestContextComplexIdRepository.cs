@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class TestContextComplexIdRepository
     : DbContextRepository<VersionId, EntityWithComplexId, TestContext, DbEntityWithComplexId>

@@ -1,4 +1,4 @@
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Represents an entity which implements optimistic concurrency checks with a manually controlled change token.

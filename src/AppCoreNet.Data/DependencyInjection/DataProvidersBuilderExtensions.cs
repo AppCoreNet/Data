@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
-using AppCore.Data;
-using AppCoreNet;
+using AppCoreNet.Data;
 using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Extensions.DependencyInjection;
+namespace AppCoreNet.Extensions.DependencyInjection;
 
 /// <summary>
 /// Provides extension methods for <see cref="IDataProvidersBuilder"/>.

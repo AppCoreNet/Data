@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace AppCore.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class TestContext : DbContext
 {

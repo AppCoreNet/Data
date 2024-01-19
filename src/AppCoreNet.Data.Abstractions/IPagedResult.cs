@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Represents the result of a paged query.

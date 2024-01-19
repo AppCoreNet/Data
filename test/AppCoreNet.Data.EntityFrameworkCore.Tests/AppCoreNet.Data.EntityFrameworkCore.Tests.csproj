@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Unix'">$(TargetFrameworks);net462</TargetFrameworks>
-    <RootNamespace>AppCore.Data.EntityFrameworkCore</RootNamespace>
+    <RootNamespace>AppCoreNet.Data.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net462'">

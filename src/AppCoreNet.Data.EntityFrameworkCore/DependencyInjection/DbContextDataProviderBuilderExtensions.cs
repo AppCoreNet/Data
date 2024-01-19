@@ -2,7 +2,7 @@
 // Copyright (c) 2020-2021 the AppCore .NET project.
 
 using System;
-using AppCore.Data.EntityFrameworkCore;
+using AppCoreNet.Data.EntityFrameworkCore;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
-namespace AppCore.Extensions.DependencyInjection;
+namespace AppCoreNet.Extensions.DependencyInjection;
 
 /// <summary>
 /// Provides extension methods to register a <see cref="DbContextDataProvider{TDbContext}"/>.

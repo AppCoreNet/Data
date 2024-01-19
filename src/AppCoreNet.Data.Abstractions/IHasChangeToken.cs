@@ -1,7 +1,7 @@
 // Licensed under the MIT License.
 // Copyright (c) 2020 the AppCore .NET project.
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Represents an entity which implements optimistic concurrency checks with a automatically managed change token.

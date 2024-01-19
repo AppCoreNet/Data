@@ -9,7 +9,8 @@ using System.Text.RegularExpressions;
 
 #nullable disable
 
-namespace AppCore.Data;
+// ReSharper disable once CheckNamespace
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Generate YouTube-like hashes from one or many numbers. Use hashids when you do not want to expose your database ids to the user.

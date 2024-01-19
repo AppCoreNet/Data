@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netstandard2.0;net462</TargetFrameworks>
-    <RootNamespace>AppCore.Data</RootNamespace>
+    <RootNamespace>AppCoreNet.Data</RootNamespace>
     <Description>Provides public API for the AppCore .NET persistence framework.</Description>
   </PropertyGroup>
 

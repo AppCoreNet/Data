@@ -1,6 +1,6 @@
 using System;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Represents a resolver for <see cref="IDataProvider"/> instances.

@@ -1,4 +1,4 @@
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 public class EntityWithComplexId : IEntity<VersionId>
 {

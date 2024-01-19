@@ -15,11 +15,11 @@ as you keep the copyright notice intact when redistributing or otherwise reusing
 
 Latest development packages can be found on [MyGet](https://www.myget.org/gallery/appcorenet).
 
-Package                                    | Description
--------------------------------------------|------------------------------------------------------------------------------------------------------
-`AppCore.Data`                             | Provides persistence framework default implementations.
-`AppCore.Data.Abstractions`                | Provides the public API of the persistence framework.
-`AppCore.Data.EntityFrameworkCore`         | Adds support for Entity Framework Core 3.1.
+| Package                               | Description                                             |
+|---------------------------------------|---------------------------------------------------------|
+| `AppCoreNet.Data`                     | Provides persistence framework default implementations. |
+| `AppCoreNet.Data.Abstractions`        | Provides the public API of the persistence framework.   |
+| `AppCoreNet.Data.EntityFrameworkCore` | Adds support for EntityFramework Core.                  |
 
 ## Contributing
 

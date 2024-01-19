@@ -3,7 +3,7 @@
 
 using System;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Provides base class for exceptions related to entities.

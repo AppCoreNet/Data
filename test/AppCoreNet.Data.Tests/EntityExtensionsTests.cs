@@ -4,7 +4,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 public class EntityExtensionsTests
 {

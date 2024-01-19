@@ -3,7 +3,7 @@
 
 using System;
 
-namespace AppCore.Data;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Exception which is thrown when one or more entities could not be updated.
