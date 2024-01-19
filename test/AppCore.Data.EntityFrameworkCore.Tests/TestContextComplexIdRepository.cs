@@ -5,13 +5,8 @@ namespace AppCore.Data.EntityFrameworkCore;
 public class TestContextComplexIdRepository
     : DbContextRepository<VersionId, EntityWithComplexId, TestContext, DbEntityWithComplexId>
 {
-    public TestContextComplexIdRepository(
-        IDbContextDataProvider<TestContext> provider,
-        IDbContextQueryHandlerProvider<TestContext> queryHandlerProvider,
-        ITokenGenerator tokenGenerator,
-        IEntityMapper entityMapper,
-        ILogger logger)
-        : base(provider, queryHandlerProvider, tokenGenerator, entityMapper, logger)
+    public TestContextComplexIdRepository(DbContextDataProvider<TestContext> provider, ILogger<TestContextComplexIdRepository> logger)
+        : base(provider, logger)
     {
     }
 }

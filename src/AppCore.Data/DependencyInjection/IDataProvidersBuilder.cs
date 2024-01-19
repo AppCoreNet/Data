@@ -10,7 +10,7 @@ namespace AppCore.Extensions.DependencyInjection;
 /// <summary>
 /// Builder object for data provider services.
 /// </summary>
-public interface IDataProviderBuilder
+public interface IDataProvidersBuilder
 {
     /// <summary>
     /// Gets the <see cref="IServiceCollection"/>.

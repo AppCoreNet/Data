@@ -20,17 +20,17 @@ namespace AppCore.Data.EntityFrameworkCore;
 public abstract class DbContextScalarQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
     : DbContextQueryHandler<TQuery, TEntity, TResult?, TDbContext, TDbEntity>
     where TQuery : IQuery<TEntity, TResult?>
-    where TEntity : IEntity
+    where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextScalarQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextScalarQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
-        : base(provider, loggerFactory)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    protected DbContextScalarQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
+        : base(provider, logger)
     {
     }
 
@@ -51,7 +51,10 @@ public abstract class DbContextScalarQueryHandler<TQuery, TEntity, TResult, TDbC
     protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
 
     /// <inheritdoc />
-    protected override async Task<TResult?> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
+    protected override async Task<TResult?> QueryResult(
+        IQueryable<TDbEntity> queryable,
+        TQuery query,
+        CancellationToken cancellationToken)
     {
         queryable = ApplyQuery(queryable, query);
         IQueryable<TResult> result = ApplyProjection(queryable, query);

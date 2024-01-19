@@ -11,7 +11,7 @@ namespace AppCore.Data;
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TResult">The type of the query result.</typeparam>
 public interface IPagedQuery<TEntity, TResult> : IQuery<TEntity, IPagedResult<TResult>>
-    where TEntity : IEntity
+    where TEntity : class, IEntity
 {
     /// <summary>
     /// Whether to query the total count.

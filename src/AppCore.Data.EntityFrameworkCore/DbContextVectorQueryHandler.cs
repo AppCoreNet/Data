@@ -16,22 +16,21 @@ namespace AppCore.Data.EntityFrameworkCore;
 /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
 /// <typeparam name="TEntity">The type of the <see cref="IEntity"/></typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
 public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
     : DbContextQueryHandler<TQuery, TEntity, IReadOnlyCollection<TResult>, TDbContext, TDbEntity>
     where TQuery : IQuery<TEntity, IReadOnlyCollection<TResult>>
-    where TEntity : IEntity
+    where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextVectorQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextVectorQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
-        : base(provider, loggerFactory)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    protected DbContextVectorQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
+        : base(provider, logger)
     {
     }
 
@@ -52,7 +51,10 @@ public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbC
     protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
 
     /// <inheritdoc />
-    protected override async Task<IReadOnlyCollection<TResult>> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
+    protected override async Task<IReadOnlyCollection<TResult>> QueryResult(
+        IQueryable<TDbEntity> queryable,
+        TQuery query,
+        CancellationToken cancellationToken)
     {
         queryable = ApplyQuery(queryable, query);
         IQueryable<TResult> result = ApplyProjection(queryable, query);

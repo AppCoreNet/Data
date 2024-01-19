@@ -5,13 +5,8 @@ namespace AppCore.Data.EntityFrameworkCore;
 public class TestContextSimpleIdRepository
     : DbContextRepository<int, EntityWithSimpleId, TestContext, DbEntityWithSimpleId>
 {
-    public TestContextSimpleIdRepository(
-        IDbContextDataProvider<TestContext> provider,
-        IDbContextQueryHandlerProvider<TestContext> queryHandlerProvider,
-        ITokenGenerator tokenGenerator,
-        IEntityMapper entityMapper,
-        ILogger logger)
-        : base(provider, queryHandlerProvider, tokenGenerator, entityMapper, logger)
+    public TestContextSimpleIdRepository(DbContextDataProvider<TestContext> provider, ILogger<TestContextSimpleIdRepository> logger)
+        : base(provider, logger)
     {
     }
 }

@@ -14,15 +14,30 @@ namespace AppCore.Data.EntityFrameworkCore;
 
 public class DbContextRepositoryTests
 {
-    private static DbContextDataProvider<DefaultDataProvider, TestContext> CreateProvider()
+    private static DbContextDataProvider<TestContext> CreateProvider(
+        string name = "",
+        IEntityMapper? entityMapper = null,
+        ITokenGenerator? tokenGenerator = null,
+        DbContextQueryHandlerFactory<TestContext>? queryHandlerProvider = null)
     {
-        return new DbContextDataProvider<DefaultDataProvider, TestContext>(
-            new TestContext(),
-            Substitute.For<ILoggerFactory>());
+        var dbContext = new TestContext();
+
+        var services = new DbContextDataProviderServices<TestContext>(
+            dbContext,
+            entityMapper ?? Substitute.For<IEntityMapper>(),
+            tokenGenerator ?? Substitute.For<ITokenGenerator>(),
+            queryHandlerProvider ?? new DbContextQueryHandlerFactory<TestContext>(
+                Substitute.For<IServiceProvider>(),
+                Array.Empty<Type>()),
+            new DbContextTransactionManager(dbContext, Substitute.For<ILogger<DbContextTransactionManager>>()));
+
+        return new DbContextDataProvider<TestContext>(
+            name,
+            services,
+            Substitute.For<ILogger<DbContextDataProvider<TestContext>>>());
     }
 
-    private static TestContextSimpleIdRepository CreateSimpleIdRepository(
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider, IDbContextQueryHandlerProvider<TestContext>? queryHandlerProvider = null)
+    private static TestContextSimpleIdRepository CreateSimpleIdRepository(DbContextQueryHandlerFactory<TestContext>? queryHandlerProvider = null)
     {
         var entityMapper = Substitute.For<IEntityMapper>();
         entityMapper.Map<EntityWithSimpleId>(Arg.Any<DbEntityWithSimpleId>())
@@ -37,16 +52,14 @@ public class DbContextRepositoryTests
                             };
                         });
 
-        return new TestContextSimpleIdRepository(
-            provider,
-            queryHandlerProvider ?? Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
-            Substitute.For<ITokenGenerator>(),
-            entityMapper,
-            Substitute.For<ILogger>());
+        DbContextDataProvider<TestContext> provider = CreateProvider(
+            entityMapper: entityMapper,
+            queryHandlerProvider: queryHandlerProvider);
+
+        return new TestContextSimpleIdRepository(provider, Substitute.For<ILogger<TestContextSimpleIdRepository>>());
     }
 
-    private static TestContextComplexIdRepository CreateComplexIdRepository(
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider)
+    private static TestContextComplexIdRepository CreateComplexIdRepository()
     {
         var entityMapper = Substitute.For<IEntityMapper>();
         entityMapper.Map<EntityWithComplexId>(Arg.Any<DbEntityWithComplexId>())
@@ -61,17 +74,11 @@ public class DbContextRepositoryTests
                             };
                         });
 
-        return new TestContextComplexIdRepository(
-            provider,
-            Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
-            Substitute.For<ITokenGenerator>(),
-            entityMapper,
-            Substitute.For<ILogger>());
+        DbContextDataProvider<TestContext> provider = CreateProvider(entityMapper: entityMapper);
+        return new TestContextComplexIdRepository(provider, Substitute.For<ILogger<TestContextComplexIdRepository>>());
     }
 
-    private static TestContextChangeTokenRepository CreateChangeTokenRepository(
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider,
-        ITokenGenerator generator)
+    private static TestContextChangeTokenRepository CreateChangeTokenRepository(ITokenGenerator? generator = null)
     {
         var entityMapper = Substitute.For<IEntityMapper>();
         entityMapper.Map<EntityWithChangeToken>(Arg.Any<DbEntityWithChangeToken>())
@@ -98,17 +105,17 @@ public class DbContextRepositoryTests
                             };
                         });
 
+        generator ??= Substitute.For<ITokenGenerator>();
+
+        DbContextDataProvider<TestContext> provider =
+            CreateProvider(entityMapper: entityMapper, tokenGenerator: generator);
+
         return new TestContextChangeTokenRepository(
             provider,
-            Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
-            generator,
-            entityMapper,
-            Substitute.For<ILogger>());
+            Substitute.For<ILogger<TestContextChangeTokenRepository>>());
     }
 
-    private static TestContextChangeTokenExRepository CreateChangeTokenExRepository(
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider,
-        ITokenGenerator generator)
+    private static TestContextChangeTokenExRepository CreateChangeTokenExRepository(ITokenGenerator? generator = null)
     {
         var entityMapper = Substitute.For<IEntityMapper>();
         entityMapper.Map<EntityWithChangeTokenEx>(Arg.Any<DbEntityWithChangeToken>())
@@ -135,12 +142,14 @@ public class DbContextRepositoryTests
                             };
                         });
 
+        generator ??= Substitute.For<ITokenGenerator>();
+
+        DbContextDataProvider<TestContext> provider =
+            CreateProvider(entityMapper: entityMapper, tokenGenerator: generator);
+
         return new TestContextChangeTokenExRepository(
             provider,
-            Substitute.For<IDbContextQueryHandlerProvider<TestContext>>(),
-            generator,
-            entityMapper,
-            Substitute.For<ILogger>());
+            Substitute.For<ILogger<TestContextChangeTokenExRepository>>());
     }
 
     private static ITokenGenerator CreateTokenGenerator(string changeToken)
@@ -155,19 +164,18 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task FindAsyncLoadsEntityWithSimpleId()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
-
         var dbEntity = new DbEntityWithSimpleId
         {
             Id = 1,
             Value = Guid.NewGuid().ToString()
         };
 
-        TestContext testContext = provider.GetContext();
+        TestContextSimpleIdRepository repository = CreateSimpleIdRepository();
+
+        TestContext testContext = repository.Provider.DbContext;
         testContext.SimpleEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
-        TestContextSimpleIdRepository repository = CreateSimpleIdRepository(provider);
         EntityWithSimpleId? result = await repository.FindAsync(dbEntity.Id, CancellationToken.None);
 
         result.Should()
@@ -177,8 +185,6 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task FindAsyncLoadsEntityWithComplexId()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
-
         var dbEntity = new DbEntityWithComplexId
         {
             Id = 1,
@@ -186,11 +192,12 @@ public class DbContextRepositoryTests
             Value = Guid.NewGuid().ToString()
         };
 
-        TestContext testContext = provider.GetContext();
+        TestContextComplexIdRepository repository = CreateComplexIdRepository();
+
+        TestContext testContext = repository.Provider.DbContext;
         testContext.ComplexEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
-        TestContextComplexIdRepository repository = CreateComplexIdRepository(provider);
         EntityWithComplexId? result = await repository.FindAsync(
             new VersionId(dbEntity.Id, dbEntity.Version),
             CancellationToken.None);
@@ -208,11 +215,10 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task CreateInitializesChangeToken()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
         ITokenGenerator generator = CreateTokenGenerator(changeToken);
 
-        TestContextChangeTokenRepository repository = CreateChangeTokenRepository(provider, generator);
+        TestContextChangeTokenRepository repository = CreateChangeTokenRepository(generator);
 
         EntityWithChangeToken result = await repository.CreateAsync(
             new EntityWithChangeToken(),
@@ -222,8 +228,8 @@ public class DbContextRepositoryTests
               .Be(changeToken);
 
         DbEntityWithChangeToken dbEntity =
-            await provider.GetContext()
-                          .ChangeTokenEntities.FirstAsync(e => e.Id == result.Id);
+            await repository.Provider.DbContext
+                            .ChangeTokenEntities.FirstAsync(e => e.Id == result.Id);
 
         dbEntity.ChangeToken.Should()
                 .Be(changeToken);
@@ -232,11 +238,10 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task CreateInitializesChangeTokenEx()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
         ITokenGenerator generator = CreateTokenGenerator(changeToken);
 
-        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(provider, generator);
+        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(generator);
 
         EntityWithChangeTokenEx result = await repository.CreateAsync(
             new EntityWithChangeTokenEx(),
@@ -246,8 +251,8 @@ public class DbContextRepositoryTests
               .Be(changeToken);
 
         DbEntityWithChangeToken dbEntity =
-            await provider.GetContext()
-                          .ChangeTokenEntities.FirstAsync(e => e.Id == result.Id);
+            await repository.Provider.DbContext
+                            .ChangeTokenEntities.FirstAsync(e => e.Id == result.Id);
 
         dbEntity.ChangeToken.Should()
                 .Be(changeToken);
@@ -256,10 +261,9 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task CreateUsesExplicitChangeToken()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
 
-        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(provider, Substitute.For<ITokenGenerator>());
+        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository();
 
         EntityWithChangeTokenEx result = await repository.CreateAsync(
             new EntityWithChangeTokenEx { ChangeToken = changeToken },
@@ -269,8 +273,8 @@ public class DbContextRepositoryTests
               .Be(changeToken);
 
         DbEntityWithChangeToken dbEntity =
-            await provider.GetContext()
-                          .ChangeTokenEntities.FirstAsync(e => e.Id == result.Id);
+            await repository.Provider.DbContext
+                            .ChangeTokenEntities.FirstAsync(e => e.Id == result.Id);
 
         dbEntity.ChangeToken.Should()
                 .Be(changeToken);
@@ -279,16 +283,16 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task UpdateSucceedsIfChangeTokenMatches()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
         ITokenGenerator generator = CreateTokenGenerator(changeToken);
 
-        TestContext testContext = provider.GetContext();
+        TestContextChangeTokenRepository repository = CreateChangeTokenRepository(generator);
+
+        TestContext testContext = repository.Provider.DbContext;
         var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
-        TestContextChangeTokenRepository repository = CreateChangeTokenRepository(provider, generator);
         await repository.UpdateAsync(
             new EntityWithChangeToken {Id = dbEntity.Id, ChangeToken = changeToken},
             CancellationToken.None);
@@ -297,16 +301,16 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task UpdateSucceedsIfExpectedChangeTokenMatches()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
         ITokenGenerator generator = CreateTokenGenerator(changeToken);
 
-        TestContext testContext = provider.GetContext();
+        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(generator);
+
+        TestContext testContext = repository.Provider.DbContext;
         var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
-        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(provider, generator);
         await repository.UpdateAsync(
             new EntityWithChangeTokenEx {Id = dbEntity.Id, ChangeToken = "abc", ExpectedChangeToken = changeToken },
             CancellationToken.None);
@@ -315,16 +319,15 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task UpdateThrowsIfChangeTokenDoesNotMatch()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
         ITokenGenerator generator = CreateTokenGenerator(changeToken);
 
-        TestContext testContext = provider.GetContext();
+        TestContextChangeTokenRepository repository = CreateChangeTokenRepository(generator);
+
+        TestContext testContext = repository.Provider.DbContext;
         var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
-
-        TestContextChangeTokenRepository repository = CreateChangeTokenRepository(provider, generator);
 
         await Assert.ThrowsAsync<EntityConcurrencyException>(
             () => repository.UpdateAsync(
@@ -335,16 +338,15 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task UpdateThrowsIfExpectedChangeTokenDoesNotMatch()
     {
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
         string changeToken = Guid.NewGuid().ToString("N");
         ITokenGenerator generator = CreateTokenGenerator(changeToken);
 
-        TestContext testContext = provider.GetContext();
+        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(generator);
+
+        TestContext testContext = repository.Provider.DbContext;
         var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
-
-        TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(provider, generator);
 
         await Assert.ThrowsAsync<EntityConcurrencyException>(
             () => repository.UpdateAsync(
@@ -355,24 +357,22 @@ public class DbContextRepositoryTests
     [Fact]
     public async Task QueryInvokesQueryHandler()
     {
-        var queryHandler = Substitute.For<IDbContextQueryHandler<EntityWithSimpleId, EntityWithSimpleId, TestContext>>();
-        queryHandler.QueryType.Returns(typeof(EntityWithSimpleIdByIdQuery));
+        var serviceProvider = Substitute.For<IServiceProvider>();
+        serviceProvider.GetService(typeof(ILogger<EntityWithSimpleIdByIdQueryHandler>))
+                       .Returns(Substitute.For<ILogger<EntityWithSimpleIdByIdQueryHandler>>());
 
-        var queryHandlerProvider = Substitute.For<IDbContextQueryHandlerProvider<TestContext>>();
-        queryHandlerProvider
-            .GetHandler<EntityWithSimpleId, EntityWithSimpleId>(
-                Arg.Is(typeof(EntityWithSimpleIdByIdQuery)))
-            .Returns(queryHandler);
+        var queryHandlerProvider = new DbContextQueryHandlerFactory<TestContext>(
+            serviceProvider,
+            new[] { typeof(EntityWithSimpleIdByIdQueryHandler) });
 
         var query = new EntityWithSimpleIdByIdQuery();
 
-        DbContextDataProvider<DefaultDataProvider, TestContext> provider = CreateProvider();
-        TestContextSimpleIdRepository repository = CreateSimpleIdRepository(provider, queryHandlerProvider);
+        TestContextSimpleIdRepository repository = CreateSimpleIdRepository(queryHandlerProvider:queryHandlerProvider);
 
         await repository.QueryAsync(query, CancellationToken.None);
 
-        await queryHandler
-              .Received(1)
-              .ExecuteAsync(Arg.Is(query), Arg.Any<CancellationToken>());
+        EntityWithSimpleIdByIdQueryHandler.ExecutedQueries.Should()
+                                          .Contain(query)
+                                          .And.ContainSingle();
     }
 }

@@ -12,7 +12,7 @@ namespace AppCore.Data;
 /// <typeparam name="TId">The type of the entity id.</typeparam>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 public interface IRepository<in TId, TEntity>
-    where TEntity : IEntity<TId>
+    where TEntity : class, IEntity<TId>
 {
     /// <summary>
     /// Gets the <see cref="IDataProvider"/> which owns the repository.

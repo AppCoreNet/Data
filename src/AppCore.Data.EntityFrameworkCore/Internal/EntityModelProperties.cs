@@ -9,7 +9,7 @@ using System.Reflection;
 namespace AppCore.Data.EntityFrameworkCore;
 
 internal class EntityModelProperties<TId, TEntity>
-    where TEntity : IEntity<TId>
+    where TEntity : class, IEntity<TId>
 {
     public Func<TId, object?[]> GetIdValues { get; }
 

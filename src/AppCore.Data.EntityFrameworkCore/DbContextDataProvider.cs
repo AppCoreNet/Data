@@ -14,13 +14,13 @@ namespace AppCore.Data.EntityFrameworkCore;
 /// <summary>
 /// Provides a base class for <see cref="DbContext"/> based data provider.
 /// </summary>
-public abstract class DbContextDataProvider : IDbContextDataProvider
+/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
+public sealed class DbContextDataProvider<TDbContext> : IDataProvider
+    where TDbContext : DbContext
 {
-    private readonly DbContext _dbContext;
-    private readonly ILogger<DbContextDataProvider> _logger;
-    private readonly DbContextTransactionManager _transactionManager;
-    private readonly Stack<IDisposable> _pendingChanges = new Stack<IDisposable>();
-    private readonly List<Action> _afterSaveCallbacks = new List<Action>();
+    private readonly ILogger<DbContextDataProvider<TDbContext>> _logger;
+    private readonly Stack<IDisposable> _pendingChanges = new();
+    private readonly List<Action> _afterSaveCallbacks = new();
 
     private class PendingChanges : IDisposable
     {
@@ -38,24 +38,55 @@ public abstract class DbContextDataProvider : IDbContextDataProvider
     }
 
     /// <inheritdoc />
-    public abstract string Name { get; }
-
-    /// <inheritdoc />
-    public ITransactionManager TransactionManager => _transactionManager;
+    public string Name { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DbContextDataProvider"/> class.
+    /// Gets the <see cref="DbContext"/> of the data provider.
     /// </summary>
-    /// <param name="dbContext">The <see cref="DbContext"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextDataProvider(DbContext dbContext, ILoggerFactory loggerFactory)
-    {
-        Ensure.Arg.NotNull(dbContext);
-        Ensure.Arg.NotNull(loggerFactory);
+    /// <value>The <see cref="DbContext"/>.</value>
+    public TDbContext DbContext { get; }
 
-        _dbContext = dbContext;
-        _logger = loggerFactory.CreateLogger<DbContextDataProvider>();
-        _transactionManager = new DbContextTransactionManager(this, loggerFactory);
+    /// <summary>
+    /// Gets the <see cref="IEntityMapper"/> of the data provider.
+    /// </summary>
+    public IEntityMapper EntityMapper { get; }
+
+    /// <summary>
+    /// Gets the <see cref="ITokenGenerator"/> of the data provider.
+    /// </summary>
+    public ITokenGenerator TokenGenerator { get; }
+
+    /// <summary>
+    /// Gets the <see cref="DbContextQueryHandlerFactory{TDbContext}"/> of the data provider.
+    /// </summary>
+    public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory { get; }
+
+    /// <inheritdoc />
+    public ITransactionManager TransactionManager { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
+    /// </summary>
+    /// <param name="name">The name of the data provider.</param>
+    /// <param name="services">The <see cref="DbContextDataProviderServices{TDbContext}"/>.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    public DbContextDataProvider(
+        string name,
+        DbContextDataProviderServices<TDbContext> services,
+        ILogger<DbContextDataProvider<TDbContext>> logger)
+    {
+        Ensure.Arg.NotNull(name);
+        Ensure.Arg.NotNull(services);
+        Ensure.Arg.NotNull(logger);
+
+        Name = name;
+        DbContext = services.DbContext;
+        EntityMapper = services.EntityMapper;
+        TokenGenerator = services.TokenGenerator;
+        QueryHandlerFactory = services.QueryHandlerFactory;
+        TransactionManager = services.TransactionManager;
+
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -72,27 +103,30 @@ public abstract class DbContextDataProvider : IDbContextDataProvider
     private void EndChangeScope(IDisposable scope)
     {
         if (!ReferenceEquals(_pendingChanges.Peek(), scope))
+        {
             throw new InvalidOperationException("Data provider change scope must be disposed in reverse-order.");
+        }
 
         _pendingChanges.Pop();
     }
 
     /// <inheritdoc />
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // if more than one change scope is active, save is a no-op
         if (_pendingChanges.Count > 1)
         {
-            _logger.SaveChangesDeferred(_dbContext.GetType());
+            _logger.SaveChangesDeferred(DbContext.GetType());
             return;
         }
 
-        _logger.SavingChanges(_dbContext.GetType());
+        _logger.SavingChanges(DbContext.GetType());
 
         int entityCount;
         try
         {
-            entityCount = await _dbContext.SaveChangesAsync(cancellationToken);
+            entityCount = await DbContext.SaveChangesAsync(cancellationToken)
+                                         .ConfigureAwait(false);
         }
         catch (DbUpdateConcurrencyException error)
         {
@@ -109,58 +143,6 @@ public abstract class DbContextDataProvider : IDbContextDataProvider
         }
 
         _afterSaveCallbacks.Clear();
-        _logger.SavedChanges(_dbContext.GetType(), entityCount);
-    }
-
-    /// <inheritdoc />
-    public DbContext GetContext()
-    {
-        return _dbContext;
-    }
-}
-
-/// <summary>
-/// Provides a base class for <see cref="DbContext"/> based data provider.
-/// </summary>
-/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-public abstract class DbContextDataProvider<TDbContext> : DbContextDataProvider, IDbContextDataProvider<TDbContext>
-    where TDbContext : DbContext
-{
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
-    /// </summary>
-    /// <param name="dbContext">The <see cref="DbContext"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextDataProvider(TDbContext dbContext, ILoggerFactory loggerFactory)
-        : base(dbContext, loggerFactory)
-    {
-    }
-
-    /// <inheritdoc />
-    public new TDbContext GetContext()
-    {
-        return (TDbContext) base.GetContext();
-    }
-}
-
-/// <summary>
-/// Provides a base class for <see cref="DbContext"/> based data provider.
-/// </summary>
-/// <typeparam name="TTag">The tag of the data provider.</typeparam>
-/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-public sealed class DbContextDataProvider<TTag, TDbContext> : DbContextDataProvider<TDbContext>
-    where TDbContext : DbContext
-{
-    /// <inheritdoc />
-    public override string Name => typeof(TTag).FullName!;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DbContextDataProvider{TTag,TDbContext}"/> class.
-    /// </summary>
-    /// <param name="dbContext">The <see cref="DbContext"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    public DbContextDataProvider(TDbContext dbContext, ILoggerFactory loggerFactory)
-        : base(dbContext, loggerFactory)
-    {
+        _logger.SavedChanges(DbContext.GetType(), entityCount);
     }
 }

@@ -6,11 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace AppCore.Extensions.DependencyInjection;
 
-internal sealed class DataProviderBuilder : IDataProviderBuilder
+internal sealed class DataProvidersBuilder : IDataProvidersBuilder
 {
     public IServiceCollection Services { get; }
 
-    public DataProviderBuilder(IServiceCollection services)
+    public DataProvidersBuilder(IServiceCollection services)
     {
         Services = services;
     }

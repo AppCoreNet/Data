@@ -20,7 +20,10 @@ public interface IDataProvider
     /// <summary>
     /// Gets the <see cref="ITransactionManager"/>.
     /// </summary>
-    ITransactionManager TransactionManager { get; }
+    /// <remarks>
+    /// Might be <c>null</c> if the provider does not support transactions.
+    /// </remarks>
+    ITransactionManager? TransactionManager { get; }
 
     /// <summary>
     /// Begins a scope for changes.
@@ -39,12 +42,4 @@ public interface IDataProvider
     /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
     /// <returns>The task representing the asynchronous operation.</returns>
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// Represents a specific provider for loading and storing entities.
-/// </summary>
-/// <typeparam name="TTag">The type used to identify the data provider.</typeparam>
-public interface IDataProvider<TTag> : IDataProvider
-{
 }

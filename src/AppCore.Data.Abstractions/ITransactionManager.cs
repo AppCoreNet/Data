@@ -13,11 +13,6 @@ namespace AppCore.Data;
 public interface ITransactionManager
 {
     /// <summary>
-    /// The data provider.
-    /// </summary>
-    IDataProvider Provider { get; }
-
-    /// <summary>
     /// Gets the currently active <see cref="ITransaction"/>. Might be <c>null</c>.
     /// </summary>
     ITransaction? CurrentTransaction { get; }
@@ -39,12 +34,4 @@ public interface ITransactionManager
     /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
     /// <returns>The created transaction.</returns>
     ITransaction BeginTransaction(IsolationLevel isolationLevel);
-}
-
-/// <summary>
-/// Provides transaction management for specific data provider.
-/// </summary>
-/// <typeparam name="TTag">The type used to identify the data provider.</typeparam>
-public interface ITransactionManager<TTag> : ITransactionManager
-{
 }

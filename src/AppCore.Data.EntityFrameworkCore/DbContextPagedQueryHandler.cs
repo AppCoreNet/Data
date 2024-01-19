@@ -20,17 +20,17 @@ namespace AppCore.Data.EntityFrameworkCore;
 public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
     : DbContextQueryHandler<TQuery, TEntity, IPagedResult<TResult>, TDbContext, TDbEntity>
     where TQuery : IPagedQuery<TEntity, TResult>
-    where TEntity : IEntity
+    where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextPagedQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextPagedQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
-        : base(provider, loggerFactory)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    /// <param name="logger">The <see cref="ILoggerFactory"/>.</param>
+    protected DbContextPagedQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
+        : base(provider, logger)
     {
     }
 
@@ -65,7 +65,10 @@ public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbCo
     }
 
     /// <inheritdoc />
-    protected override async Task<IPagedResult<TResult>> QueryResult(IQueryable<TDbEntity> queryable, TQuery query, CancellationToken cancellationToken)
+    protected override async Task<IPagedResult<TResult>> QueryResult(
+        IQueryable<TDbEntity> queryable,
+        TQuery query,
+        CancellationToken cancellationToken)
     {
         queryable = ApplyQuery(queryable, query);
 

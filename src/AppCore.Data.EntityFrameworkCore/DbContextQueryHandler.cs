@@ -12,9 +12,6 @@ using Microsoft.Extensions.Logging;
 
 namespace AppCore.Data.EntityFrameworkCore;
 
-// just for the logger
-internal abstract class DbContextQueryHandler {}
-
 /// <summary>
 /// Provides a base class for <see cref="DbContext"/> based query handlers.
 /// </summary>
@@ -26,16 +23,14 @@ internal abstract class DbContextQueryHandler {}
 public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
     : IDbContextQueryHandler<TEntity, TResult, TDbContext>
     where TQuery : IQuery<TEntity, TResult>
-    where TEntity : IEntity
+    where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
-    Type IDbContextQueryHandler<TEntity, TResult, TDbContext>.QueryType => typeof(TQuery);
-
     /// <summary>
-    /// Gets the <see cref="IDbContextDataProvider{TDbContext}"/> used by the query.
+    /// Gets the <see cref="DbContextDataProvider{TDbContext}"/> used by the query.
     /// </summary>
-    protected IDbContextDataProvider<TDbContext> Provider { get; }
+    protected DbContextDataProvider<TDbContext> Provider { get; }
 
     /// <summary>
     /// The <see cref="ILogger"/>.
@@ -43,17 +38,18 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     protected ILogger Logger { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DbContextQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
+    /// Initializes a new instance of the
+    /// <see cref="DbContextQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="IDbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextQueryHandler(IDbContextDataProvider<TDbContext> provider, ILoggerFactory loggerFactory)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    protected DbContextQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
     {
         Ensure.Arg.NotNull(provider);
-        Ensure.Arg.NotNull(loggerFactory);
+        Ensure.Arg.NotNull(logger);
 
         Provider = provider;
-        Logger = loggerFactory.CreateLogger<DbContextQueryHandler>();
+        Logger = logger;
     }
 
     /// <summary>
@@ -67,7 +63,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
         CancellationToken cancellationToken)
     {
         IQueryable<TDbEntity> queryable =
-            Provider.GetContext()
+            Provider.DbContext
                     .Set<TDbEntity>()
                     .AsNoTracking();
 
@@ -92,7 +88,7 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     /// <param name="query">The query to execute.</param>
     /// <param name="cancellationToken">Token which can be used to cancel the process.</param>
     /// <returns>The result of the query.</returns>
-    public virtual async Task<TResult> ExecuteAsync(TQuery query, CancellationToken cancellationToken)
+    public virtual async Task<TResult> ExecuteAsync(TQuery query, CancellationToken cancellationToken = default)
     {
         Ensure.Arg.NotNull(query);
 
@@ -111,8 +107,16 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
         return result;
     }
 
-    Task<TResult> IDbContextQueryHandler<TEntity,TResult,TDbContext>.ExecuteAsync(IQuery<TEntity, TResult> query, CancellationToken cancellationToken)
+    bool IDbContextQueryHandler<TEntity, TResult, TDbContext>.CanExecute(IQuery<TEntity, TResult> query)
     {
+        return query is TQuery;
+    }
+
+    Task<TResult> IDbContextQueryHandler<TEntity, TResult, TDbContext>.ExecuteAsync(
+        IQuery<TEntity, TResult> query,
+        CancellationToken cancellationToken)
+    {
+        Ensure.Arg.NotNull(query);
         return ExecuteAsync((TQuery)query, cancellationToken);
     }
 }

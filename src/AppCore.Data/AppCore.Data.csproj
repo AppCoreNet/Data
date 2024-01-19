@@ -10,7 +10,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="AppCore.TypeHelpers.Sources" Version="$(AppCore_Shared_Version)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="AppCore.Extensions.DependencyInjection.Abstractions" Version="$(AppCore_Extensions_Version)" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$(Microsoft_Extensions_Options_Version)" />
   </ItemGroup>
 
   <ItemGroup>

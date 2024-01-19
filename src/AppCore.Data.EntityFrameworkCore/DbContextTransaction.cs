@@ -13,7 +13,7 @@ namespace AppCore.Data.EntityFrameworkCore;
 /// <summary>
 /// Provides a <see cref="DbContext"/> transaction scope.
 /// </summary>
-public sealed class DbContextTransaction : ITransaction
+internal sealed class DbContextTransaction : ITransaction
 {
     private readonly ILogger _logger;
 

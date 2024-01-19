@@ -17,7 +17,7 @@ namespace AppCore.Data.EntityFrameworkCore;
 /// </summary>
 public sealed class DbContextTransactionManager : ITransactionManager
 {
-    private readonly IDbContextDataProvider _provider;
+    private readonly DbContext _dbContext;
     private readonly ILogger<DbContextTransactionManager> _logger;
     private DbContextTransaction? _currentTransaction;
 
@@ -26,13 +26,12 @@ public sealed class DbContextTransactionManager : ITransactionManager
     {
         get
         {
-            DbContext dbContext = _provider.GetContext();
-            DatabaseFacade database = dbContext.Database;
+            DatabaseFacade database = _dbContext.Database;
             if (_currentTransaction == null)
             {
                 if (database.CurrentTransaction != null)
                 {
-                    _currentTransaction = new DbContextTransaction(dbContext, database.CurrentTransaction, _logger);
+                    _currentTransaction = new DbContextTransaction(_dbContext, database.CurrentTransaction, _logger);
                 }
             }
             else
@@ -41,7 +40,7 @@ public sealed class DbContextTransactionManager : ITransactionManager
                     || database.CurrentTransaction != _currentTransaction.Transaction)
                 {
                     _currentTransaction = database.CurrentTransaction != null
-                        ? new DbContextTransaction(dbContext, database.CurrentTransaction, _logger)
+                        ? new DbContextTransaction(_dbContext, database.CurrentTransaction, _logger)
                         : null;
                 }
             }
@@ -50,21 +49,18 @@ public sealed class DbContextTransactionManager : ITransactionManager
         }
     }
 
-    /// <inheritdoc />
-    public IDataProvider Provider => _provider;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextTransactionManager"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="IDbContextDataProvider"/>.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    public DbContextTransactionManager(IDbContextDataProvider provider, ILoggerFactory loggerFactory)
+    /// <param name="dbContext">The <see cref="DbContext"/>.</param>
+    /// <param name="logger">The <see cref="ILogger{TCategoryName}"/>.</param>
+    public DbContextTransactionManager(DbContext dbContext, ILogger<DbContextTransactionManager> logger)
     {
-        Ensure.Arg.NotNull(provider);
-        Ensure.Arg.NotNull(loggerFactory);
+        Ensure.Arg.NotNull(dbContext);
+        Ensure.Arg.NotNull(logger);
 
-        _provider = provider;
-        _logger = loggerFactory.CreateLogger<DbContextTransactionManager>();
+        _dbContext = dbContext;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -72,16 +68,16 @@ public sealed class DbContextTransactionManager : ITransactionManager
         IsolationLevel isolationLevel,
         CancellationToken cancellationToken = default)
     {
-        DbContext dbContext = _provider.GetContext();
-        IDbContextTransaction transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        return _currentTransaction = new DbContextTransaction(dbContext, transaction, _logger);
+        IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken)
+                                                            .ConfigureAwait(false);
+
+        return _currentTransaction = new DbContextTransaction(_dbContext, transaction, _logger);
     }
 
     /// <inheritdoc />
     public ITransaction BeginTransaction(IsolationLevel isolationLevel)
     {
-        DbContext dbContext = _provider.GetContext();
-        IDbContextTransaction transaction = dbContext.Database.BeginTransaction();
-        return _currentTransaction = new DbContextTransaction(dbContext, transaction, _logger);
+        IDbContextTransaction transaction = _dbContext.Database.BeginTransaction();
+        return _currentTransaction = new DbContextTransaction(_dbContext, transaction, _logger);
     }
 }
