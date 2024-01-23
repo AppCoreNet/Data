@@ -12,10 +12,10 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 public class EntityWithSimpleIdByIdQueryHandler
     : TestContextSimpleIdRepository.ScalarQueryHandler<EntityWithSimpleIdByIdQuery, EntityWithSimpleId?>
 {
-    public static List<EntityWithSimpleIdByIdQuery> ExecutedQueries { get; } = new();
+    public static List<EntityWithSimpleIdByIdQuery> ExecutedQueries { get; } = new ();
 
-    public EntityWithSimpleIdByIdQueryHandler(DbContextDataProvider<TestContext> provider, ILogger<EntityWithSimpleIdByIdQueryHandler> logger)
-        : base(provider, logger)
+    public EntityWithSimpleIdByIdQueryHandler(DbContextDataProvider<TestContext> provider)
+        : base(provider)
     {
     }
 

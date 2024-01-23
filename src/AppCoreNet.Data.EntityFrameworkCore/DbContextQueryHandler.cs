@@ -1,14 +1,11 @@
 ﻿// Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
@@ -33,23 +30,14 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
     protected DbContextDataProvider<TDbContext> Provider { get; }
 
     /// <summary>
-    /// Gets the <see cref="ILogger"/>.
-    /// </summary>
-    protected ILogger Logger { get; }
-
-    /// <summary>
     /// Initializes a new instance of the
     /// <see cref="DbContextQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
     /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="logger">The <see cref="ILogger"/>.</param>
-    protected DbContextQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
+    protected DbContextQueryHandler(DbContextDataProvider<TDbContext> provider)
     {
         Ensure.Arg.NotNull(provider);
-        Ensure.Arg.NotNull(logger);
-
         Provider = provider;
-        Logger = logger;
     }
 
     /// <summary>
@@ -95,15 +83,9 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
         IQueryable<TDbEntity> queryable = await GetQueryableAsync(query, cancellationToken)
             .ConfigureAwait(false);
 
-        Type queryType = query.GetType();
-        Logger.QueryExecuting(queryType);
-
-        var stopwatch = new Stopwatch();
-
         TResult result = await QueryResultAsync(queryable, query, cancellationToken)
             .ConfigureAwait(false);
 
-        Logger.QueryExecuted(queryType, stopwatch.Elapsed);
         return result;
     }
 

@@ -6,7 +6,6 @@ using AppCoreNet.Data.EntityFrameworkCore;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
@@ -42,20 +41,13 @@ public static class DbContextDataProviderBuilderExtensions
         builder.Services.AddOptions();
         builder.Services.AddLogging();
 
-        builder.Services.TryAdd(
-            ServiceDescriptor.Describe(
-                typeof(DbContextDataProviderServiceResolver<TDbContext>),
-                typeof(DbContextDataProviderServiceResolver<TDbContext>),
-                providerLifetime));
-
         builder.AddProvider<DbContextDataProvider<TDbContext>>(
             name,
             providerLifetime,
             sp =>
             {
                 DbContextDataProviderServices<TDbContext> services =
-                    sp.GetRequiredService<DbContextDataProviderServiceResolver<TDbContext>>()
-                      .Get(name);
+                    DbContextDataProviderServices<TDbContext>.Create(name, sp);
 
                 var logger = sp.GetRequiredService<ILogger<DbContextDataProvider<TDbContext>>>();
 

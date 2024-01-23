@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,9 +38,8 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         /// Initializes a new instance of the <see cref="ScalarQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
         /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
-        protected ScalarQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-            : base(provider, logger)
+        protected ScalarQueryHandler(DbContextDataProvider<TDbContext> provider)
+            : base(provider)
         {
         }
     }
@@ -56,9 +56,8 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         /// Initializes a new instance of the <see cref="VectorQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
         /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
-        protected VectorQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-            : base(provider, logger)
+        protected VectorQueryHandler(DbContextDataProvider<TDbContext> provider)
+            : base(provider)
         {
         }
     }
@@ -75,9 +74,8 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         /// Initializes a new instance of the <see cref="PagedQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
         /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
-        protected PagedQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-            : base(provider, logger)
+        protected PagedQueryHandler(DbContextDataProvider<TDbContext> provider)
+            : base(provider)
         {
         }
     }
@@ -221,16 +219,31 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         IDbContextQueryHandler<TEntity, TResult, TDbContext> queryHandler =
             Provider.QueryHandlerFactory.CreateHandler(Provider, query);
 
+        Type queryType = query.GetType();
+        _logger.QueryExecuting(queryType);
+
+        var stopwatch = new Stopwatch();
+
         TResult result;
         try
         {
             result = await queryHandler.ExecuteAsync(query, cancellationToken)
                                        .ConfigureAwait(false);
+
+            _logger.QueryExecuted(queryType, stopwatch.Elapsed);
         }
         finally
         {
-            if (queryHandler is IDisposable disposable)
-                disposable.Dispose();
+            switch (queryHandler)
+            {
+                case IAsyncDisposable disposable:
+                    await disposable.DisposeAsync()
+                                    .ConfigureAwait(false);
+                    break;
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
         }
 
         return result;
@@ -344,7 +357,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         if (entity.IsTransient())
         {
             throw new InvalidOperationException(
-                "The entity cannot be updated because the id property has the default value.");
+                $"The entity cannot be updated because the '{nameof(IEntity<TId>.Id)}' property has the default value.");
         }
 
         _logger.EntitySaving(entity);

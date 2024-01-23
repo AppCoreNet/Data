@@ -22,14 +22,20 @@ public class DbContextRepositoryTests
     {
         var dbContext = new TestContext();
 
+        queryHandlerProvider ??= new DbContextQueryHandlerFactory<TestContext>(
+            Substitute.For<IServiceProvider>(),
+            Array.Empty<Type>());
+
+        var transactionManager = new DbContextTransactionManager(
+            dbContext,
+            Substitute.For<ILogger<DbContextTransactionManager>>());
+
         var services = new DbContextDataProviderServices<TestContext>(
             dbContext,
             entityMapper ?? Substitute.For<IEntityMapper>(),
             tokenGenerator ?? Substitute.For<ITokenGenerator>(),
-            queryHandlerProvider ?? new DbContextQueryHandlerFactory<TestContext>(
-                Substitute.For<IServiceProvider>(),
-                Array.Empty<Type>()),
-            new DbContextTransactionManager(dbContext, Substitute.For<ILogger<DbContextTransactionManager>>()));
+            queryHandlerProvider,
+            transactionManager);
 
         return new DbContextDataProvider<TestContext>(
             name,
@@ -48,7 +54,7 @@ public class DbContextRepositoryTests
                             return new EntityWithSimpleId
                             {
                                 Id = dbEntity.Id,
-                                Value = dbEntity.Value
+                                Value = dbEntity.Value,
                             };
                         });
 
@@ -70,7 +76,7 @@ public class DbContextRepositoryTests
                             return new EntityWithComplexId
                             {
                                 Id = new VersionId(dbEntity.Id, dbEntity.Version),
-                                Value = dbEntity.Value
+                                Value = dbEntity.Value,
                             };
                         });
 
@@ -89,7 +95,7 @@ public class DbContextRepositoryTests
                             return new EntityWithChangeToken
                             {
                                 Id = dbEntity.Id,
-                                ChangeToken = dbEntity.ChangeToken
+                                ChangeToken = dbEntity.ChangeToken,
                             };
                         });
 
@@ -101,7 +107,7 @@ public class DbContextRepositoryTests
                             return new DbEntityWithChangeToken
                             {
                                 Id = dbEntity.Id,
-                                ChangeToken = dbEntity.ChangeToken
+                                ChangeToken = dbEntity.ChangeToken,
                             };
                         });
 
@@ -126,7 +132,7 @@ public class DbContextRepositoryTests
                             return new EntityWithChangeTokenEx
                             {
                                 Id = dbEntity.Id,
-                                ChangeToken = dbEntity.ChangeToken
+                                ChangeToken = dbEntity.ChangeToken,
                             };
                         });
 
@@ -138,7 +144,7 @@ public class DbContextRepositoryTests
                             return new DbEntityWithChangeToken
                             {
                                 Id = dbEntity.Id,
-                                ChangeToken = dbEntity.ChangeToken
+                                ChangeToken = dbEntity.ChangeToken,
                             };
                         });
 
@@ -167,7 +173,7 @@ public class DbContextRepositoryTests
         var dbEntity = new DbEntityWithSimpleId
         {
             Id = 1,
-            Value = Guid.NewGuid().ToString()
+            Value = Guid.NewGuid().ToString(),
         };
 
         TestContextSimpleIdRepository repository = CreateSimpleIdRepository();
@@ -189,7 +195,7 @@ public class DbContextRepositoryTests
         {
             Id = 1,
             Version = 1,
-            Value = Guid.NewGuid().ToString()
+            Value = Guid.NewGuid().ToString(),
         };
 
         TestContextComplexIdRepository repository = CreateComplexIdRepository();
@@ -289,12 +295,12 @@ public class DbContextRepositoryTests
         TestContextChangeTokenRepository repository = CreateChangeTokenRepository(generator);
 
         TestContext testContext = repository.Provider.DbContext;
-        var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
+        var dbEntity = new DbEntityWithChangeToken() { ChangeToken = changeToken };
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
         await repository.UpdateAsync(
-            new EntityWithChangeToken {Id = dbEntity.Id, ChangeToken = changeToken},
+            new EntityWithChangeToken { Id = dbEntity.Id, ChangeToken = changeToken },
             CancellationToken.None);
     }
 
@@ -307,12 +313,12 @@ public class DbContextRepositoryTests
         TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(generator);
 
         TestContext testContext = repository.Provider.DbContext;
-        var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
+        var dbEntity = new DbEntityWithChangeToken() { ChangeToken = changeToken };
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
         await repository.UpdateAsync(
-            new EntityWithChangeTokenEx {Id = dbEntity.Id, ChangeToken = "abc", ExpectedChangeToken = changeToken },
+            new EntityWithChangeTokenEx { Id = dbEntity.Id, ChangeToken = "abc", ExpectedChangeToken = changeToken },
             CancellationToken.None);
     }
 
@@ -325,13 +331,13 @@ public class DbContextRepositoryTests
         TestContextChangeTokenRepository repository = CreateChangeTokenRepository(generator);
 
         TestContext testContext = repository.Provider.DbContext;
-        var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
+        var dbEntity = new DbEntityWithChangeToken() { ChangeToken = changeToken };
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
         await Assert.ThrowsAsync<EntityConcurrencyException>(
             () => repository.UpdateAsync(
-                new EntityWithChangeToken {Id = dbEntity.Id, ChangeToken = "abc"},
+                new EntityWithChangeToken { Id = dbEntity.Id, ChangeToken = "abc" },
                 CancellationToken.None));
     }
 
@@ -344,13 +350,13 @@ public class DbContextRepositoryTests
         TestContextChangeTokenExRepository repository = CreateChangeTokenExRepository(generator);
 
         TestContext testContext = repository.Provider.DbContext;
-        var dbEntity = new DbEntityWithChangeToken() {ChangeToken = changeToken};
+        var dbEntity = new DbEntityWithChangeToken() { ChangeToken = changeToken };
         testContext.ChangeTokenEntities.Add(dbEntity);
         await testContext.SaveChangesAsync();
 
         await Assert.ThrowsAsync<EntityConcurrencyException>(
             () => repository.UpdateAsync(
-                new EntityWithChangeTokenEx {Id = dbEntity.Id, ExpectedChangeToken = "abc"},
+                new EntityWithChangeTokenEx { Id = dbEntity.Id, ExpectedChangeToken = "abc" },
                 CancellationToken.None));
     }
 
@@ -367,7 +373,7 @@ public class DbContextRepositoryTests
 
         var query = new EntityWithSimpleIdByIdQuery();
 
-        TestContextSimpleIdRepository repository = CreateSimpleIdRepository(queryHandlerProvider:queryHandlerProvider);
+        TestContextSimpleIdRepository repository = CreateSimpleIdRepository(queryHandlerProvider: queryHandlerProvider);
 
         await repository.QueryAsync(query, CancellationToken.None);
 

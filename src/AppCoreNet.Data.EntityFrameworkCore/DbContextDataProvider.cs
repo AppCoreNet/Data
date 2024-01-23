@@ -61,8 +61,12 @@ public sealed class DbContextDataProvider<TDbContext> : IDataProvider
     /// </summary>
     public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory { get; }
 
-    /// <inheritdoc />
-    public ITransactionManager TransactionManager { get; }
+    /// <summary>
+    /// Gets the <see cref="DbContextTransactionManager"/>.
+    /// </summary>
+    public DbContextTransactionManager TransactionManager { get; }
+
+    ITransactionManager IDataProvider.TransactionManager => TransactionManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
@@ -125,7 +129,8 @@ public sealed class DbContextDataProvider<TDbContext> : IDataProvider
         int entityCount;
         try
         {
-            entityCount = await DbContext.SaveChangesAsync(cancellationToken)
+            bool acceptChanges = DbContext.Database.CurrentTransaction == null;
+            entityCount = await DbContext.SaveChangesAsync(acceptChanges, cancellationToken)
                                          .ConfigureAwait(false);
         }
         catch (DbUpdateConcurrencyException error)

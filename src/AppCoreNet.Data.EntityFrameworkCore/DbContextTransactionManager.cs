@@ -21,8 +21,7 @@ public sealed class DbContextTransactionManager : ITransactionManager
     private readonly ILogger<DbContextTransactionManager> _logger;
     private DbContextTransaction? _currentTransaction;
 
-    /// <inheritdoc />
-    public ITransaction? CurrentTransaction
+    public DbContextTransaction? CurrentTransaction
     {
         get
         {
@@ -48,6 +47,8 @@ public sealed class DbContextTransactionManager : ITransactionManager
             return _currentTransaction;
         }
     }
+
+    ITransaction? ITransactionManager.CurrentTransaction => CurrentTransaction;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextTransactionManager"/> class.

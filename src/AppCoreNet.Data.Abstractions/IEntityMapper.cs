@@ -1,7 +1,7 @@
 // Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-namespace AppCoreNet.Data.EntityFrameworkCore;
+namespace AppCoreNet.Data;
 
 /// <summary>
 /// Maps domain entities to/from data entities.

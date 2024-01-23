@@ -186,7 +186,6 @@ internal static class LoggerExtensions
         _entityDeleted(logger, entity.GetType(), entity.Id, null);
     }
 
-    // DbContextQueryHandler
     private static readonly Action<ILogger, Type, Exception?> _queryExecuting =
         LoggerMessage.Define<Type>(
             LogLevel.Debug,

@@ -151,6 +151,5 @@ public class DbContextDataProviderBuilderTest
 
         repository2!.Provider.Name.Should()
                     .Be(providerName2);
-
     }
 }

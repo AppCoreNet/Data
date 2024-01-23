@@ -13,13 +13,13 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 /// <summary>
 /// Provides a <see cref="DbContext"/> transaction scope.
 /// </summary>
-internal sealed class DbContextTransaction : ITransaction
+public sealed class DbContextTransaction : ITransaction
 {
+    private readonly DbContext _dbContext;
+    private readonly IDbContextTransaction _transaction;
     private readonly ILogger _logger;
 
-    private DbContext DbContext { get; }
-
-    internal IDbContextTransaction Transaction { get; }
+    internal IDbContextTransaction Transaction => _transaction;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextTransaction"/> class.
@@ -33,9 +33,8 @@ internal sealed class DbContextTransaction : ITransaction
         Ensure.Arg.NotNull(transaction);
         Ensure.Arg.NotNull(logger);
 
-        DbContext = dbContext;
-        Transaction = transaction;
-
+        _dbContext = dbContext;
+        _transaction = transaction;
         _logger = logger;
         _logger.TransactionInit(dbContext.GetType(), transaction.TransactionId);
     }
@@ -43,50 +42,52 @@ internal sealed class DbContextTransaction : ITransaction
     /// <inheritdoc />
     public void Dispose()
     {
-        Transaction.Dispose();
-        _logger.TransactionDisposed(DbContext.GetType(), Transaction.TransactionId);
+        _transaction.Dispose();
+        _logger.TransactionDisposed(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        await Transaction.DisposeAsync();
-        _logger.TransactionDisposed(DbContext.GetType(), Transaction.TransactionId);
+        await _transaction.DisposeAsync()
+                          .ConfigureAwait(false);
+
+        _logger.TransactionDisposed(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public void Commit()
     {
-        Transaction.Commit();
-        DbContext.ChangeTracker.AcceptAllChanges();
+        _transaction.Commit();
+        _dbContext.ChangeTracker.AcceptAllChanges();
 
-        _logger.TransactionCommit(DbContext.GetType(), Transaction.TransactionId);
+        _logger.TransactionCommit(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
-        await Transaction.CommitAsync(cancellationToken)
-                         .ConfigureAwait(false);
+        await _transaction.CommitAsync(cancellationToken)
+                          .ConfigureAwait(false);
 
-        DbContext.ChangeTracker.AcceptAllChanges();
+        _dbContext.ChangeTracker.AcceptAllChanges();
 
-        _logger.TransactionCommit(DbContext.GetType(), Transaction.TransactionId);
+        _logger.TransactionCommit(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public void Rollback()
     {
-        Transaction.Rollback();
-        _logger.TransactionRollback(DbContext.GetType(), Transaction.TransactionId);
+        _transaction.Rollback();
+        _logger.TransactionRollback(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        await Transaction.RollbackAsync(cancellationToken)
+        await _transaction.RollbackAsync(cancellationToken)
                          .ConfigureAwait(false);
 
-        _logger.TransactionRollback(DbContext.GetType(), Transaction.TransactionId);
+        _logger.TransactionRollback(_dbContext.GetType(), _transaction.TransactionId);
     }
 }
