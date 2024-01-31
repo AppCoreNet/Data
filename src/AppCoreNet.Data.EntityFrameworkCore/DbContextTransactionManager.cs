@@ -18,7 +18,7 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 public sealed class DbContextTransactionManager : ITransactionManager
 {
     private readonly DbContext _dbContext;
-    private readonly ILogger<DbContextTransactionManager> _logger;
+    private readonly ILogger _logger;
     private DbContextTransaction? _currentTransaction;
 
     public DbContextTransaction? CurrentTransaction
@@ -54,8 +54,8 @@ public sealed class DbContextTransactionManager : ITransactionManager
     /// Initializes a new instance of the <see cref="DbContextTransactionManager"/> class.
     /// </summary>
     /// <param name="dbContext">The <see cref="DbContext"/>.</param>
-    /// <param name="logger">The <see cref="ILogger{TCategoryName}"/>.</param>
-    public DbContextTransactionManager(DbContext dbContext, ILogger<DbContextTransactionManager> logger)
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    public DbContextTransactionManager(DbContext dbContext, ILogger logger)
     {
         Ensure.Arg.NotNull(dbContext);
         Ensure.Arg.NotNull(logger);

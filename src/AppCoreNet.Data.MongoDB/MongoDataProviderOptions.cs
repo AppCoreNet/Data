@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace AppCoreNet.Data.MongoDB;
 
-internal class MongoDataProviderOptions
+public class MongoDataProviderOptions
 {
     public MongoClientSettings ClientSettings { get; set; } = new ();
 
@@ -12,9 +12,9 @@ internal class MongoDataProviderOptions
 
     public MongoDatabaseSettings? DatabaseSettings { get; set; }
 
-    public Type? EntityMapperType { get; set; }
+    internal Type? EntityMapperType { get; set; }
 
-    public Type? TokenGeneratorType { get; set; }
+    internal Type? TokenGeneratorType { get; set; }
 
-    public ISet<Type> QueryHandlerTypes { get; } = new HashSet<Type>();
+    internal ISet<Type> QueryHandlerTypes { get; } = new HashSet<Type>();
 }

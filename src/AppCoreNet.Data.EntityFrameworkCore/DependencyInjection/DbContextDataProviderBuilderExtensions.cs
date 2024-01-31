@@ -49,9 +49,7 @@ public static class DbContextDataProviderBuilderExtensions
                 DbContextDataProviderServices<TDbContext> services =
                     DbContextDataProviderServices<TDbContext>.Create(name, sp);
 
-                var logger = sp.GetRequiredService<ILogger<DbContextDataProvider<TDbContext>>>();
-
-                return new DbContextDataProvider<TDbContext>(name, services, logger);
+                return new DbContextDataProvider<TDbContext>(name, services);
             });
 
         return new DbContextDataProviderBuilder<TDbContext>(name, builder.Services, providerLifetime);

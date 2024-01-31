@@ -3,12 +3,16 @@ using System.Threading.Tasks;
 
 namespace AppCoreNet.Data.MongoDB;
 
+public interface IMongoQueryHandler
+{
+}
+
 /// <summary>
 /// Represents a handler for <see cref="IQuery{TEntity,TResult}"/>.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-public interface IMongoQueryHandler<TEntity, TResult>
+public interface IMongoQueryHandler<TEntity, TResult> : IMongoQueryHandler
     where TEntity : class, IEntity
 {
     /// <summary>

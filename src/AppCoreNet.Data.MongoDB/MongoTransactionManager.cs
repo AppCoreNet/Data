@@ -23,11 +23,17 @@ namespace AppCoreNet.Data.MongoDB;
 public sealed class MongoTransactionManager : ITransactionManager
 {
     private readonly IMongoClient _client;
+    private readonly AsyncLocal<MongoTransaction?> _currentTransaction = new ();
+    private readonly ILogger _logger;
 
     /// <summary>
     /// Gets the currently active transaction.
     /// </summary>
-    public MongoTransaction? CurrentTransaction { get; private set; }
+    public MongoTransaction? CurrentTransaction
+    {
+        get => _currentTransaction.Value;
+        private set => _currentTransaction.Value = value;
+    }
 
     ITransaction? ITransactionManager.CurrentTransaction => CurrentTransaction;
 
@@ -36,12 +42,13 @@ public sealed class MongoTransactionManager : ITransactionManager
     /// </summary>
     /// <param name="client">The <see cref="IMongoClient"/>.</param>
     /// <param name="logger">The logger.</param>
-    public MongoTransactionManager(IMongoClient client, ILogger<MongoTransactionManager> logger)
+    public MongoTransactionManager(IMongoClient client, ILogger logger)
     {
         Ensure.Arg.NotNull(client);
         Ensure.Arg.NotNull(logger);
 
         _client = client;
+        _logger = logger;
     }
 
     private ClientSessionOptions CreateSessionOptions(IsolationLevel isolationLevel)

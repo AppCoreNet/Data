@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.MongoDB", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.MongoDB.IntegrationTests", "test\AppCoreNet.Data.MongoDB.IntegrationTests\AppCoreNet.Data.MongoDB.IntegrationTests.csproj", "{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.SpecificationTests", "test\AppCoreNet.Data.SpecificationTests\AppCoreNet.Data.SpecificationTests.csproj", "{BFC43033-85FA-479A-AFCE-F7BF70DDB11B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFC43033-85FA-479A-AFCE-F7BF70DDB11B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC43033-85FA-479A-AFCE-F7BF70DDB11B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC43033-85FA-479A-AFCE-F7BF70DDB11B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFC43033-85FA-479A-AFCE-F7BF70DDB11B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +103,6 @@ Global
 		{5EC3B837-5244-4C45-8046-D0D7A3C1FBBB} = {80A494A8-C591-4A8D-98DF-826D2D32ECA9}
 		{AF7F153C-EFE8-4CE5-9882-34B006E8D94F} = {80A494A8-C591-4A8D-98DF-826D2D32ECA9}
 		{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4} = {C8F2D282-96F6-48F4-B707-79E7FF58974C}
+		{BFC43033-85FA-479A-AFCE-F7BF70DDB11B} = {C8F2D282-96F6-48F4-B707-79E7FF58974C}
 	EndGlobalSection
 EndGlobal

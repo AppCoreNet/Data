@@ -3,7 +3,7 @@ using Xunit;
 namespace AppCoreNet.Data.MongoDB;
 
 [CollectionDefinition(Name)]
-public class MongoCollection : ICollectionFixture<MongoFixture>
+public class MongoTestCollection : ICollectionFixture<MongoTestFixture>
 {
     public const string Name = "MongoDB";
 }

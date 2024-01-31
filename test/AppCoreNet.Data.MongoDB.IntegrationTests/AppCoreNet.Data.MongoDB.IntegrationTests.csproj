@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AppCoreNet.Data.MongoDB\AppCoreNet.Data.MongoDB.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data.SpecificationTests\AppCoreNet.Data.SpecificationTests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AppCoreNet.Data.EntityFrameworkCore\AppCoreNet.Data.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data.SpecificationTests\AppCoreNet.Data.SpecificationTests.csproj" />
   </ItemGroup>
 
 </Project>

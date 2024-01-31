@@ -41,18 +41,25 @@ public sealed class DbContextDataProviderServices<TDbContext>
     /// </summary>
     public DbContextTransactionManager TransactionManager { get; }
 
+    /// <summary>
+    /// Gets the <see cref="ILogger"/>.
+    /// </summary>
+    public ILogger Logger { get; }
+
     internal DbContextDataProviderServices(
         TDbContext dbContext,
         IEntityMapper entityMapper,
         ITokenGenerator tokenGenerator,
         DbContextQueryHandlerFactory<TDbContext> queryHandlerFactory,
-        DbContextTransactionManager transactionManager)
+        DbContextTransactionManager transactionManager,
+        ILogger logger)
     {
         DbContext = dbContext;
         EntityMapper = entityMapper;
         TokenGenerator = tokenGenerator;
         QueryHandlerFactory = queryHandlerFactory;
         TransactionManager = transactionManager;
+        Logger = logger;
     }
 
     private static T GetOrCreateInstance<T>(IServiceProvider serviceProvider, Type? type)
@@ -70,18 +77,18 @@ public sealed class DbContextDataProviderServices<TDbContext>
 
         var entityMapper = GetOrCreateInstance<IEntityMapper>(serviceProvider, options.EntityMapperType);
         var tokenGenerator = GetOrCreateInstance<ITokenGenerator>(serviceProvider, options.TokenGeneratorType);
+        var logger = serviceProvider.GetRequiredService<ILogger<DbContextDataProvider<TDbContext>>>();
 
         var dbContext = serviceProvider.GetRequiredService<TDbContext>();
         var queryHandlerFactory = new DbContextQueryHandlerFactory<TDbContext>(serviceProvider, options.QueryHandlerTypes);
-        var transactionManager = new DbContextTransactionManager(
-            dbContext,
-            serviceProvider.GetRequiredService<ILogger<DbContextTransactionManager>>());
+        var transactionManager = new DbContextTransactionManager(dbContext, logger);
 
         return new DbContextDataProviderServices<TDbContext>(
             dbContext,
             entityMapper,
             tokenGenerator,
             queryHandlerFactory,
-            transactionManager);
+            transactionManager,
+            logger);
     }
 }

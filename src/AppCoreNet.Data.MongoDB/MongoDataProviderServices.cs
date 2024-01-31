@@ -32,13 +32,19 @@ public sealed class MongoDataProviderServices
     /// </summary>
     public MongoTransactionManager TransactionManager { get; }
 
+    /// <summary>
+    /// Gets the <see cref="ILogger"/>.
+    /// </summary>
+    public ILogger Logger { get; }
+
     internal MongoDataProviderServices(
         IMongoClient client,
         IMongoDatabase database,
         IEntityMapper entityMapper,
         ITokenGenerator tokenGenerator,
         MongoQueryHandlerFactory queryHandlerFactory,
-        MongoTransactionManager transactionManager)
+        MongoTransactionManager transactionManager,
+        ILogger logger)
     {
         Client = client;
         Database = database;
@@ -46,6 +52,7 @@ public sealed class MongoDataProviderServices
         TokenGenerator = tokenGenerator;
         QueryHandlerFactory = queryHandlerFactory;
         TransactionManager = transactionManager;
+        Logger = logger;
     }
 
     private static T GetOrCreateInstance<T>(IServiceProvider serviceProvider, Type? type)
@@ -63,14 +70,13 @@ public sealed class MongoDataProviderServices
 
         var entityMapper = GetOrCreateInstance<IEntityMapper>(serviceProvider, options.EntityMapperType);
         var tokenGenerator = GetOrCreateInstance<ITokenGenerator>(serviceProvider, options.TokenGeneratorType);
+        var logger = serviceProvider.GetRequiredService<ILogger<MongoDataProvider>>();
 
         var client = new MongoClient(options.ClientSettings);
         IMongoDatabase database = client.GetDatabase(options.Database);
 
         var queryHandlerFactory = new MongoQueryHandlerFactory(serviceProvider, options.QueryHandlerTypes);
-        var transactionManager = new MongoTransactionManager(
-            client,
-            serviceProvider.GetRequiredService<ILogger<MongoTransactionManager>>());
+        var transactionManager = new MongoTransactionManager(client, logger);
 
         return new MongoDataProviderServices(
             client,
@@ -78,6 +84,7 @@ public sealed class MongoDataProviderServices
             entityMapper,
             tokenGenerator,
             queryHandlerFactory,
-            transactionManager);
+            transactionManager,
+            logger);
     }
 }

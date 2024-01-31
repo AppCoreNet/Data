@@ -4,7 +4,7 @@ using Xunit;
 
 namespace AppCoreNet.Data.MongoDB;
 
-public class MongoFixture : IAsyncLifetime
+public class MongoTestFixture : IAsyncLifetime
 {
     private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
 
