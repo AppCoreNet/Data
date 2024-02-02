@@ -30,6 +30,11 @@ jobs:
         with:
           dotnet-version: |
             8.0.x
+      - name: Install Docker
+        if: matrix.os == 'macOS-latest'
+        run: |
+          brew install docker
+          colina start
       - name: Restore
         run: dotnet restore
       - name: Build
