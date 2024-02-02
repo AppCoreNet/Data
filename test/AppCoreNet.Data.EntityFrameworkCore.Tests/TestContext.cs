@@ -7,26 +7,27 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class TestContext : DbContext
 {
-    public DbSet<DbEntityWithSimpleId> SimpleEntities => Set<DbEntityWithSimpleId>();
-
-    public DbSet<DbEntityWithComplexId> ComplexEntities => Set<DbEntityWithComplexId>();
-
-    public DbSet<DbEntityWithChangeToken> ChangeTokenEntities => Set<DbEntityWithChangeToken>();
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public TestContext(DbContextOptions<TestContext> options)
+        : base(options)
     {
-        optionsBuilder.UseInMemoryDatabase("DbContextRepositoryTests");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<DbEntityWithComplexId>()
-                    .HasKey(e => new {e.Id, e.Version});
+        modelBuilder.Entity<DAO.TestEntity>()
+                    .HasKey(e => e.Id);
 
-        modelBuilder.Entity<DbEntityWithChangeToken>()
-                    .Property(p => p.ChangeToken)
+        modelBuilder.Entity<DAO.TestEntity>()
+                    .Property(e => e.ChangeToken)
+                    .IsConcurrencyToken();
+
+        modelBuilder.Entity<DAO.TestEntity2>()
+                    .HasKey(e => new { e.Id, e.Version });
+
+        modelBuilder.Entity<DAO.TestEntity2>()
+                    .Property(e => e.ChangeToken)
                     .IsConcurrencyToken();
     }
 }

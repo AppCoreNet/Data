@@ -35,4 +35,6 @@ internal static class LogEventIds
     public static readonly EventId QueryExecuting = new EventId(0, "query_executing");
 
     public static readonly EventId QueryExecuted = new EventId(1, "query_executed");
+
+    public static readonly EventId QueryFailed = new EventId(1, "query_failed");
 }

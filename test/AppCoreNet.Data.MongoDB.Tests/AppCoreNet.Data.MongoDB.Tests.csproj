@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Unix'">$(TargetFrameworks);net462</TargetFrameworks>
+    <RootNamespace>AppCoreNet.Data.MongoDB</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AppCoreNet.Data.MongoDB\AppCoreNet.Data.MongoDB.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data.SpecificationTests\AppCoreNet.Data.SpecificationTests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.MongoDb" Version="3.7.0" />
+  </ItemGroup>
+
+</Project>

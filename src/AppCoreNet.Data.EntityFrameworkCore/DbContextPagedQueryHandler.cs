@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
@@ -28,9 +27,8 @@ public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbCo
     /// Initializes a new instance of the <see cref="DbContextPagedQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
     /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="logger">The <see cref="ILoggerFactory"/>.</param>
-    protected DbContextPagedQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-        : base(provider, logger)
+    protected DbContextPagedQueryHandler(DbContextDataProvider<TDbContext> provider)
+        : base(provider)
     {
     }
 

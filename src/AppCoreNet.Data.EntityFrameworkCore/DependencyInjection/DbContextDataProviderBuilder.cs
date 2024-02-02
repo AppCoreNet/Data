@@ -74,17 +74,18 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
         where TService : class
         where TImplementation : class, IDbContextRepository<TDbContext>, TService
     {
-        Services.TryAdd(
+        Services.TryAddEnumerable(
             ServiceDescriptor.Describe(
                 typeof(TService),
-                sp =>
-                {
-                    var provider =
-                        (DbContextDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
-                                                             .Resolve(Name);
+                new Func<IServiceProvider, TImplementation>(
+                    sp =>
+                    {
+                        var provider =
+                            (DbContextDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
+                                                                 .Resolve(Name);
 
-                    return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
-                },
+                        return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
+                    }),
                 ProviderLifetime));
 
         return this;

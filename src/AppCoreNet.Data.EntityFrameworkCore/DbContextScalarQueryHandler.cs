@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
@@ -28,9 +27,8 @@ public abstract class DbContextScalarQueryHandler<TQuery, TEntity, TResult, TDbC
     /// Initializes a new instance of the <see cref="DbContextScalarQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
     /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="logger">The <see cref="ILogger"/>.</param>
-    protected DbContextScalarQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-        : base(provider, logger)
+    protected DbContextScalarQueryHandler(DbContextDataProvider<TDbContext> provider)
+        : base(provider)
     {
     }
 

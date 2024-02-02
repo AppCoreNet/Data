@@ -1,6 +1,8 @@
 // Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
@@ -13,80 +15,114 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 /// <summary>
 /// Provides a <see cref="DbContext"/> transaction scope.
 /// </summary>
-internal sealed class DbContextTransaction : ITransaction
+[SuppressMessage(
+    "IDisposableAnalyzers.Correctness",
+    "IDISP007:Don\'t dispose injected",
+    Justification = "Ownership is transferred from DbContextTransactionManager.")]
+public sealed class DbContextTransaction : ITransaction
 {
+    private readonly DbContext _dbContext;
+    private readonly IDbContextTransaction _transaction;
     private readonly ILogger _logger;
+    private bool _disposed;
 
-    private DbContext DbContext { get; }
+    internal IDbContextTransaction Transaction => _transaction;
 
-    internal IDbContextTransaction Transaction { get; }
+    internal event EventHandler? TransactionFinished;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DbContextTransaction"/> class.
-    /// </summary>
-    /// <param name="dbContext">The <see cref="T:DbContext"/>.</param>
-    /// <param name="transaction">The transaction.</param>
-    /// <param name="logger">The logger.</param>
-    public DbContextTransaction(DbContext dbContext, IDbContextTransaction transaction, ILogger logger)
+    internal DbContextTransaction(DbContext dbContext, IDbContextTransaction transaction, ILogger logger)
     {
         Ensure.Arg.NotNull(dbContext);
         Ensure.Arg.NotNull(transaction);
         Ensure.Arg.NotNull(logger);
 
-        DbContext = dbContext;
-        Transaction = transaction;
-
+        _dbContext = dbContext;
+        _transaction = transaction;
         _logger = logger;
         _logger.TransactionInit(dbContext.GetType(), transaction.TransactionId);
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(DbContextTransaction));
+        }
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        Transaction.Dispose();
-        _logger.TransactionDisposed(DbContext.GetType(), Transaction.TransactionId);
+        if (_disposed)
+            return;
+
+        _transaction.Dispose();
+        _disposed = true;
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        await Transaction.DisposeAsync();
-        _logger.TransactionDisposed(DbContext.GetType(), Transaction.TransactionId);
+        if (_disposed)
+            return;
+
+        await _transaction.DisposeAsync()
+                          .ConfigureAwait(false);
+
+        _disposed = true;
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
     public void Commit()
     {
-        Transaction.Commit();
-        DbContext.ChangeTracker.AcceptAllChanges();
+        EnsureNotDisposed();
 
-        _logger.TransactionCommit(DbContext.GetType(), Transaction.TransactionId);
+        _transaction.Commit();
+        Dispose();
+
+        _logger.TransactionCommit(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
-        await Transaction.CommitAsync(cancellationToken)
-                         .ConfigureAwait(false);
+        EnsureNotDisposed();
 
-        DbContext.ChangeTracker.AcceptAllChanges();
+        await _transaction.CommitAsync(cancellationToken)
+                          .ConfigureAwait(false);
 
-        _logger.TransactionCommit(DbContext.GetType(), Transaction.TransactionId);
+        await DisposeAsync()
+            .ConfigureAwait(false);
+
+        _logger.TransactionCommit(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public void Rollback()
     {
-        Transaction.Rollback();
-        _logger.TransactionRollback(DbContext.GetType(), Transaction.TransactionId);
+        EnsureNotDisposed();
+
+        _transaction.Rollback();
+        Dispose();
+
+        _logger.TransactionRollback(_dbContext.GetType(), _transaction.TransactionId);
     }
 
     /// <inheritdoc />
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        await Transaction.RollbackAsync(cancellationToken)
-                         .ConfigureAwait(false);
+        EnsureNotDisposed();
 
-        _logger.TransactionRollback(DbContext.GetType(), Transaction.TransactionId);
+        await _transaction.RollbackAsync(cancellationToken)
+                          .ConfigureAwait(false);
+
+        await DisposeAsync()
+            .ConfigureAwait(false);
+
+        _logger.TransactionRollback(_dbContext.GetType(), _transaction.TransactionId);
     }
 }

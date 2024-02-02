@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
@@ -29,9 +28,8 @@ public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbC
     /// Initializes a new instance of the <see cref="DbContextVectorQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
     /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-    /// <param name="logger">The <see cref="ILogger"/>.</param>
-    protected DbContextVectorQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-        : base(provider, logger)
+    protected DbContextVectorQueryHandler(DbContextDataProvider<TDbContext> provider)
+        : base(provider)
     {
     }
 

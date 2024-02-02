@@ -6,6 +6,18 @@
     <RootNamespace>AppCoreNet.Data</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)'=='net462'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\AppCoreNet.Data\AppCoreNet.Data.csproj" />
   </ItemGroup>

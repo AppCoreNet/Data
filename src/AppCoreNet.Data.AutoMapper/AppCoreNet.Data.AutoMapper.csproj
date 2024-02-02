@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <Description>Adds AutoMapper support to AppCore .NET persistence.</Description>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'!='netstandard2.1'">
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="[8.1.1,9.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="[12.0.1,13.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppCoreNet.Data\AppCoreNet.Data.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,9 +39,8 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         /// Initializes a new instance of the <see cref="ScalarQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
         /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
-        protected ScalarQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-            : base(provider, logger)
+        protected ScalarQueryHandler(DbContextDataProvider<TDbContext> provider)
+            : base(provider)
         {
         }
     }
@@ -56,9 +57,8 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         /// Initializes a new instance of the <see cref="VectorQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
         /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
-        protected VectorQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-            : base(provider, logger)
+        protected VectorQueryHandler(DbContextDataProvider<TDbContext> provider)
+            : base(provider)
         {
         }
     }
@@ -75,15 +75,13 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         /// Initializes a new instance of the <see cref="PagedQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
         /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
-        protected PagedQueryHandler(DbContextDataProvider<TDbContext> provider, ILogger logger)
-            : base(provider, logger)
+        protected PagedQueryHandler(DbContextDataProvider<TDbContext> provider)
+            : base(provider)
         {
         }
     }
 
     private static readonly EntityModelProperties<TId, TEntity> _entityModelProperties = new ();
-    private readonly ILogger _logger;
     private readonly DbModelProperties _modelProperties;
 
     /// <inheritdoc />
@@ -113,8 +111,6 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
             typeof(TDbEntity),
             context.Model,
             typeof(TEntity));
-
-        _logger = logger;
 
         Provider = provider;
     }
@@ -221,16 +217,50 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         IDbContextQueryHandler<TEntity, TResult, TDbContext> queryHandler =
             Provider.QueryHandlerFactory.CreateHandler(Provider, query);
 
+        Type queryType = query.GetType();
+        Provider.Logger.QueryExecuting(queryType);
+
+        var stopwatch = new Stopwatch();
+
         TResult result;
         try
         {
             result = await queryHandler.ExecuteAsync(query, cancellationToken)
                                        .ConfigureAwait(false);
+
+            Provider.Logger.QueryExecuted(queryType, stopwatch.Elapsed);
+        }
+        catch (Exception error)
+        {
+            Provider.Logger.QueryFailed(error, queryType);
+            throw;
         }
         finally
         {
-            if (queryHandler is IDisposable disposable)
-                disposable.Dispose();
+            await DisposeQueryHandler(queryHandler)
+                .ConfigureAwait(false);
+        }
+
+        [SuppressMessage(
+            "IDisposableAnalyzers.Correctness",
+            "IDISP007:Don\'t dispose injected",
+            Justification = "Ownership is correct.")]
+        [SuppressMessage(
+            "ReSharper",
+            "SuspiciousTypeConversion.Global",
+            Justification = "Handler may implement IDisposable.")]
+        async ValueTask DisposeQueryHandler(IDbContextQueryHandler<TEntity, TResult, TDbContext> handler)
+        {
+            switch (handler)
+            {
+                case IAsyncDisposable disposable:
+                    await disposable.DisposeAsync()
+                                    .ConfigureAwait(false);
+                    break;
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
         }
 
         return result;
@@ -299,24 +329,21 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
     {
         Ensure.Arg.NotNull(entity);
 
-        _logger.EntitySaving(entity);
+        Provider.Logger.EntitySaving(entity);
 
         var dbEntity = Provider.EntityMapper.Map<TDbEntity>(entity);
 
-        using (Provider.BeginChangeScope())
-        {
-            EntityEntry<TDbEntity> dbEntry = await CreateCoreAsync(entity, dbEntity, cancellationToken)
-                .ConfigureAwait(false);
+        EntityEntry<TDbEntity> dbEntry = await CreateCoreAsync(entity, dbEntity, cancellationToken)
+            .ConfigureAwait(false);
 
-            dbEntity = dbEntry.Entity;
-            UpdateChangeToken(dbEntry, entity);
+        dbEntity = dbEntry.Entity;
+        UpdateChangeToken(dbEntry, entity);
 
-            await Provider.SaveChangesAsync(cancellationToken)
-                          .ConfigureAwait(false);
-        }
+        await Provider.SaveChangesAsync(cancellationToken)
+                      .ConfigureAwait(false);
 
         entity = Provider.EntityMapper.Map<TEntity>(dbEntity);
-        _logger.EntitySaved(entity);
+        Provider.Logger.EntitySaved(entity);
 
         return entity;
     }
@@ -344,34 +371,31 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         if (entity.IsTransient())
         {
             throw new InvalidOperationException(
-                "The entity cannot be updated because the id property has the default value.");
+                $"The entity cannot be updated because the '{nameof(IEntity<TId>.Id)}' property has the default value.");
         }
 
-        _logger.EntitySaving(entity);
+        Provider.Logger.EntitySaving(entity);
 
         TDbEntity? dbEntity = await GetQueryable(entity.Id)
                                     .FirstOrDefaultAsync(cancellationToken)
                                     .ConfigureAwait(false);
 
         if (dbEntity == null)
-            throw new EntityNotFoundException(typeof(TEntity), entity.Id!);
+            throw new EntityConcurrencyException();
 
         Provider.EntityMapper.Map(entity, dbEntity);
 
-        using (Provider.BeginChangeScope())
-        {
-            EntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(entity, dbEntity, cancellationToken)
-                .ConfigureAwait(false);
+        EntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(entity, dbEntity, cancellationToken)
+            .ConfigureAwait(false);
 
-            dbEntity = dbEntry.Entity;
-            UpdateChangeToken(dbEntry, entity);
+        dbEntity = dbEntry.Entity;
+        UpdateChangeToken(dbEntry, entity);
 
-            await Provider.SaveChangesAsync(cancellationToken)
-                          .ConfigureAwait(false);
-        }
+        await Provider.SaveChangesAsync(cancellationToken)
+                      .ConfigureAwait(false);
 
         entity = Provider.EntityMapper.Map<TEntity>(dbEntity);
-        _logger.EntitySaved(entity);
+        Provider.Logger.EntitySaved(entity);
 
         return entity;
     }
@@ -396,22 +420,18 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
     {
         Ensure.Arg.NotNull(entity);
 
-        _logger.EntityDeleting(entity);
+        Provider.Logger.EntityDeleting(entity);
 
-        var dbEntity = Activator.CreateInstance<TDbEntity>();
-        Provider.EntityMapper.Map(entity, dbEntity);
+        var dbEntity = Provider.EntityMapper.Map<TDbEntity>(entity);
 
-        using (Provider.BeginChangeScope())
-        {
-            EntityEntry<TDbEntity> dbEntry = await DeleteCoreAsync(entity, dbEntity, cancellationToken)
-                .ConfigureAwait(false);
+        EntityEntry<TDbEntity> dbEntry = await DeleteCoreAsync(entity, dbEntity, cancellationToken)
+            .ConfigureAwait(false);
 
-            UpdateChangeToken(dbEntry, entity);
+        UpdateChangeToken(dbEntry, entity);
 
-            await Provider.SaveChangesAsync(cancellationToken)
-                          .ConfigureAwait(false);
-        }
+        await Provider.SaveChangesAsync(cancellationToken)
+                      .ConfigureAwait(false);
 
-        _logger.EntityDeleted(entity);
+        Provider.Logger.EntityDeleted(entity);
     }
 }
