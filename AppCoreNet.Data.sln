@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.AutoMapper"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.MongoDB", "src\AppCoreNet.Data.MongoDB\AppCoreNet.Data.MongoDB.csproj", "{AF7F153C-EFE8-4CE5-9882-34B006E8D94F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.MongoDB.IntegrationTests", "test\AppCoreNet.Data.MongoDB.IntegrationTests\AppCoreNet.Data.MongoDB.IntegrationTests.csproj", "{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.MongoDB.Tests", "test\AppCoreNet.Data.MongoDB.Tests\AppCoreNet.Data.MongoDB.Tests.csproj", "{100CCE22-F7A5-4D93-BC71-6E2B1910A7B4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCoreNet.Data.SpecificationTests", "test\AppCoreNet.Data.SpecificationTests\AppCoreNet.Data.SpecificationTests.csproj", "{BFC43033-85FA-479A-AFCE-F7BF70DDB11B}"
 EndProject

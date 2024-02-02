@@ -5,7 +5,7 @@
     <TargetFrameworks Condition="'$(OS)' != 'Unix'">$(TargetFrameworks);net462</TargetFrameworks>
     <RootNamespace>AppCoreNet.Data.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
-
+  
   <ItemGroup Condition="'$(TargetFramework)'=='net462'">
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.32" />
   </ItemGroup>

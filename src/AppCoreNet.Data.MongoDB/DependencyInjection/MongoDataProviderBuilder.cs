@@ -64,9 +64,8 @@ public sealed class MongoDataProviderBuilder
         where TService : class
         where TImplementation : class, IMongoRepository, TService
     {
-        Services.TryAdd(
-            ServiceDescriptor.Describe(
-                typeof(TService),
+        Services.TryAddEnumerable(
+            ServiceDescriptor.Transient<TService, TImplementation>(
                 sp =>
                 {
                     var provider =
@@ -74,8 +73,7 @@ public sealed class MongoDataProviderBuilder
                                              .Resolve(Name);
 
                     return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
-                },
-                ServiceLifetime.Transient));
+                }));
 
         return this;
     }

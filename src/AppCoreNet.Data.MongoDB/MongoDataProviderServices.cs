@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -6,10 +9,19 @@ using MongoDB.Driver;
 
 namespace AppCoreNet.Data.MongoDB;
 
+/// <summary>
+/// Provides all dependent services used by the <see cref="MongoDataProvider"/>.
+/// </summary>
 public sealed class MongoDataProviderServices
 {
+    /// <summary>
+    /// Gets the <see cref="IMongoClient"/>.
+    /// </summary>
     public IMongoClient Client { get; }
 
+    /// <summary>
+    /// Gets the <see cref="IMongoDatabase"/>.
+    /// </summary>
     public IMongoDatabase Database { get; }
 
     /// <summary>

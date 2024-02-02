@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -51,9 +54,47 @@ public sealed class MongoTransactionManager : ITransactionManager
         _logger = logger;
     }
 
-    private ClientSessionOptions CreateSessionOptions(IsolationLevel isolationLevel)
+    private TransactionOptions? CreateTransactionOptions(IsolationLevel isolationLevel)
     {
-        var options = new ClientSessionOptions();
+        TransactionOptions options;
+
+        switch (isolationLevel)
+        {
+            case IsolationLevel.Unspecified:
+            case IsolationLevel.Chaos:
+                options = null;
+                break;
+            case IsolationLevel.ReadUncommitted:
+                options = new TransactionOptions(
+                    writeConcern: WriteConcern.Acknowledged,
+                    readConcern: ReadConcern.Local);
+                break;
+            case IsolationLevel.ReadCommitted:
+                options = new TransactionOptions(
+                    writeConcern: WriteConcern.WMajority,
+                    readConcern: ReadConcern.Majority);
+                break;
+            case IsolationLevel.RepeatableRead:
+                options = new TransactionOptions(
+                    writeConcern: WriteConcern.WMajority,
+                    readPreference: ReadPreference.Primary,
+                    readConcern: ReadConcern.Majority);
+                break;
+            case IsolationLevel.Serializable:
+                options = new TransactionOptions(
+                    writeConcern: WriteConcern.WMajority,
+                    readPreference: ReadPreference.Primary,
+                    readConcern: ReadConcern.Linearizable);
+                break;
+            case IsolationLevel.Snapshot:
+                options = new TransactionOptions(
+                    writeConcern: WriteConcern.WMajority,
+                    readConcern: ReadConcern.Snapshot);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(isolationLevel), isolationLevel, null);
+        }
+
         return options;
     }
 
@@ -64,32 +105,78 @@ public sealed class MongoTransactionManager : ITransactionManager
         CurrentTransaction = null;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Begins a new transaction in the context of the data provider.
+    /// </summary>
+    /// <param name="options">Specifies the options for the transaction.</param>
+    /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
+    /// <returns>The created transaction.</returns>
     public async Task<ITransaction> BeginTransactionAsync(
-        IsolationLevel isolationLevel,
+        TransactionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         if (CurrentTransaction != null)
             throw new InvalidOperationException("A transaction is already in progress.");
 
-        ClientSessionOptions options = CreateSessionOptions(isolationLevel);
-        MongoTransaction transaction = await MongoTransaction
-                                             .CreateAsync(_client, options, cancellationToken)
-                                             .ConfigureAwait(false);
+        IClientSessionHandle session =
+            await _client
+                  .StartSessionAsync(null, cancellationToken)
+                  .ConfigureAwait(false);
 
-        transaction.TransactionFinished += OnTransactionFinished;
+        MongoTransaction transaction;
+        try
+        {
+            session.StartTransaction(options);
+            transaction = new MongoTransaction(session, _logger);
+            transaction.TransactionFinished += OnTransactionFinished;
+        }
+        catch
+        {
+            session.Dispose();
+            throw;
+        }
+
+        return CurrentTransaction = transaction;
+    }
+
+    /// <inheritdoc />
+    public async Task<ITransaction> BeginTransactionAsync(
+        IsolationLevel isolationLevel,
+        CancellationToken cancellationToken = default)
+    {
+        return await BeginTransactionAsync(CreateTransactionOptions(isolationLevel), cancellationToken);
+    }
+
+    /// <summary>
+    /// Begins a new transaction in the context of the data provider.
+    /// </summary>
+    /// <param name="options">Specifies the options for the transaction.</param>
+    /// <returns>The created transaction.</returns>
+    public ITransaction BeginTransaction(TransactionOptions? options = null)
+    {
+        if (CurrentTransaction != null)
+            throw new InvalidOperationException("A transaction is already in progress.");
+
+        IClientSessionHandle session = _client.StartSession();
+        MongoTransaction transaction;
+        try
+        {
+            session.StartTransaction(options);
+            transaction = new MongoTransaction(session, _logger);
+            transaction.TransactionFinished += OnTransactionFinished;
+        }
+        catch
+        {
+            session.Dispose();
+            throw;
+        }
+
         return CurrentTransaction = transaction;
     }
 
     /// <inheritdoc />
     public ITransaction BeginTransaction(IsolationLevel isolationLevel)
     {
-        if (CurrentTransaction != null)
-            throw new InvalidOperationException("A transaction is already in progress.");
-
-        ClientSessionOptions options = CreateSessionOptions(isolationLevel);
-        var transaction = MongoTransaction.Create(_client, options);
-        transaction.TransactionFinished += OnTransactionFinished;
-        return CurrentTransaction = transaction;
+        return BeginTransaction(CreateTransactionOptions(isolationLevel));
     }
 }

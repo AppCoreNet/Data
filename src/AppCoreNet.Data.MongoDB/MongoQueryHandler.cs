@@ -14,21 +14,16 @@ namespace AppCoreNet.Data.MongoDB;
 /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
 /// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
-/// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
-public abstract class MongoQueryHandler<TQuery, TEntity, TResult, TDbEntity> : IMongoQueryHandler<TEntity, TResult>
+/// <typeparam name="TDocument">The type of the MongoDB document.</typeparam>
+public abstract class MongoQueryHandler<TQuery, TEntity, TResult, TDocument> : IMongoQueryHandler<TEntity, TResult>
     where TQuery : IQuery<TEntity, TResult>
     where TEntity : class, IEntity
-    where TDbEntity : class
+    where TDocument : class
 {
     /// <summary>
-    /// Gets the name of the collection which is being queried.
+    /// Gets the <see cref="IMongoCollection{TDocument}"/> used by the query handler.
     /// </summary>
-    protected abstract string CollectionName { get; }
-
-    /// <summary>
-    /// Gets the <see cref="MongoCollectionSettings"/> used by the query.
-    /// </summary>
-    protected virtual MongoCollectionSettings? CollectionSettings { get; }
+    protected IMongoCollection<TDocument> Collection { get; }
 
     /// <summary>
     /// Gets the <see cref="MongoDataProvider"/> used by the query.
@@ -36,24 +31,34 @@ public abstract class MongoQueryHandler<TQuery, TEntity, TResult, TDbEntity> : I
     protected MongoDataProvider Provider { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MongoQueryHandler{TQuery,TEntity,TResult,TDbEntity}"/> class.
+    /// Initializes a new instance of the <see cref="MongoQueryHandler{TQuery,TEntity,TResult,TDocument}"/> class.
     /// </summary>
     /// <param name="provider">The <see cref="MongoDataProvider"/>.</param>
-    protected MongoQueryHandler(MongoDataProvider provider)
+    /// <param name="collectionName">The name of the collection.</param>
+    /// <param name="collectionSettings">The settings used when accessing the collection.</param>
+    protected MongoQueryHandler(
+        MongoDataProvider provider,
+        string? collectionName = null,
+        MongoCollectionSettings? collectionSettings = null)
     {
         Ensure.Arg.NotNull(provider);
+        Ensure.Arg.NotEmptyButNull(collectionName);
+
         Provider = provider;
+        Collection = provider.Database.GetCollection<TDocument>(
+            string.IsNullOrEmpty(collectionName)
+                ? provider.GetCollectionName<TEntity>()
+                : collectionName,
+            collectionSettings);
     }
 
     /// <summary>
     /// Must be implemented to query the result.
     /// </summary>
-    /// <param name="collection">The collection to query.</param>
     /// <param name="query">The <see cref="IQuery{TEntity,TResult}"/> for which results must be queried.</param>
     /// <param name="cancellationToken">Token which can be used to cancel the process.</param>
     /// <returns>The result of the query.</returns>
     protected abstract Task<TResult> QueryResultAsync(
-        IMongoCollection<TDbEntity> collection,
         TQuery query,
         CancellationToken cancellationToken);
 
@@ -67,20 +72,19 @@ public abstract class MongoQueryHandler<TQuery, TEntity, TResult, TDbEntity> : I
     {
         Ensure.Arg.NotNull(query);
 
-        IMongoCollection<TDbEntity> collection =
-            Provider.Database.GetCollection<TDbEntity>(CollectionName, CollectionSettings);
-
-        TResult result = await QueryResultAsync(collection, query, cancellationToken)
+        TResult result = await QueryResultAsync(query, cancellationToken)
             .ConfigureAwait(false);
 
         return result;
     }
 
+    /// <inheritdoc />
     bool IMongoQueryHandler<TEntity, TResult>.CanExecute(IQuery<TEntity, TResult> query)
     {
         return query is TQuery;
     }
 
+    /// <inheritdoc />
     Task<TResult> IMongoQueryHandler<TEntity, TResult>.ExecuteAsync(
         IQuery<TEntity, TResult> query,
         CancellationToken cancellationToken)

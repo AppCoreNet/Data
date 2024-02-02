@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppCoreNet.Diagnostics;
@@ -7,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AppCoreNet.Data.MongoDB;
 
 /// <summary>
-/// Provides query handler factory for MongoDB.
+/// Provides a factory for MongoDB query handlers.
 /// </summary>
 public sealed class MongoQueryHandlerFactory
 {

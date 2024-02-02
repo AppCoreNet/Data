@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AppCoreNet.Data.MongoDB.Queries;
 using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +39,7 @@ public class MongoRepositoryTests : RepositoryTests
                         o.Database = DatabaseName;
                     })
                  .AddRepository<ITestEntityRepository, MongoTestEntityRepository>()
+                 .AddQueryHandler<TestEntityByIdQueryHandler>()
                  .AddRepository<ITestEntity2Repository, MongoTestEntity2Repository>();
             });
     }

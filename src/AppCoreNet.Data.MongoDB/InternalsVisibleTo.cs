@@ -4,4 +4,3 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("AppCoreNet.Data.MongoDB.Tests")]
-[assembly: InternalsVisibleTo("AppCoreNet.Data.MongoDB.IntegrationTests")]

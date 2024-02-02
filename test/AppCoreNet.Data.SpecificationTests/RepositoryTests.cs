@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AppCoreNet.Data.Entities;
+using AppCoreNet.Data.Queries;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -513,5 +514,33 @@ public abstract class RepositoryTests
         async Task Action() => await repository.UpdateAsync(entity);
 
         await Assert.ThrowsAsync<EntityConcurrencyException>(Action);
+    }
+
+    [Fact]
+    public async Task QueryByIdReturnsEntity()
+    {
+        await using ServiceProvider sp = CreateServiceProvider();
+
+        IDataProvider provider = sp.GetRequiredService<IDataProviderResolver>()
+                                   .Resolve(ProviderName);
+
+        var repository = sp.GetRequiredService<ITestEntityRepository>();
+
+        var id = Guid.NewGuid();
+        var entity = new TestEntity
+        {
+            Id = id,
+            Name = "name",
+        };
+
+        await CreateDataEntity(provider, entity);
+
+        TestEntity? result = await repository.QueryAsync(new TestEntityByIdQuery(id));
+
+        result.Should()
+              .NotBeNull();
+
+        result.Should()
+              .BeEquivalentTo(entity);
     }
 }

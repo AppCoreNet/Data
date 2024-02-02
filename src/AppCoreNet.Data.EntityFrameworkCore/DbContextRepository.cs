@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -231,12 +232,26 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         }
         catch (Exception error)
         {
-            // TODO: _logger.QueryFailed(error, queryType);
+            Provider.Logger.QueryFailed(error, queryType);
             throw;
         }
         finally
         {
-            switch (queryHandler)
+            await DisposeQueryHandler(queryHandler)
+                .ConfigureAwait(false);
+        }
+
+        [SuppressMessage(
+            "IDisposableAnalyzers.Correctness",
+            "IDISP007:Don\'t dispose injected",
+            Justification = "Ownership is correct.")]
+        [SuppressMessage(
+            "ReSharper",
+            "SuspiciousTypeConversion.Global",
+            Justification = "Handler may implement IDisposable.")]
+        async ValueTask DisposeQueryHandler(IDbContextQueryHandler<TEntity, TResult, TDbContext> handler)
+        {
+            switch (handler)
             {
                 case IAsyncDisposable disposable:
                     await disposable.DisposeAsync()

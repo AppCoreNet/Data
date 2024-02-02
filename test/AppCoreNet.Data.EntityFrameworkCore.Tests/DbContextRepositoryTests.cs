@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AppCoreNet.Data.EntityFrameworkCore.Queries;
 using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ public class DbContextRepositoryTests : RepositoryTests
                         o.UseInMemoryDatabase(DatabaseName);
                     })
                  .AddRepository<ITestEntityRepository, DbContextTestEntityRepository>()
+                 .AddQueryHandler<TestEntityByIdQueryHandler>()
                  .AddRepository<ITestEntity2Repository, DbContextTestEntity2Repository>();
             });
     }

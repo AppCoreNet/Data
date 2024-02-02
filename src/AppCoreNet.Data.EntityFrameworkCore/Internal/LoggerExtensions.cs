@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
+// TODO: Use same code like in MongoDataProviderLogger
 internal static class LoggerExtensions
 {
     // DbContextDataProvider
@@ -198,6 +199,12 @@ internal static class LoggerExtensions
             LogEventIds.QueryExecuted,
             "Executed query {queryType} in {queryExecutionTime}s");
 
+    private static readonly Action<ILogger, Type, string, Exception?> _queryFailed =
+        LoggerMessage.Define<Type, string>(
+            LogLevel.Error,
+            LogEventIds.QueryFailed,
+            "Failed to execute query {queryType}: {errorMessage}");
+
     public static void QueryExecuting(this ILogger logger, Type queryType)
     {
         _queryExecuting(logger, queryType, null);
@@ -206,5 +213,10 @@ internal static class LoggerExtensions
     public static void QueryExecuted(this ILogger logger, Type queryType, TimeSpan duration)
     {
         _queryExecuted(logger, queryType, duration.TotalSeconds, null);
+    }
+
+    public static void QueryFailed(this ILogger logger, Exception exception, Type queryType)
+    {
+        _queryFailed(logger, queryType, exception.Message, exception);
     }
 }

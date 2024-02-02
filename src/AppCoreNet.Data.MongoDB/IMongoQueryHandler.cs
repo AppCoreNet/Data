@@ -1,14 +1,24 @@
-﻿using System.Threading;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System.Threading;
 using System.Threading.Tasks;
+using AppCoreNet.Extensions.DependencyInjection;
 
 namespace AppCoreNet.Data.MongoDB;
 
+/// <summary>
+/// Represent a MongoDB query handler.
+/// </summary>
+/// <remarks>
+/// Primarily used as a marker interface by <see cref="MongoDataProviderBuilderExtensions"/>.
+/// </remarks>
 public interface IMongoQueryHandler
 {
 }
 
 /// <summary>
-/// Represents a handler for <see cref="IQuery{TEntity,TResult}"/>.
+/// Represents a MongoDB query handler for.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>

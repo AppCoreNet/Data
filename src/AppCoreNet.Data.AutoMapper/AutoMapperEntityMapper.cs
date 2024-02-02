@@ -1,8 +1,14 @@
-﻿using AppCoreNet.Diagnostics;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using AppCoreNet.Diagnostics;
 using AutoMapper;
 
 namespace AppCoreNet.Data.AutoMapper;
 
+/// <summary>
+/// Provides an implementation of <see cref="IEntityMapper"/> which uses AutoMapper.
+/// </summary>
 public sealed class AutoMapperEntityMapper : IEntityMapper
 {
     private readonly IMapper _mapper;

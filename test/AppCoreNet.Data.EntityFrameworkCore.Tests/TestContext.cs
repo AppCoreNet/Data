@@ -7,12 +7,6 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 
 public class TestContext : DbContext
 {
-    public DbSet<DbEntityWithSimpleId> SimpleEntities => Set<DbEntityWithSimpleId>();
-
-    public DbSet<DbEntityWithComplexId> ComplexEntities => Set<DbEntityWithComplexId>();
-
-    public DbSet<DbEntityWithChangeToken> ChangeTokenEntities => Set<DbEntityWithChangeToken>();
-
     public TestContext(DbContextOptions<TestContext> options)
         : base(options)
     {

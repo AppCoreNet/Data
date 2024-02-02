@@ -1,20 +1,83 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
-using Microsoft.Extensions.Primitives;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace AppCoreNet.Data.MongoDB;
 
+/// <summary>
+/// Provides a MongoDB based implementation of the <see cref="IRepository{TId,TEntity}"/> interface.
+/// </summary>
+/// <typeparam name="TId">The type of the entity id.</typeparam>
+/// <typeparam name="TEntity">The type of the entity.</typeparam>
+/// <typeparam name="TDocument">The type of the MongoDB document.</typeparam>
 public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity>, IMongoRepository
     where TEntity : class, IEntity<TId>
     where TDocument : class
 {
+    /// <summary>
+    /// Provides a base class for scalar query handlers of this repository.
+    /// </summary>
+    /// <typeparam name="TQuery">The type of the query.</typeparam>
+    /// <typeparam name="TResult">The type of the result.</typeparam>
+    public abstract class ScalarQueryHandler<TQuery, TResult> : MongoScalarQueryHandler<TQuery, TEntity, TResult?, TDocument>
+        where TQuery : IQuery<TEntity, TResult?>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScalarQueryHandler{TQuery,TResult}"/> class.
+        /// </summary>
+        /// <param name="provider">The <see cref="MongoDataProvider"/>.</param>
+        protected ScalarQueryHandler(MongoDataProvider provider)
+            : base(provider)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Provides a base class for vector query handlers of this repository.
+    /// </summary>
+    /// <typeparam name="TQuery">The type of the query.</typeparam>
+    /// <typeparam name="TResult">The type of the result.</typeparam>
+    public abstract class VectorQueryHandler<TQuery, TResult> : MongoVectorQueryHandler<TQuery, TEntity, TResult, TDocument>
+        where TQuery : IQuery<TEntity, IReadOnlyCollection<TResult>>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VectorQueryHandler{TQuery,TResult}"/> class.
+        /// </summary>
+        /// <param name="provider">The <see cref="MongoDataProvider"/>.</param>
+        protected VectorQueryHandler(MongoDataProvider provider)
+            : base(provider)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Provides a base class for paged query handlers of this repository.
+    /// </summary>
+    /// <typeparam name="TQuery">The type of the query.</typeparam>
+    /// <typeparam name="TResult">The type of the result.</typeparam>
+    public abstract class PagedQueryHandler<TQuery, TResult> : MongoPagedQueryHandler<TQuery, TEntity, TResult, TDocument>
+        where TQuery : IPagedQuery<TEntity, TResult>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PagedQueryHandler{TQuery,TResult}"/> class.
+        /// </summary>
+        /// <param name="provider">The <see cref="MongoDataProvider"/>.</param>
+        protected PagedQueryHandler(MongoDataProvider provider)
+            : base(provider)
+        {
+        }
+    }
+
     private const string ObjectIdField = "_id";
 
     [SuppressMessage(
@@ -23,10 +86,17 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         Justification = "Depends on generic parameter.")]
     private static readonly string? _changeTokenField;
 
+    /// <summary>
+    /// Gets the <see cref="MongoDataProvider"/>.
+    /// </summary>
     public MongoDataProvider Provider { get; }
 
+    /// <summary>
+    /// Gets the <see cref="IMongoCollection{TDocument}"/> used by the repository.
+    /// </summary>
     protected IMongoCollection<BsonDocument> Collection { get; }
 
+    /// <inheritdoc />
     IDataProvider IRepository<TId, TEntity>.Provider => Provider;
 
     static MongoRepository()
@@ -51,17 +121,23 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         }
     }
 
-    public MongoRepository(MongoDataProvider provider, string? collectionName = null)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MongoRepository{TId,TEntity,TDocument}"/> class.
+    /// </summary>
+    /// <param name="provider">The <see cref="MongoDataProvider"/>.</param>
+    /// <param name="collectionName">The name of the collection to use.</param>
+    /// <param name="collectionSettings">The settings used to access to collection.</param>
+    public MongoRepository(MongoDataProvider provider, string? collectionName = null, MongoCollectionSettings? collectionSettings = null)
     {
         Ensure.Arg.NotNull(provider);
+        Ensure.Arg.NotEmptyButNull(collectionName);
 
         Provider = provider;
         Collection = provider.Database.GetCollection<BsonDocument>(
-            string.IsNullOrEmpty(collectionName) ? provider.GetCollectionName<TEntity>() : collectionName,
-            new MongoCollectionSettings
-            {
-                AssignIdOnInsert = true,
-            });
+            string.IsNullOrEmpty(collectionName)
+                ? provider.GetCollectionName<TEntity>()
+                : collectionName,
+            collectionSettings);
     }
 
     private FilterDefinition<BsonDocument> GetModificationFilter(TEntity entity)
@@ -102,6 +178,7 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         }
     }
 
+    /// <inheritdoc />
     public async Task<TResult> QueryAsync<TResult>(IQuery<TEntity, TResult> query, CancellationToken cancellationToken = default)
     {
         Ensure.Arg.NotNull(query);
@@ -109,8 +186,7 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         IMongoQueryHandler<TEntity, TResult> queryHandler =
             Provider.QueryHandlerFactory.CreateHandler(Provider, query);
 
-        Type queryType = query.GetType();
-        // _logger.QueryExecuting(queryType);
+        Provider.Logger.QueryExecuting(query);
 
         var stopwatch = new Stopwatch();
 
@@ -120,16 +196,30 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
             result = await queryHandler.ExecuteAsync(query, cancellationToken)
                                        .ConfigureAwait(false);
 
-            // _logger.QueryExecuted(queryType, stopwatch.Elapsed);
+            Provider.Logger.QueryExecuted(query, stopwatch.ElapsedMilliseconds);
         }
         catch (Exception error)
         {
-            // TODO: _logger.QueryFailed(error, queryType);
+            Provider.Logger.QueryExecuteFailed(error, query);
             throw;
         }
         finally
         {
-            switch (queryHandler)
+            await DisposeQueryHandler(queryHandler)
+                .ConfigureAwait(false);
+        }
+
+        [SuppressMessage(
+            "IDisposableAnalyzers.Correctness",
+            "IDISP007:Don\'t dispose injected",
+            Justification = "Ownership is correct.")]
+        [SuppressMessage(
+            "ReSharper",
+            "SuspiciousTypeConversion.Global",
+            Justification = "Handler may implement IDisposable.")]
+        async ValueTask DisposeQueryHandler(IMongoQueryHandler<TEntity, TResult> handler)
+        {
+            switch (handler)
             {
                 case IAsyncDisposable disposable:
                     await disposable.DisposeAsync()
@@ -159,18 +249,40 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
                          .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken = default)
     {
         Ensure.Arg.NotNull(id);
 
-        TDocument? document = await FindCoreAsync(id, cancellationToken)
-            .ConfigureAwait(false);
+        Provider.Logger.EntityLoading(typeof(TEntity), id);
+        try
+        {
+            TDocument? document = await FindCoreAsync(id, cancellationToken)
+                .ConfigureAwait(false);
 
-        return document != null
-            ? Provider.EntityMapper.Map<TEntity>(document)
-            : default;
+            TEntity? result = document != null
+                ? Provider.EntityMapper.Map<TEntity>(document)
+                : default;
+
+            if (result != null)
+            {
+                Provider.Logger.EntityLoaded(result);
+            }
+            else
+            {
+                Provider.Logger.EntityNotFound(typeof(TEntity), id);
+            }
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            Provider.Logger.EntityLoadFailed(error, typeof(TEntity), id);
+            throw;
+        }
     }
 
+    /// <inheritdoc />
     public async Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken = default)
     {
         TEntity? entity = await FindAsync(id, cancellationToken)
@@ -223,6 +335,7 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         return BsonSerializer.Deserialize<TDocument>(bson);
     }
 
+    /// <inheritdoc />
     public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         Ensure.Arg.NotNull(entity);
@@ -235,10 +348,22 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
 
         var document = Provider.EntityMapper.Map<TDocument>(entity);
 
-        document = await UpdateCoreAsync(entity, document, cancellationToken)
-            .ConfigureAwait(false);
+        Provider.Logger.EntityUpdating(entity);
+        try
+        {
+            document = await UpdateCoreAsync(entity, document, cancellationToken)
+                .ConfigureAwait(false);
 
-        return Provider.EntityMapper.Map<TEntity>(document);
+            var result = Provider.EntityMapper.Map<TEntity>(document);
+            Provider.Logger.EntityUpdated(result);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            Provider.Logger.EntityUpdateFailed(error, entity);
+            throw;
+        }
     }
 
     protected virtual async Task<TDocument> CreateCoreAsync(
@@ -265,16 +390,29 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         return BsonSerializer.Deserialize<TDocument>(bson);
     }
 
+    /// <inheritdoc />
     public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         Ensure.Arg.NotNull(entity);
 
         var document = Provider.EntityMapper.Map<TDocument>(entity);
 
-        document = await CreateCoreAsync(entity, document, cancellationToken)
-            .ConfigureAwait(false);
+        Provider.Logger.EntityCreating(entity);
+        try
+        {
+            document = await CreateCoreAsync(entity, document, cancellationToken)
+                .ConfigureAwait(false);
 
-        return Provider.EntityMapper.Map<TEntity>(document);
+            var result = Provider.EntityMapper.Map<TEntity>(document);
+            Provider.Logger.EntityCreated(result);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            Provider.Logger.EntityCreateFailed(error, entity);
+            throw;
+        }
     }
 
     protected virtual async Task DeleteCoreAsync(TEntity entity, CancellationToken cancellationToken)
@@ -300,11 +438,23 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         Ensure.Arg.NotNull(entity);
 
-        await DeleteCoreAsync(entity, cancellationToken)
-            .ConfigureAwait(false);
+        Provider.Logger.EntityDeleting(entity);
+        try
+        {
+            await DeleteCoreAsync(entity, cancellationToken)
+                .ConfigureAwait(false);
+
+            Provider.Logger.EntityDeleted(entity);
+        }
+        catch (Exception error)
+        {
+            Provider.Logger.EntityDeleteFailed(error, entity);
+            throw;
+        }
     }
 }

@@ -89,11 +89,13 @@ public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext
         return result;
     }
 
+    /// <inheritdoc />
     bool IDbContextQueryHandler<TEntity, TResult, TDbContext>.CanExecute(IQuery<TEntity, TResult> query)
     {
         return query is TQuery;
     }
 
+    /// <inheritdoc />
     Task<TResult> IDbContextQueryHandler<TEntity, TResult, TDbContext>.ExecuteAsync(
         IQuery<TEntity, TResult> query,
         CancellationToken cancellationToken)

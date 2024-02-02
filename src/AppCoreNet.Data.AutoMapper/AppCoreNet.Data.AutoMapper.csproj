@@ -14,11 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppCoreNet.Data.Abstractions\AppCoreNet.Data.Abstractions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AppCoreNet.Data.Abstractions\AppCoreNet.Data.Abstractions.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data\AppCoreNet.Data.csproj" />
   </ItemGroup>
 
 </Project>
