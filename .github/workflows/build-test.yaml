@@ -33,8 +33,8 @@ jobs:
       - name: Install Docker
         if: matrix.os == 'macOS-latest'
         run: |
-          brew install docker
-          colina start
+          brew install colima docker
+          colima start
       - name: Restore
         run: dotnet restore
       - name: Build
