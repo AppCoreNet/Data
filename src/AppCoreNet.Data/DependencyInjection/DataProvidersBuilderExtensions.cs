@@ -2,6 +2,7 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppCoreNet.Data;
 using AppCoreNet.Diagnostics;
@@ -16,20 +17,15 @@ namespace AppCoreNet.Extensions.DependencyInjection;
 /// </summary>
 public static class DataProvidersBuilderExtensions
 {
-    private static DataProviderResolverOptions GetOptions(IServiceCollection services)
+    private static ProviderRegistration? FindRegistration(IServiceCollection services, string name)
     {
-        var options = (DataProviderResolverOptions?)services
-                                                    .FirstOrDefault(
-                                                        sd => sd.ServiceType == typeof(DataProviderResolverOptions))
-                                                    ?.ImplementationInstance;
+        IEnumerable<ServiceDescriptor> registrations =
+            services.Where(sd => sd.ServiceType == typeof(ProviderRegistration));
 
-        if (options == null)
-        {
-            options = new DataProviderResolverOptions();
-            services.AddSingleton(options);
-        }
-
-        return options;
+        return (ProviderRegistration?)registrations
+                                      .FirstOrDefault(
+                                          r => ((ProviderRegistration)r.ImplementationInstance!).Name == name)
+                                      ?.ImplementationInstance;
     }
 
     /// <summary>
@@ -45,18 +41,17 @@ public static class DataProvidersBuilderExtensions
         this IDataProvidersBuilder builder,
         string name,
         ServiceLifetime lifetime,
-        Func<IServiceProvider, T> factory)
+        Func<IServiceProvider, string, T> factory)
         where T : class, IDataProvider
     {
         Ensure.Arg.NotNull(builder);
         Ensure.Arg.NotNull(name);
         Ensure.Arg.NotNull(factory);
 
-        DataProviderResolverOptions options = GetOptions(builder.Services);
-
-        if (options.ProviderMap.TryGetValue(name, out Type providerType))
+        ProviderRegistration? registration = FindRegistration(builder.Services, name);
+        if (registration != null)
         {
-            if (providerType != typeof(T))
+            if (registration.ProviderType != typeof(T))
             {
                 throw new InvalidOperationException(
                     $"Data provider with name '{name}' is already registered with type '{typeof(T).GetDisplayName()}'.");
@@ -64,15 +59,33 @@ public static class DataProvidersBuilderExtensions
         }
         else
         {
-            options.ProviderMap.Add(name, typeof(T));
-            builder.Services.Add(ServiceDescriptor.Describe(typeof(T), factory, lifetime));
-        }
+            builder.Services.AddSingleton(new ProviderRegistration(name, typeof(T)));
 
-        if (name == string.Empty)
-        {
-            builder.Services.TryAddTransient<IDataProvider>(
+#if !NET8_0_OR_GREATER
+            builder.Services.Add(
+                ServiceDescriptor.Describe(
+                    typeof(T),
+                    sp => factory(sp, name),
+                    lifetime));
+
+            builder.Services.AddTransient<IDataProvider>(
                 sp => sp.GetRequiredService<IDataProviderResolver>()
-                        .Resolve(string.Empty));
+                        .Resolve(name));
+#else
+            builder.Services.Add(
+                ServiceDescriptor.DescribeKeyed(
+                    typeof(T),
+                    name,
+                    (sp, key) => factory(sp, (string)key!),
+                    lifetime));
+
+            builder.Services.AddKeyedTransient<IDataProvider>(
+                name,
+                (sp, key) => sp.GetRequiredKeyedService<T>(key));
+
+            builder.Services.AddTransient<T>(sp => sp.GetRequiredKeyedService<T>(name));
+            builder.Services.AddTransient<IDataProvider>(sp => sp.GetRequiredKeyedService<T>(name));
+#endif
         }
 
         return builder;
@@ -95,6 +108,6 @@ public static class DataProvidersBuilderExtensions
         return builder.AddProvider<T>(
             name,
             lifetime,
-            sp => ActivatorUtilities.CreateInstance<T>(sp, name));
+            static (sp, n) => ActivatorUtilities.CreateInstance<T>(sp, n));
     }
 }

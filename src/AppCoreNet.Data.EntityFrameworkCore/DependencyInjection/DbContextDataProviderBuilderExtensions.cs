@@ -44,7 +44,7 @@ public static class DbContextDataProviderBuilderExtensions
         builder.AddProvider<DbContextDataProvider<TDbContext>>(
             name,
             providerLifetime,
-            sp =>
+            static (sp, name) =>
             {
                 DbContextDataProviderServices<TDbContext> services =
                     DbContextDataProviderServices<TDbContext>.Create(name, sp);

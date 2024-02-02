@@ -2,6 +2,7 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,30 +11,31 @@ namespace AppCoreNet.Data;
 
 internal sealed class DataProviderResolver : IDataProviderResolver
 {
+    private readonly IEnumerable<ProviderRegistration> _registrations;
     private readonly IServiceProvider _serviceProvider;
-    private readonly DataProviderResolverOptions _options;
 
-    public DataProviderResolver(IServiceProvider serviceProvider, DataProviderResolverOptions options)
+    public DataProviderResolver(IEnumerable<ProviderRegistration> registrations, IServiceProvider serviceProvider)
     {
+        _registrations = registrations;
         _serviceProvider = serviceProvider;
-        _options = options;
     }
 
     public IDataProvider Resolve(string name)
     {
         Ensure.Arg.NotNull(name);
 
-        IDataProvider? provider = null;
-        if (_options.ProviderMap.TryGetValue(name, out Type type))
+        ProviderRegistration? registration = _registrations.FirstOrDefault(r => r.Name == name);
+        if (registration == null)
         {
-            provider = _serviceProvider.GetServices(type)
-                                       .OfType<IDataProvider>()
-                                       .FirstOrDefault(p => p.Name == name);
+            throw new InvalidOperationException($"Data provider with name '{name}' is not registered.");
         }
 
-        if (provider == null)
-            throw new InvalidOperationException($"Data provider with name '{name}' is not registered.");
-
-        return provider;
+#if !NET8_0_OR_GREATER
+        return _serviceProvider.GetServices(registration.ProviderType)
+                               .OfType<IDataProvider>()
+                               .First(p => p.Name == name);
+#else
+        return (IDataProvider)_serviceProvider.GetRequiredKeyedService(registration.ProviderType, name);
+#endif
     }
 }

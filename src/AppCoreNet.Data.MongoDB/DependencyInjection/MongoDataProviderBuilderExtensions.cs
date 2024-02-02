@@ -40,7 +40,7 @@ public static class MongoDataProviderBuilderExtensions
         builder.AddProvider<MongoDataProvider>(
             name,
             ServiceLifetime.Singleton,
-            sp =>
+            static (sp, name) =>
             {
                 var services = MongoDataProviderServices.Create(name, sp);
                 return new MongoDataProvider(name, services);
