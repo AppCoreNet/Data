@@ -11,6 +11,7 @@ using Xunit;
 namespace AppCoreNet.Data.MongoDB;
 
 [Collection(MongoTestCollection.Name)]
+[Trait("Category", "Integration")]
 public class MongoRepositoryTests : RepositoryTests
 {
     private const string DatabaseName = "test";
