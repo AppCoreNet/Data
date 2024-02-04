@@ -17,12 +17,12 @@ public static class MongoDataProviderBuilderExtensions
     /// <summary>
     /// Registers a MongoDB data provider.
     /// </summary>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="configure">Optional delegate to configure the <see cref="MongoDataProviderOptions"/>.</param>
     /// <returns>A <see cref="MongoDataProviderBuilder"/> to further configure the data provider.</returns>
     public static MongoDataProviderBuilder AddMongoDB(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         string name,
         Action<MongoDataProviderOptions>? configure)
     {

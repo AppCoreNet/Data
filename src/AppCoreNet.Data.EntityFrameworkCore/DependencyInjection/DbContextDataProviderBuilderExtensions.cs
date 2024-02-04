@@ -25,12 +25,12 @@ public static class DbContextDataProviderBuilderExtensions
     /// Note that you have to register the <see cref="DbContext"/> on your own.
     /// </remarks>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="providerLifetime">The lifetime of the data provider.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContextCore<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         string name,
         ServiceLifetime providerLifetime = ServiceLifetime.Scoped)
         where TDbContext : DbContext
@@ -62,11 +62,11 @@ public static class DbContextDataProviderBuilderExtensions
     /// Note that you have to register the <see cref="DbContext"/> on your own.
     /// </remarks>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="providerLifetime">The lifetime of the data provider.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContextCore<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         ServiceLifetime providerLifetime = ServiceLifetime.Scoped)
         where TDbContext : DbContext
     {
@@ -77,14 +77,14 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a <see cref="DbContext"/> with a data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="contextLifetime">The lifetime of the <see cref="DbContext"/>.</param>
     /// <param name="optionsLifetime">The lifetime of the <see cref="DbContextOptions"/>.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContext<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         string name,
         Action<IServiceProvider, DbContextOptionsBuilder>? optionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped,
@@ -102,14 +102,14 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a <see cref="DbContext"/> with a data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="contextLifetime">The lifetime of the <see cref="DbContext"/>.</param>
     /// <param name="optionsLifetime">The lifetime of the <see cref="DbContextOptions"/>.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContext<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         string name,
         Action<DbContextOptionsBuilder>? optionsAction,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped,
@@ -126,13 +126,13 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a <see cref="DbContext"/> with a default data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="contextLifetime">The lifetime of the <see cref="DbContext"/>.</param>
     /// <param name="optionsLifetime">The lifetime of the <see cref="DbContextOptions"/>.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContext<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         Action<IServiceProvider, DbContextOptionsBuilder>? optionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped,
         ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
@@ -145,13 +145,13 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a <see cref="DbContext"/> with a default data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="contextLifetime">The lifetime of the <see cref="DbContext"/>.</param>
     /// <param name="optionsLifetime">The lifetime of the <see cref="DbContextOptions"/>.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContext<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         Action<DbContextOptionsBuilder>? optionsAction,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped,
         ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
@@ -164,13 +164,13 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a pooled <see cref="DbContext"/> with a data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="poolSize">The size of the pool.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContextPool<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         string name,
         Action<IServiceProvider, DbContextOptionsBuilder>? optionsAction = null,
         int poolSize = DefaultPoolSize)
@@ -189,13 +189,13 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a pooled <see cref="DbContext"/> with a data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="poolSize">The size of the pool.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContextPool<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         string name,
         Action<DbContextOptionsBuilder>? optionsAction = null,
         int poolSize = DefaultPoolSize)
@@ -211,12 +211,12 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a pooled <see cref="DbContext"/> with a default data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="poolSize">The size of the pool.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContextPool<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         Action<IServiceProvider, DbContextOptionsBuilder>? optionsAction = null,
         int poolSize = DefaultPoolSize)
         where TDbContext : DbContext
@@ -228,12 +228,12 @@ public static class DbContextDataProviderBuilderExtensions
     /// Registers a pooled <see cref="DbContext"/> with a default data provider in the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="optionsAction">The delegate used to configure the options.</param>
     /// <param name="poolSize">The size of the pool.</param>
     /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
     public static DbContextDataProviderBuilder<TDbContext> AddDbContextPool<TDbContext>(
-        this IDataProvidersBuilder builder,
+        this IDataProviderBuilder builder,
         Action<DbContextOptionsBuilder>? optionsAction = null,
         int poolSize = DefaultPoolSize)
         where TDbContext : DbContext

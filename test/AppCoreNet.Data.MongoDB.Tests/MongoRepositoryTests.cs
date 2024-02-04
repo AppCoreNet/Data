@@ -29,7 +29,7 @@ public class MongoRepositoryTests : RepositoryTests
 
         Mapper = EntityMapper.Instance;
 
-        services.AddDataProviders(
+        services.AddDataProvider(
             p =>
             {
                 p.AddMongoDB(

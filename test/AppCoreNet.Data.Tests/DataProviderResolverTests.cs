@@ -17,7 +17,7 @@ public class DataProviderResolverTests
         const string providerName2 = "provider-2";
 
         var services = new ServiceCollection();
-        services.AddDataProviders(b =>
+        services.AddDataProvider(b =>
         {
             b.AddProvider<TestDataProvider>(providerName1, ServiceLifetime.Scoped);
             b.AddProvider<TestDataProvider>(providerName2, ServiceLifetime.Scoped);

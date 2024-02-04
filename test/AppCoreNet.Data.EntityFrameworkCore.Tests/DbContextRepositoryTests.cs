@@ -21,7 +21,7 @@ public class DbContextRepositoryTests : RepositoryTests
 
         Mapper = EntityMapper.Instance;
 
-        services.AddDataProviders(
+        services.AddDataProvider(
             p =>
             {
                 p.AddDbContext<TestContext>(

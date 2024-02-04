@@ -20,7 +20,7 @@ public class DataProviderRegistrationTests
         const string providerName2 = "provider-2";
 
         var services = new ServiceCollection();
-        services.AddDataProviders(b =>
+        services.AddDataProvider(b =>
         {
             b.AddProvider<TestDataProvider>(providerName1, ServiceLifetime.Scoped);
             b.AddProvider<TestDataProvider>(providerName2, ServiceLifetime.Scoped);
@@ -60,7 +60,7 @@ public class DataProviderRegistrationTests
         Assert.Throws<InvalidOperationException>(
             () =>
             {
-                services.AddDataProviders(
+                services.AddDataProvider(
                     b =>
                     {
                         b.AddProvider<TestDataProvider>(providerName, ServiceLifetime.Scoped);
@@ -75,7 +75,7 @@ public class DataProviderRegistrationTests
         const string providerName = "provider";
 
         var services = new ServiceCollection();
-        services.AddDataProviders(
+        services.AddDataProvider(
             b =>
             {
                 b.AddProvider<TestDataProvider>(providerName, ServiceLifetime.Scoped);
@@ -105,7 +105,7 @@ public class DataProviderRegistrationTests
         const string providerName2 = "provider-2";
 
         var services = new ServiceCollection();
-        services.AddDataProviders(b =>
+        services.AddDataProvider(b =>
         {
             b.AddProvider<TestDataProvider>(providerName1, ServiceLifetime.Scoped);
             b.AddProvider<TestDataProvider2>(providerName2, ServiceLifetime.Scoped);
@@ -137,7 +137,7 @@ public class DataProviderRegistrationTests
         const string providerName2 = "provider-2";
 
         var services = new ServiceCollection();
-        services.AddDataProviders(b =>
+        services.AddDataProvider(b =>
         {
             b.AddProvider<TestDataProvider>(providerName1, ServiceLifetime.Scoped);
             b.AddProvider<TestDataProvider2>(providerName2, ServiceLifetime.Scoped);

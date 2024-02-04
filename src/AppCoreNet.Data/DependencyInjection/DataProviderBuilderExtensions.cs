@@ -7,15 +7,14 @@ using System.Linq;
 using AppCoreNet.Data;
 using AppCoreNet.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace AppCoreNet.Extensions.DependencyInjection;
 
 /// <summary>
-/// Provides extension methods for <see cref="IDataProvidersBuilder"/>.
+/// Provides extension methods for <see cref="IDataProviderBuilder"/>.
 /// </summary>
-public static class DataProvidersBuilderExtensions
+public static class DataProviderBuilderExtensions
 {
     private static ProviderRegistration? FindRegistration(IServiceCollection services, string name)
     {
@@ -31,14 +30,14 @@ public static class DataProvidersBuilderExtensions
     /// <summary>
     /// Registers a data provider with a factory.
     /// </summary>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="lifetime">The lifetime of the data provider service.</param>
     /// <param name="factory">The factory method that creates the data provider.</param>
     /// <typeparam name="T">The type of the data provider.</typeparam>
-    /// <returns>The <see cref="IDataProvidersBuilder"/> to allow chaining.</returns>
-    public static IDataProvidersBuilder AddProvider<T>(
-        this IDataProvidersBuilder builder,
+    /// <returns>The <see cref="IDataProviderBuilder"/> to allow chaining.</returns>
+    public static IDataProviderBuilder AddProvider<T>(
+        this IDataProviderBuilder builder,
         string name,
         ServiceLifetime lifetime,
         Func<IServiceProvider, string, T> factory)
@@ -94,13 +93,13 @@ public static class DataProvidersBuilderExtensions
     /// <summary>
     /// Registers a data provider.
     /// </summary>
-    /// <param name="builder">The <see cref="IDataProvidersBuilder"/>.</param>
+    /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="lifetime">The lifetime of the data provider service.</param>
     /// <typeparam name="T">The type of the data provider.</typeparam>
-    /// <returns>The <see cref="IDataProvidersBuilder"/> to allow chaining.</returns>
-    public static IDataProvidersBuilder AddProvider<T>(
-        this IDataProvidersBuilder builder,
+    /// <returns>The <see cref="IDataProviderBuilder"/> to allow chaining.</returns>
+    public static IDataProviderBuilder AddProvider<T>(
+        this IDataProviderBuilder builder,
         string name,
         ServiceLifetime lifetime)
         where T : class, IDataProvider
