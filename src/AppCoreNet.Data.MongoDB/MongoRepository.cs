@@ -127,7 +127,10 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
     /// <param name="provider">The <see cref="MongoDataProvider"/>.</param>
     /// <param name="collectionName">The name of the collection to use.</param>
     /// <param name="collectionSettings">The settings used to access to collection.</param>
-    public MongoRepository(MongoDataProvider provider, string? collectionName = null, MongoCollectionSettings? collectionSettings = null)
+    public MongoRepository(
+        MongoDataProvider provider,
+        string? collectionName = null,
+        MongoCollectionSettings? collectionSettings = null)
     {
         Ensure.Arg.NotNull(provider);
         Ensure.Arg.NotEmptyButNull(collectionName);
@@ -178,6 +181,43 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         }
     }
 
+    private async Task<T> DoAsync<T>(Action before, Func<Task<T>> action, Action<T, long> after, Action<Exception> failed)
+    {
+        before();
+
+        var stopwatch = new Stopwatch();
+
+        try
+        {
+            T result = await action()
+                .ConfigureAwait(false);
+
+            after(result, stopwatch.ElapsedMilliseconds);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            failed(error);
+            throw;
+        }
+    }
+
+    private async Task DoAsync(Action before, Func<Task> action, Action<long> after, Action<Exception> failed)
+    {
+        await DoAsync(
+            before,
+            async () =>
+            {
+                await action()
+                    .ConfigureAwait(false);
+
+                return true;
+            },
+            (_, elapsedTimeMs) => after(elapsedTimeMs),
+            failed);
+    }
+
     /// <inheritdoc />
     public async Task<TResult> QueryAsync<TResult>(IQuery<TEntity, TResult> query, CancellationToken cancellationToken = default)
     {
@@ -186,22 +226,16 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         IMongoQueryHandler<TEntity, TResult> queryHandler =
             Provider.QueryHandlerFactory.CreateHandler(Provider, query);
 
-        Provider.Logger.QueryExecuting(query);
-
-        var stopwatch = new Stopwatch();
-
         TResult result;
         try
         {
-            result = await queryHandler.ExecuteAsync(query, cancellationToken)
-                                       .ConfigureAwait(false);
-
-            Provider.Logger.QueryExecuted(query, stopwatch.ElapsedMilliseconds);
-        }
-        catch (Exception error)
-        {
-            Provider.Logger.QueryExecuteFailed(error, query);
-            throw;
+            result = await DoAsync(
+                    () => Provider.Logger.QueryExecuting(query),
+                    async () => await queryHandler.ExecuteAsync(query, cancellationToken)
+                                                  .ConfigureAwait(false),
+                    (_, elapsedTimeMs) => Provider.Logger.QueryExecuted(query, elapsedTimeMs),
+                    error => Provider.Logger.QueryExecuteFailed(error, query))
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -254,32 +288,31 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
     {
         Ensure.Arg.NotNull(id);
 
-        Provider.Logger.EntityLoading(typeof(TEntity), id);
-        try
-        {
-            TDocument? document = await FindCoreAsync(id, cancellationToken)
-                .ConfigureAwait(false);
+        return await DoAsync(
+                () => Provider.Logger.EntityLoading(typeof(TEntity), id),
+                async () =>
+                {
+                    TDocument? document = await FindCoreAsync(id, cancellationToken)
+                        .ConfigureAwait(false);
 
-            TEntity? result = document != null
-                ? Provider.EntityMapper.Map<TEntity>(document)
-                : default;
-
-            if (result != null)
-            {
-                Provider.Logger.EntityLoaded(result);
-            }
-            else
-            {
-                Provider.Logger.EntityNotFound(typeof(TEntity), id);
-            }
-
-            return result;
-        }
-        catch (Exception error)
-        {
-            Provider.Logger.EntityLoadFailed(error, typeof(TEntity), id);
-            throw;
-        }
+                    return document != null
+                        ? Provider.EntityMapper.Map<TEntity>(document)
+                        : default;
+                },
+                (result, elapsedTimeMs) =>
+                {
+                    if (result != null)
+                    {
+                        Provider.Logger.EntityLoaded(result, elapsedTimeMs);
+                    }
+                    else
+                    {
+                        Provider.Logger.EntityNotFound(typeof(TEntity), id);
+                    }
+                },
+                error =>
+                    Provider.Logger.EntityLoadFailed(error, typeof(TEntity), id))
+            .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -309,22 +342,29 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         UpdateChangeToken(entity, bson);
 
         ReplaceOneResult result;
-        if (sessionHandle == null)
+        try
         {
-            result = await Collection.ReplaceOneAsync(
-                                         filter,
-                                         bson,
-                                         cancellationToken: cancellationToken)
-                                     .ConfigureAwait(false);
+            if (sessionHandle == null)
+            {
+                result = await Collection.ReplaceOneAsync(
+                                             filter,
+                                             bson,
+                                             cancellationToken: cancellationToken)
+                                         .ConfigureAwait(false);
+            }
+            else
+            {
+                result = await Collection.ReplaceOneAsync(
+                                             sessionHandle,
+                                             filter,
+                                             bson,
+                                             cancellationToken: cancellationToken)
+                                         .ConfigureAwait(false);
+            }
         }
-        else
+        catch (Exception error)
         {
-            result = await Collection.ReplaceOneAsync(
-                                         sessionHandle,
-                                         filter,
-                                         bson,
-                                         cancellationToken: cancellationToken)
-                                     .ConfigureAwait(false);
+            throw new EntityUpdateException(error);
         }
 
         if (result.ModifiedCount == 0)
@@ -346,24 +386,20 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
                 $"The entity cannot be updated because the '{nameof(IEntity<TId>.Id)}' property has the default value.");
         }
 
-        var document = Provider.EntityMapper.Map<TDocument>(entity);
+        return await DoAsync(
+                () => Provider.Logger.EntityUpdating(entity),
+                async () =>
+                {
+                    var document = Provider.EntityMapper.Map<TDocument>(entity);
 
-        Provider.Logger.EntityUpdating(entity);
-        try
-        {
-            document = await UpdateCoreAsync(entity, document, cancellationToken)
-                .ConfigureAwait(false);
+                    document = await UpdateCoreAsync(entity, document, cancellationToken)
+                        .ConfigureAwait(false);
 
-            var result = Provider.EntityMapper.Map<TEntity>(document);
-            Provider.Logger.EntityUpdated(result);
-
-            return result;
-        }
-        catch (Exception error)
-        {
-            Provider.Logger.EntityUpdateFailed(error, entity);
-            throw;
-        }
+                    return Provider.EntityMapper.Map<TEntity>(document);
+                },
+                (result, elapsedTimeMs) => Provider.Logger.EntityUpdated(result, elapsedTimeMs),
+                error => Provider.Logger.EntityUpdateFailed(error, entity))
+            .ConfigureAwait(false);
     }
 
     protected virtual async Task<TDocument> CreateCoreAsync(
@@ -376,15 +412,22 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         var bson = document.ToBsonDocument();
         UpdateChangeToken(entity, bson);
 
-        if (sessionHandle == null)
+        try
         {
-            await Collection.InsertOneAsync(bson, cancellationToken: cancellationToken)
-                            .ConfigureAwait(false);
+            if (sessionHandle == null)
+            {
+                await Collection.InsertOneAsync(bson, cancellationToken: cancellationToken)
+                                .ConfigureAwait(false);
+            }
+            else
+            {
+                await Collection.InsertOneAsync(sessionHandle, bson, cancellationToken: cancellationToken)
+                                .ConfigureAwait(false);
+            }
         }
-        else
+        catch (Exception error)
         {
-            await Collection.InsertOneAsync(sessionHandle, bson, cancellationToken: cancellationToken)
-                            .ConfigureAwait(false);
+            throw new EntityUpdateException(error);
         }
 
         return BsonSerializer.Deserialize<TDocument>(bson);
@@ -395,24 +438,20 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
     {
         Ensure.Arg.NotNull(entity);
 
-        var document = Provider.EntityMapper.Map<TDocument>(entity);
+        return await DoAsync(
+                () => Provider.Logger.EntityCreating(entity),
+                async () =>
+                {
+                    var document = Provider.EntityMapper.Map<TDocument>(entity);
 
-        Provider.Logger.EntityCreating(entity);
-        try
-        {
-            document = await CreateCoreAsync(entity, document, cancellationToken)
-                .ConfigureAwait(false);
+                    document = await CreateCoreAsync(entity, document, cancellationToken)
+                        .ConfigureAwait(false);
 
-            var result = Provider.EntityMapper.Map<TEntity>(document);
-            Provider.Logger.EntityCreated(result);
-
-            return result;
-        }
-        catch (Exception error)
-        {
-            Provider.Logger.EntityCreateFailed(error, entity);
-            throw;
-        }
+                    return Provider.EntityMapper.Map<TEntity>(document);
+                },
+                (result, elapsedTimeMs) => Provider.Logger.EntityCreated(result, elapsedTimeMs),
+                error => Provider.Logger.EntityCreateFailed(error, entity))
+            .ConfigureAwait(false);
     }
 
     protected virtual async Task DeleteCoreAsync(TEntity entity, CancellationToken cancellationToken)
@@ -421,15 +460,22 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         FilterDefinition<BsonDocument> filter = GetModificationFilter(entity);
 
         DeleteResult result;
-        if (sessionHandle == null)
+        try
         {
-            result = await Collection.DeleteOneAsync(filter, cancellationToken: cancellationToken)
-                                     .ConfigureAwait(false);
+            if (sessionHandle == null)
+            {
+                result = await Collection.DeleteOneAsync(filter, cancellationToken: cancellationToken)
+                                         .ConfigureAwait(false);
+            }
+            else
+            {
+                result = await Collection.DeleteOneAsync(sessionHandle, filter, cancellationToken: cancellationToken)
+                                         .ConfigureAwait(false);
+            }
         }
-        else
+        catch (Exception error)
         {
-            result = await Collection.DeleteOneAsync(sessionHandle, filter, cancellationToken: cancellationToken)
-                                     .ConfigureAwait(false);
+            throw new EntityUpdateException(error);
         }
 
         if (result.DeletedCount == 0)
@@ -443,18 +489,15 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
     {
         Ensure.Arg.NotNull(entity);
 
-        Provider.Logger.EntityDeleting(entity);
-        try
-        {
-            await DeleteCoreAsync(entity, cancellationToken)
-                .ConfigureAwait(false);
-
-            Provider.Logger.EntityDeleted(entity);
-        }
-        catch (Exception error)
-        {
-            Provider.Logger.EntityDeleteFailed(error, entity);
-            throw;
-        }
+        await DoAsync(
+                () => Provider.Logger.EntityDeleting(entity),
+                async () =>
+                {
+                    await DeleteCoreAsync(entity, cancellationToken)
+                        .ConfigureAwait(false);
+                },
+                elapsedTimeMs => Provider.Logger.EntityDeleted(entity, elapsedTimeMs),
+                error => Provider.Logger.EntityDeleteFailed(error, entity))
+            .ConfigureAwait(false);
     }
 }

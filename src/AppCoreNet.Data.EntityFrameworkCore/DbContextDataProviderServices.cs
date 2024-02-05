@@ -37,22 +37,22 @@ public sealed class DbContextDataProviderServices<TDbContext>
     public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory { get; }
 
     /// <summary>
-    /// Gets the <see cref="DbContextTransactionManager"/>.
+    /// Gets the <see cref="DbContextTransactionManager{TDbContext}"/>.
     /// </summary>
-    public DbContextTransactionManager TransactionManager { get; }
+    public DbContextTransactionManager<TDbContext> TransactionManager { get; }
 
     /// <summary>
     /// Gets the <see cref="ILogger"/>.
     /// </summary>
-    public ILogger Logger { get; }
+    public DataProviderLogger<DbContextDataProvider<TDbContext>> Logger { get; }
 
     internal DbContextDataProviderServices(
         TDbContext dbContext,
         IEntityMapper entityMapper,
         ITokenGenerator tokenGenerator,
         DbContextQueryHandlerFactory<TDbContext> queryHandlerFactory,
-        DbContextTransactionManager transactionManager,
-        ILogger logger)
+        DbContextTransactionManager<TDbContext> transactionManager,
+        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
     {
         DbContext = dbContext;
         EntityMapper = entityMapper;
@@ -77,11 +77,11 @@ public sealed class DbContextDataProviderServices<TDbContext>
 
         var entityMapper = GetOrCreateInstance<IEntityMapper>(serviceProvider, options.EntityMapperType);
         var tokenGenerator = GetOrCreateInstance<ITokenGenerator>(serviceProvider, options.TokenGeneratorType);
-        var logger = serviceProvider.GetRequiredService<ILogger<DbContextDataProvider<TDbContext>>>();
+        var logger = serviceProvider.GetRequiredService<DataProviderLogger<DbContextDataProvider<TDbContext>>>();
 
         var dbContext = serviceProvider.GetRequiredService<TDbContext>();
         var queryHandlerFactory = new DbContextQueryHandlerFactory<TDbContext>(serviceProvider, options.QueryHandlerTypes);
-        var transactionManager = new DbContextTransactionManager(dbContext, logger);
+        var transactionManager = new DbContextTransactionManager<TDbContext>(dbContext, logger);
 
         return new DbContextDataProviderServices<TDbContext>(
             dbContext,

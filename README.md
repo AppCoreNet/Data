@@ -19,6 +19,8 @@ Latest development packages can be found on [MyGet](https://www.myget.org/galler
 | `AppCoreNet.Data.Abstractions`        | Provides the public API of the persistence framework.   |
 | `AppCoreNet.Data.EntityFrameworkCore` | Adds support for EntityFramework Core.                  |
 | `AppCoreNet.Data.MongoDB`             | Adds support for Mongo DB.                              |
+| `AppCoreNet.Data.AutoMapper`          | Adds support for mapping entities using AutoMapper.     |
+
 
 ## Contributing
 

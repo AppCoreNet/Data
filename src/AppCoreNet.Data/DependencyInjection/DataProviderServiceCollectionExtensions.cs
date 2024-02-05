@@ -25,6 +25,7 @@ public static class DataProviderServiceCollectionExtensions
     {
         Ensure.Arg.NotNull(services);
 
+        services.TryAddSingleton(typeof(DataProviderLogger<>), typeof(DefaultDataProviderLogger<>));
         services.TryAddTransient<ITokenGenerator, TokenGenerator>();
         services.TryAddTransient<IDataProviderResolver, DataProviderResolver>();
 

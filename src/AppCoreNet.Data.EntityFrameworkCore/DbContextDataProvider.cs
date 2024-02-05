@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
@@ -46,13 +45,13 @@ public sealed class DbContextDataProvider<TDbContext> : IDataProvider
     internal DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory => _services.QueryHandlerFactory;
 
     /// <summary>
-    /// Gets the <see cref="DbContextTransactionManager"/>.
+    /// Gets the <see cref="DbContextTransactionManager{TDbContext}"/>.
     /// </summary>
-    public DbContextTransactionManager TransactionManager => _services.TransactionManager;
+    public DbContextTransactionManager<TDbContext> TransactionManager => _services.TransactionManager;
 
     ITransactionManager IDataProvider.TransactionManager => TransactionManager;
 
-    internal ILogger Logger => _services.Logger;
+    internal DataProviderLogger<DbContextDataProvider<TDbContext>> Logger => _services.Logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
@@ -70,7 +69,12 @@ public sealed class DbContextDataProvider<TDbContext> : IDataProvider
         _services = services;
     }
 
-    internal async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Saves changes made to the <see cref="DbContext"/>.
+    /// </summary>
+    /// <param name="cancellationToken">Optional <see cref="CancellationToken"/>.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {

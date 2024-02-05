@@ -13,6 +13,11 @@ namespace AppCoreNet.Data;
 public interface ITransaction : IDisposable, IAsyncDisposable
 {
     /// <summary>
+    /// Gets the transaction identifier.
+    /// </summary>
+    string Id { get; }
+
+    /// <summary>
     /// Commit changes done in the transaction.
     /// </summary>
     void Commit();

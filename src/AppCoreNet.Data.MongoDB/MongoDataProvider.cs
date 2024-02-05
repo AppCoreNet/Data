@@ -2,7 +2,6 @@
 // Copyright (c) The AppCore .NET project.
 
 using AppCoreNet.Diagnostics;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace AppCoreNet.Data.MongoDB;
@@ -50,7 +49,7 @@ public sealed class MongoDataProvider : IDataProvider
     /// </summary>
     internal MongoQueryHandlerFactory QueryHandlerFactory => _services.QueryHandlerFactory;
 
-    internal ILogger Logger => _services.Logger;
+    internal DataProviderLogger<MongoDataProvider> Logger => _services.Logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MongoDataProvider"/> class.

@@ -8,29 +8,36 @@ using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
 /// <summary>
 /// Provides a <see cref="DbContext"/> transaction scope.
 /// </summary>
+/// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 [SuppressMessage(
     "IDisposableAnalyzers.Correctness",
     "IDISP007:Don\'t dispose injected",
     Justification = "Ownership is transferred from DbContextTransactionManager.")]
-public sealed class DbContextTransaction : ITransaction
+public sealed class DbContextTransaction<TDbContext> : ITransaction
+    where TDbContext : DbContext
 {
-    private readonly DbContext _dbContext;
+    private readonly TDbContext _dbContext;
     private readonly IDbContextTransaction _transaction;
-    private readonly ILogger _logger;
+    private readonly DataProviderLogger<DbContextDataProvider<TDbContext>> _logger;
     private bool _disposed;
+
+    /// <inheritdoc />
+    public string Id => _transaction.TransactionId.ToString("N");
 
     internal IDbContextTransaction Transaction => _transaction;
 
     internal event EventHandler? TransactionFinished;
 
-    internal DbContextTransaction(DbContext dbContext, IDbContextTransaction transaction, ILogger logger)
+    internal DbContextTransaction(
+        TDbContext dbContext,
+        IDbContextTransaction transaction,
+        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
     {
         Ensure.Arg.NotNull(dbContext);
         Ensure.Arg.NotNull(transaction);
@@ -39,14 +46,14 @@ public sealed class DbContextTransaction : ITransaction
         _dbContext = dbContext;
         _transaction = transaction;
         _logger = logger;
-        _logger.TransactionInit(dbContext.GetType(), transaction.TransactionId);
+        _logger.TransactionCreated(this);
     }
 
     private void EnsureNotDisposed()
     {
         if (_disposed)
         {
-            throw new ObjectDisposedException(nameof(DbContextTransaction));
+            throw new ObjectDisposedException(nameof(DbContextTransaction<TDbContext>));
         }
     }
 
@@ -84,7 +91,7 @@ public sealed class DbContextTransaction : ITransaction
         _transaction.Commit();
         Dispose();
 
-        _logger.TransactionCommit(_dbContext.GetType(), _transaction.TransactionId);
+        _logger.TransactionCommitted(this, 0);
     }
 
     /// <inheritdoc />
@@ -98,7 +105,7 @@ public sealed class DbContextTransaction : ITransaction
         await DisposeAsync()
             .ConfigureAwait(false);
 
-        _logger.TransactionCommit(_dbContext.GetType(), _transaction.TransactionId);
+        _logger.TransactionCommitted(this, 0);
     }
 
     /// <inheritdoc />
@@ -109,7 +116,7 @@ public sealed class DbContextTransaction : ITransaction
         _transaction.Rollback();
         Dispose();
 
-        _logger.TransactionRollback(_dbContext.GetType(), _transaction.TransactionId);
+        _logger.TransactionRolledback(this);
     }
 
     /// <inheritdoc />
@@ -123,6 +130,6 @@ public sealed class DbContextTransaction : ITransaction
         await DisposeAsync()
             .ConfigureAwait(false);
 
-        _logger.TransactionRollback(_dbContext.GetType(), _transaction.TransactionId);
+        _logger.TransactionRolledback(this);
     }
 }

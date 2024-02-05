@@ -47,7 +47,7 @@ public sealed class MongoDataProviderServices
     /// <summary>
     /// Gets the <see cref="ILogger"/>.
     /// </summary>
-    public ILogger Logger { get; }
+    public DataProviderLogger<MongoDataProvider> Logger { get; }
 
     internal MongoDataProviderServices(
         IMongoClient client,
@@ -56,7 +56,7 @@ public sealed class MongoDataProviderServices
         ITokenGenerator tokenGenerator,
         MongoQueryHandlerFactory queryHandlerFactory,
         MongoTransactionManager transactionManager,
-        ILogger logger)
+        DataProviderLogger<MongoDataProvider> logger)
     {
         Client = client;
         Database = database;
@@ -82,7 +82,7 @@ public sealed class MongoDataProviderServices
 
         var entityMapper = GetOrCreateInstance<IEntityMapper>(serviceProvider, options.EntityMapperType);
         var tokenGenerator = GetOrCreateInstance<ITokenGenerator>(serviceProvider, options.TokenGeneratorType);
-        var logger = serviceProvider.GetRequiredService<ILogger<MongoDataProvider>>();
+        var logger = serviceProvider.GetRequiredService<DataProviderLogger<MongoDataProvider>>();
 
         var client = new MongoClient(options.ClientSettings);
         IMongoDatabase database = client.GetDatabase(options.Database);

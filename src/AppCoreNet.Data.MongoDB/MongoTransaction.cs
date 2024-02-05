@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -22,8 +21,11 @@ public sealed class MongoTransaction : ITransaction
 {
     private readonly IClientSessionHandle _session;
     private readonly string _id;
-    private readonly ILogger _logger;
+    private readonly DataProviderLogger<MongoDataProvider> _logger;
     private bool _disposed;
+
+    /// <inheritdoc />
+    public string Id => _id;
 
     /// <summary>
     /// Gets the <see cref="IClientSessionHandle"/> of the transaction.
@@ -32,7 +34,7 @@ public sealed class MongoTransaction : ITransaction
 
     internal event EventHandler? TransactionFinished;
 
-    internal MongoTransaction(IClientSessionHandle session, ILogger logger)
+    internal MongoTransaction(IClientSessionHandle session, DataProviderLogger<MongoDataProvider> logger)
     {
         _session = session;
         _logger = logger;
@@ -41,7 +43,7 @@ public sealed class MongoTransaction : ITransaction
         _id = BitConverter.ToString(sessionIdBytes.Bytes)
                           .Replace("-", string.Empty);
 
-        _logger.TransactionCreated(_id);
+        _logger.TransactionCreated(this);
     }
 
     private void EnsureNotDisposed()
@@ -92,15 +94,15 @@ public sealed class MongoTransaction : ITransaction
     {
         EnsureNotDisposed();
 
-        _logger.TransactionCommitting(_id);
+        _logger.TransactionCommitting(this);
         try
         {
             _session.CommitTransaction();
-            _logger.TransactionCommitted(_id);
+            _logger.TransactionCommitted(this, 0);
         }
         catch (Exception error)
         {
-            _logger.TransactionCommitFailed(error, _id);
+            _logger.TransactionCommitFailed(error, this);
         }
 
         Dispose();
@@ -111,7 +113,7 @@ public sealed class MongoTransaction : ITransaction
     {
         EnsureNotDisposed();
 
-        _logger.TransactionRollingback(_id);
+        _logger.TransactionRollingback(this);
         try
         {
             _session.AbortTransaction();
@@ -121,7 +123,7 @@ public sealed class MongoTransaction : ITransaction
             // ignored
         }
 
-        _logger.TransactionRollback(_id);
+        _logger.TransactionRolledback(this);
 
         Dispose();
     }
@@ -131,17 +133,17 @@ public sealed class MongoTransaction : ITransaction
     {
         EnsureNotDisposed();
 
-        _logger.TransactionCommitting(_id);
+        _logger.TransactionCommitting(this);
         try
         {
             await _session.CommitTransactionAsync(cancellationToken)
                           .ConfigureAwait(false);
 
-            _logger.TransactionCommitted(_id);
+            _logger.TransactionCommitted(this, 0);
         }
         catch (Exception error)
         {
-            _logger.TransactionCommitFailed(error, _id);
+            _logger.TransactionCommitFailed(error, this);
         }
 
         await DisposeAsync()
@@ -153,7 +155,7 @@ public sealed class MongoTransaction : ITransaction
     {
         EnsureNotDisposed();
 
-        _logger.TransactionRollingback(_id);
+        _logger.TransactionRollingback(this);
 
         try
         {
@@ -165,7 +167,7 @@ public sealed class MongoTransaction : ITransaction
             // ignored
         }
 
-        _logger.TransactionRollback(_id);
+        _logger.TransactionRolledback(this);
 
         await DisposeAsync()
             .ConfigureAwait(false);

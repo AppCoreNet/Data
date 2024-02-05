@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace AppCoreNet.Data.MongoDB;
@@ -27,7 +26,7 @@ public sealed class MongoTransactionManager : ITransactionManager
 {
     private readonly IMongoClient _client;
     private readonly AsyncLocal<MongoTransaction?> _currentTransaction = new ();
-    private readonly ILogger _logger;
+    private readonly DataProviderLogger<MongoDataProvider> _logger;
 
     /// <summary>
     /// Gets the currently active transaction.
@@ -45,7 +44,7 @@ public sealed class MongoTransactionManager : ITransactionManager
     /// </summary>
     /// <param name="client">The <see cref="IMongoClient"/>.</param>
     /// <param name="logger">The logger.</param>
-    public MongoTransactionManager(IMongoClient client, ILogger logger)
+    public MongoTransactionManager(IMongoClient client, DataProviderLogger<MongoDataProvider> logger)
     {
         Ensure.Arg.NotNull(client);
         Ensure.Arg.NotNull(logger);
