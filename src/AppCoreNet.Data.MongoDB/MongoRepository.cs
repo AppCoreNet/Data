@@ -186,6 +186,7 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
         before();
 
         var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         try
         {

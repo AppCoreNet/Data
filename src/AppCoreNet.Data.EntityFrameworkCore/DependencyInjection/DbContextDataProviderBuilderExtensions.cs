@@ -117,6 +117,7 @@ public static class DbContextDataProviderBuilderExtensions
         where TDbContext : DbContext
     {
         return builder.AddDbContext<TDbContext>(
+            name,
             (_, ob) => optionsAction?.Invoke(ob),
             contextLifetime,
             optionsLifetime);

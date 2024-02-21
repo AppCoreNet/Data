@@ -209,6 +209,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         before();
 
         var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         try
         {

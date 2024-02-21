@@ -71,7 +71,7 @@ public sealed class DbContextTransactionManager<TDbContext> : ITransactionManage
             throw new InvalidOperationException("A transaction is already in progress.");
 
         IDbContextTransaction transaction =
-            await _dbContext.Database.BeginTransactionAsync(cancellationToken)
+            await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken)
                             .ConfigureAwait(false);
 
         try
@@ -94,7 +94,7 @@ public sealed class DbContextTransactionManager<TDbContext> : ITransactionManage
         if (CurrentTransaction != null)
             throw new InvalidOperationException("A transaction is already in progress.");
 
-        IDbContextTransaction transaction = _dbContext.Database.BeginTransaction();
+        IDbContextTransaction transaction = _dbContext.Database.BeginTransaction(isolationLevel);
 
         try
         {
