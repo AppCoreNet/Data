@@ -53,50 +53,6 @@ public sealed class MongoTransactionManager : ITransactionManager
         _logger = logger;
     }
 
-    private TransactionOptions? CreateTransactionOptions(IsolationLevel isolationLevel)
-    {
-        TransactionOptions options;
-
-        switch (isolationLevel)
-        {
-            case IsolationLevel.Unspecified:
-            case IsolationLevel.Chaos:
-                options = null;
-                break;
-            case IsolationLevel.ReadUncommitted:
-                options = new TransactionOptions(
-                    writeConcern: WriteConcern.Acknowledged,
-                    readConcern: ReadConcern.Local);
-                break;
-            case IsolationLevel.ReadCommitted:
-                options = new TransactionOptions(
-                    writeConcern: WriteConcern.WMajority,
-                    readConcern: ReadConcern.Majority);
-                break;
-            case IsolationLevel.RepeatableRead:
-                options = new TransactionOptions(
-                    writeConcern: WriteConcern.WMajority,
-                    readPreference: ReadPreference.Primary,
-                    readConcern: ReadConcern.Majority);
-                break;
-            case IsolationLevel.Serializable:
-                options = new TransactionOptions(
-                    writeConcern: WriteConcern.WMajority,
-                    readPreference: ReadPreference.Primary,
-                    readConcern: ReadConcern.Linearizable);
-                break;
-            case IsolationLevel.Snapshot:
-                options = new TransactionOptions(
-                    writeConcern: WriteConcern.WMajority,
-                    readConcern: ReadConcern.Snapshot);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(isolationLevel), isolationLevel, null);
-        }
-
-        return options;
-    }
-
     private void OnTransactionFinished(object sender, EventArgs args)
     {
         var transaction = (MongoTransaction)sender;
@@ -111,7 +67,7 @@ public sealed class MongoTransactionManager : ITransactionManager
     /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
     /// <returns>The created transaction.</returns>
     public async Task<ITransaction> BeginTransactionAsync(
-        TransactionOptions? options = null,
+        TransactionOptions? options,
         CancellationToken cancellationToken = default)
     {
         if (CurrentTransaction != null)
@@ -139,11 +95,9 @@ public sealed class MongoTransactionManager : ITransactionManager
     }
 
     /// <inheritdoc />
-    public async Task<ITransaction> BeginTransactionAsync(
-        IsolationLevel isolationLevel,
-        CancellationToken cancellationToken = default)
+    public async Task<ITransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        return await BeginTransactionAsync(CreateTransactionOptions(isolationLevel), cancellationToken);
+        return await BeginTransactionAsync(null, cancellationToken);
     }
 
     /// <summary>
@@ -151,7 +105,7 @@ public sealed class MongoTransactionManager : ITransactionManager
     /// </summary>
     /// <param name="options">Specifies the options for the transaction.</param>
     /// <returns>The created transaction.</returns>
-    public ITransaction BeginTransaction(TransactionOptions? options = null)
+    public ITransaction BeginTransaction(TransactionOptions? options)
     {
         if (CurrentTransaction != null)
             throw new InvalidOperationException("A transaction is already in progress.");
@@ -174,8 +128,8 @@ public sealed class MongoTransactionManager : ITransactionManager
     }
 
     /// <inheritdoc />
-    public ITransaction BeginTransaction(IsolationLevel isolationLevel)
+    public ITransaction BeginTransaction()
     {
-        return BeginTransaction(CreateTransactionOptions(isolationLevel));
+        return BeginTransaction(null);
     }
 }

@@ -1,7 +1,6 @@
 // Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,17 +19,13 @@ public interface ITransactionManager
     /// <summary>
     /// Begins a new transaction in the context of the data provider.
     /// </summary>
-    /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
     /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
     /// <returns>The created transaction.</returns>
-    Task<ITransaction> BeginTransactionAsync(
-        IsolationLevel isolationLevel,
-        CancellationToken cancellationToken = default);
+    Task<ITransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Begins a new transaction in the context of the data provider.
     /// </summary>
-    /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
     /// <returns>The created transaction.</returns>
-    ITransaction BeginTransaction(IsolationLevel isolationLevel);
+    ITransaction BeginTransaction();
 }

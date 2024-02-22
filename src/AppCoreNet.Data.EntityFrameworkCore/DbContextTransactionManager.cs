@@ -62,7 +62,12 @@ public sealed class DbContextTransactionManager<TDbContext> : ITransactionManage
         _currentTransaction = null;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Begins a new transaction in the context of the data provider.
+    /// </summary>
+    /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
+    /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
+    /// <returns>The created transaction.</returns>
     public async Task<ITransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel,
         CancellationToken cancellationToken = default)
@@ -89,6 +94,17 @@ public sealed class DbContextTransactionManager<TDbContext> : ITransactionManage
     }
 
     /// <inheritdoc />
+    public async Task<ITransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        return await BeginTransactionAsync(IsolationLevel.Unspecified, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Begins a new transaction in the context of the data provider.
+    /// </summary>
+    /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
+    /// <returns>The created transaction.</returns>
     public ITransaction BeginTransaction(IsolationLevel isolationLevel)
     {
         if (CurrentTransaction != null)
@@ -107,5 +123,11 @@ public sealed class DbContextTransactionManager<TDbContext> : ITransactionManage
             transaction.Dispose();
             throw;
         }
+    }
+
+    /// <inheritdoc />
+    public ITransaction BeginTransaction()
+    {
+        return BeginTransaction(IsolationLevel.Unspecified);
     }
 }
