@@ -2,7 +2,6 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,9 +52,9 @@ public sealed class MongoTransactionManager : ITransactionManager
         _logger = logger;
     }
 
-    private void OnTransactionFinished(object sender, EventArgs args)
+    private void OnTransactionFinished(object? sender, EventArgs args)
     {
-        var transaction = (MongoTransaction)sender;
+        var transaction = (MongoTransaction)sender!;
         transaction.TransactionFinished -= OnTransactionFinished;
         CurrentTransaction = null;
     }

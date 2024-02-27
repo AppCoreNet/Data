@@ -6,14 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AppCoreNet.Extensions.DependencyInjection.Abstractions" Version="0.5.0" />
+    <PackageReference Include="AppCoreNet.Extensions.DependencyInjection.Abstractions" Version="0.5.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net462' OR '$(TargetFramework)'=='netstandard2.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
