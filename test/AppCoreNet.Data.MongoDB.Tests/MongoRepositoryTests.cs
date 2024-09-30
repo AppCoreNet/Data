@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AppCoreNet.Data.MongoDB.Queries;
@@ -41,6 +44,7 @@ public class MongoRepositoryTests : RepositoryTests
                     })
                  .AddRepository<ITestEntityRepository, MongoTestEntityRepository>()
                  .AddQueryHandler<TestEntityByIdQueryHandler>()
+                 .AddQueryHandler<TestEntity2ByIdQueryHandler>()
                  .AddRepository<ITestEntity2Repository, MongoTestEntity2Repository>();
             });
     }

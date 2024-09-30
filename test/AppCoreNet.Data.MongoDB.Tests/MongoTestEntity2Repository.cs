@@ -1,4 +1,7 @@
-﻿namespace AppCoreNet.Data.MongoDB;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+namespace AppCoreNet.Data.MongoDB;
 
 public class MongoTestEntity2Repository
     : MongoRepository<Entities.ComplexId, Entities.TestEntity2, DAO.TestEntity2>, ITestEntity2Repository

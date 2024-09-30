@@ -1,4 +1,7 @@
-﻿using AppCoreNet.Data.Entities;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using AppCoreNet.Data.Entities;
 using AppCoreNet.Data.Queries;
 using MongoDB.Driver;
 

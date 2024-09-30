@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System.Linq;
 using AppCoreNet.Data.Entities;
 using AppCoreNet.Data.Queries;
 

@@ -1,16 +1,15 @@
 ﻿// Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using System;
 using AppCoreNet.Data.Entities;
 
 namespace AppCoreNet.Data.Queries;
 
-public class TestEntityByIdQuery : IQuery<TestEntity, TestEntity?>
+public class TestEntity2ByIdQuery : IQuery<TestEntity2, TestEntity2?>
 {
-    public Guid Id { get; }
+    public ComplexId Id { get; }
 
-    public TestEntityByIdQuery(Guid id)
+    public TestEntity2ByIdQuery(ComplexId id)
     {
         Id = id;
     }

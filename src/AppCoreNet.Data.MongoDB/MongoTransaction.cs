@@ -2,6 +2,7 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,15 +61,11 @@ public sealed class MongoTransaction : ITransaction
         if (_disposed)
             return;
 
-        if (_session.IsInTransaction)
-        {
-            Rollback();
-        }
-
-        TransactionFinished?.Invoke(this, EventArgs.Empty);
-
         _session.Dispose();
         _disposed = true;
+        _logger.TransactionDisposed(this);
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
@@ -77,16 +74,13 @@ public sealed class MongoTransaction : ITransaction
         if (_disposed)
             return;
 
-        if (_session.IsInTransaction)
-        {
-            await RollbackAsync()
-                .ConfigureAwait(false);
-        }
+        await Task.Run(() => _session.Dispose())
+                  .ConfigureAwait(false);
+
+        _disposed = true;
+        _logger.TransactionDisposed(this);
 
         TransactionFinished?.Invoke(this, EventArgs.Empty);
-
-        _session.Dispose();
-        _disposed = true;
     }
 
     /// <inheritdoc />
@@ -95,17 +89,18 @@ public sealed class MongoTransaction : ITransaction
         EnsureNotDisposed();
 
         _logger.TransactionCommitting(this);
+
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             _session.CommitTransaction();
-            _logger.TransactionCommitted(this, 0);
+            _logger.TransactionCommitted(this, stopwatch.ElapsedMilliseconds);
         }
         catch (Exception error)
         {
-            _logger.TransactionCommitFailed(error, this);
+            _logger.TransactionCommitFailed(this, error);
+            throw;
         }
-
-        Dispose();
     }
 
     /// <inheritdoc />
@@ -114,18 +109,18 @@ public sealed class MongoTransaction : ITransaction
         EnsureNotDisposed();
 
         _logger.TransactionRollingback(this);
+
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             _session.AbortTransaction();
+            _logger.TransactionRolledback(this, stopwatch.ElapsedMilliseconds);
         }
-        catch
+        catch (Exception error)
         {
-            // ignored
+            _logger.TransactionRollbackFailed(this, error);
+            throw;
         }
-
-        _logger.TransactionRolledback(this);
-
-        Dispose();
     }
 
     /// <inheritdoc />
@@ -134,20 +129,20 @@ public sealed class MongoTransaction : ITransaction
         EnsureNotDisposed();
 
         _logger.TransactionCommitting(this);
+
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             await _session.CommitTransactionAsync(cancellationToken)
                           .ConfigureAwait(false);
 
-            _logger.TransactionCommitted(this, 0);
+            _logger.TransactionCommitted(this, stopwatch.ElapsedMilliseconds);
         }
         catch (Exception error)
         {
-            _logger.TransactionCommitFailed(error, this);
+            _logger.TransactionCommitFailed(this, error);
+            throw;
         }
-
-        await DisposeAsync()
-            .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -157,19 +152,18 @@ public sealed class MongoTransaction : ITransaction
 
         _logger.TransactionRollingback(this);
 
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             await _session.AbortTransactionAsync(cancellationToken)
                           .ConfigureAwait(false);
+
+            _logger.TransactionRolledback(this, stopwatch.ElapsedMilliseconds);
         }
-        catch
+        catch (Exception error)
         {
-            // ignored
+            _logger.TransactionRollbackFailed(this, error);
+            throw;
         }
-
-        _logger.TransactionRolledback(this);
-
-        await DisposeAsync()
-            .ConfigureAwait(false);
     }
 }

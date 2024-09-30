@@ -30,12 +30,12 @@ public sealed class MongoDataProvider : IDataProvider
     /// <summary>
     /// Gets the <see cref="IEntityMapper"/> of the data provider.
     /// </summary>
-    internal IEntityMapper EntityMapper => _services.EntityMapper;
+    public IEntityMapper EntityMapper => _services.EntityMapper;
 
     /// <summary>
     /// Gets the <see cref="ITokenGenerator"/> of the data provider.
     /// </summary>
-    internal ITokenGenerator TokenGenerator => _services.TokenGenerator;
+    public ITokenGenerator TokenGenerator => _services.TokenGenerator;
 
     /// <summary>
     /// Gets the <see cref="MongoTransactionManager"/> of the data provider.
@@ -47,7 +47,7 @@ public sealed class MongoDataProvider : IDataProvider
     /// <summary>
     /// Gets the <see cref="MongoQueryHandlerFactory"/> of the data provider.
     /// </summary>
-    internal MongoQueryHandlerFactory QueryHandlerFactory => _services.QueryHandlerFactory;
+    public MongoQueryHandlerFactory QueryHandlerFactory => _services.QueryHandlerFactory;
 
     internal DataProviderLogger<MongoDataProvider> Logger => _services.Logger;
 

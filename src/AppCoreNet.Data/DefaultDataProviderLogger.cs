@@ -199,18 +199,32 @@ public partial class DefaultDataProviderLogger<T> : DataProviderLogger<T>
         EventName = nameof(TransactionRollingback),
         Level = LogLevel.Debug,
         Message = "Rolling back transaction with id {TransactionId} ...")]
-    private static partial void TransactionRollingback(
-        ILogger logger,
-        string transactionId);
+    private static partial void TransactionRollingback(ILogger logger, string transactionId);
 
     [LoggerMessage(
         EventId = 21,
         EventName = nameof(TransactionRolledback),
         Level = LogLevel.Information,
-        Message = "Transaction with id {TransactionId} rolled back")]
-    private static partial void TransactionRollback(
+        Message = "Transaction with id {TransactionId} rolled back in {ElapsedTimeMs} ms")]
+    private static partial void TransactionRollback(ILogger logger, string transactionId, long elapsedTimeMs);
+
+    [LoggerMessage(
+        EventId = 22,
+        EventName = nameof(TransactionRollbackFailed),
+        Level = LogLevel.Error,
+        Message = "Error rolling back transaction with id {TransactionId}: {ErrorMessage}")]
+    private static partial void TransactionRollbackFailed(
         ILogger logger,
-        string transactionId);
+        Exception error,
+        string transactionId,
+        string errorMessage);
+
+    [LoggerMessage(
+        EventId = 23,
+        EventName = nameof(TransactionDisposed),
+        Level = LogLevel.Debug,
+        Message = "Transaction with id {TransactionId} disposed")]
+    private static partial void TransactionDisposed(ILogger logger, string transactionId);
 
     /// <inheritdoc />
     public override void EntityCreating(IEntity entity)
@@ -327,7 +341,7 @@ public partial class DefaultDataProviderLogger<T> : DataProviderLogger<T>
     }
 
     /// <inheritdoc />
-    public override void TransactionCommitFailed(Exception error, ITransaction transaction)
+    public override void TransactionCommitFailed(ITransaction transaction, Exception error)
     {
         TransactionCommitFailed(_logger, error, transaction.Id, error.Message);
     }
@@ -339,8 +353,20 @@ public partial class DefaultDataProviderLogger<T> : DataProviderLogger<T>
     }
 
     /// <inheritdoc />
-    public override void TransactionRolledback(ITransaction transaction)
+    public override void TransactionRolledback(ITransaction transaction, long elapsedTimeMs)
     {
-        TransactionRollback(_logger, transaction.Id);
+        TransactionRollback(_logger, transaction.Id, elapsedTimeMs);
+    }
+
+    /// <inheritdoc />
+    public override void TransactionRollbackFailed(ITransaction transaction, Exception error)
+    {
+        TransactionRollbackFailed(_logger, error, transaction.Id, error.Message);
+    }
+
+    /// <inheritdoc />
+    public override void TransactionDisposed(ITransaction transaction)
+    {
+        TransactionDisposed(_logger, transaction.Id);
     }
 }

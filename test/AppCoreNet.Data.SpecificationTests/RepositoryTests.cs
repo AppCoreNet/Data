@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using System.Threading.Tasks;
 using AppCoreNet.Data.Entities;
 using AppCoreNet.Data.Queries;
@@ -536,6 +539,35 @@ public abstract class RepositoryTests
         await CreateDataEntity(provider, entity);
 
         TestEntity? result = await repository.QueryAsync(new TestEntityByIdQuery(id));
+
+        result.Should()
+              .NotBeNull();
+
+        result.Should()
+              .BeEquivalentTo(entity);
+    }
+
+    [Fact]
+    public async Task QueryByComplexIdReturnsEntity()
+    {
+        await using ServiceProvider sp = CreateServiceProvider();
+
+        IDataProvider provider = sp.GetRequiredService<IDataProviderResolver>()
+                                   .Resolve(ProviderName);
+
+        var repository = sp.GetRequiredService<ITestEntity2Repository>();
+
+        var id = Guid.NewGuid();
+        var entity = new TestEntity2
+        {
+            Id = new ComplexId { Id = id, Version = 0 },
+            Name = "name",
+        };
+
+        await CreateDataEntity(provider, entity);
+
+        TestEntity2? result =
+            await repository.QueryAsync(new TestEntity2ByIdQuery(new ComplexId { Id = id, Version = 0 }));
 
         result.Should()
               .NotBeNull();

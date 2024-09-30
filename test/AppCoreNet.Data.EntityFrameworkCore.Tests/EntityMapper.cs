@@ -1,4 +1,7 @@
-﻿using NSubstitute;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using NSubstitute;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 

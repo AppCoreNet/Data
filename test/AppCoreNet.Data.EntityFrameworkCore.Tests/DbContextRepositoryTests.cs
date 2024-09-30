@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -32,6 +35,7 @@ public class DbContextRepositoryTests : RepositoryTests
                     })
                  .AddRepository<ITestEntityRepository, DbContextTestEntityRepository>()
                  .AddQueryHandler<TestEntityByIdQueryHandler>()
+                 .AddQueryHandler<TestEntity2ByIdQueryHandler>()
                  .AddRepository<ITestEntity2Repository, DbContextTestEntity2Repository>();
             });
     }

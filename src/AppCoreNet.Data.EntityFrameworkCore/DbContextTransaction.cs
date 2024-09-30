@@ -2,6 +2,7 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,6 +66,7 @@ public sealed class DbContextTransaction<TDbContext> : ITransaction
 
         _transaction.Dispose();
         _disposed = true;
+        _logger.TransactionDisposed(this);
 
         TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
@@ -79,6 +81,7 @@ public sealed class DbContextTransaction<TDbContext> : ITransaction
                           .ConfigureAwait(false);
 
         _disposed = true;
+        _logger.TransactionDisposed(this);
 
         TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
@@ -88,10 +91,19 @@ public sealed class DbContextTransaction<TDbContext> : ITransaction
     {
         EnsureNotDisposed();
 
-        _transaction.Commit();
-        Dispose();
+        _logger.TransactionCommitting(this);
 
-        _logger.TransactionCommitted(this, 0);
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            _transaction.Commit();
+            _logger.TransactionCommitted(this, stopwatch.ElapsedMilliseconds);
+        }
+        catch (Exception error)
+        {
+            _logger.TransactionCommitFailed(this, error);
+            throw;
+        }
     }
 
     /// <inheritdoc />
@@ -99,13 +111,21 @@ public sealed class DbContextTransaction<TDbContext> : ITransaction
     {
         EnsureNotDisposed();
 
-        await _transaction.CommitAsync(cancellationToken)
-                          .ConfigureAwait(false);
+        _logger.TransactionCommitting(this);
 
-        await DisposeAsync()
-            .ConfigureAwait(false);
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            await _transaction.CommitAsync(cancellationToken)
+                              .ConfigureAwait(false);
 
-        _logger.TransactionCommitted(this, 0);
+            _logger.TransactionCommitted(this, stopwatch.ElapsedMilliseconds);
+        }
+        catch (Exception error)
+        {
+            _logger.TransactionCommitFailed(this, error);
+            throw;
+        }
     }
 
     /// <inheritdoc />
@@ -113,10 +133,19 @@ public sealed class DbContextTransaction<TDbContext> : ITransaction
     {
         EnsureNotDisposed();
 
-        _transaction.Rollback();
-        Dispose();
+        _logger.TransactionRollingback(this);
 
-        _logger.TransactionRolledback(this);
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            _transaction.Rollback();
+            _logger.TransactionRolledback(this, stopwatch.ElapsedMilliseconds);
+        }
+        catch (Exception error)
+        {
+            _logger.TransactionRollbackFailed(this, error);
+            throw;
+        }
     }
 
     /// <inheritdoc />
@@ -124,12 +153,20 @@ public sealed class DbContextTransaction<TDbContext> : ITransaction
     {
         EnsureNotDisposed();
 
-        await _transaction.RollbackAsync(cancellationToken)
-                          .ConfigureAwait(false);
+        _logger.TransactionRollingback(this);
 
-        await DisposeAsync()
-            .ConfigureAwait(false);
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            await _transaction.RollbackAsync(cancellationToken)
+                              .ConfigureAwait(false);
 
-        _logger.TransactionRolledback(this);
+            _logger.TransactionRolledback(this, stopwatch.ElapsedMilliseconds);
+        }
+        catch (Exception error)
+        {
+            _logger.TransactionRollbackFailed(this, error);
+            throw;
+        }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed under the MIT license.
+// Copyright (c) The AppCore .NET project.
+
+using System;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace AppCoreNet.Data.MongoDB.DAO;

@@ -152,9 +152,9 @@ public abstract class DataProviderLogger<T>
     /// <summary>
     /// Transaction commit failed.
     /// </summary>
-    /// <param name="error">The <see cref="Exception"/> that occured.</param>
     /// <param name="transaction">The <see cref="ITransaction"/>.</param>
-    public abstract void TransactionCommitFailed(Exception error, ITransaction transaction);
+    /// <param name="error">The <see cref="Exception"/> that occured.</param>
+    public abstract void TransactionCommitFailed(ITransaction transaction, Exception error);
 
     /// <summary>
     /// Transaction is being rolled back.
@@ -166,5 +166,19 @@ public abstract class DataProviderLogger<T>
     /// Transaction has been rolled back.
     /// </summary>
     /// <param name="transaction">The <see cref="ITransaction"/>.</param>
-    public abstract void TransactionRolledback(ITransaction transaction);
+    /// <param name="elapsedTimeMs">The elapsed time in milliseconds.</param>
+    public abstract void TransactionRolledback(ITransaction transaction, long elapsedTimeMs);
+
+    /// <summary>
+    /// Transaction rollback failed.
+    /// </summary>
+    /// <param name="transaction">The <see cref="ITransaction"/>.</param>
+    /// <param name="error">The <see cref="Exception"/> that occured.</param>
+    public abstract void TransactionRollbackFailed(ITransaction transaction, Exception error);
+
+    /// <summary>
+    /// Transaction disposed.
+    /// </summary>
+    /// <param name="transaction">The <see cref="ITransaction"/>.</param>
+    public abstract void TransactionDisposed(ITransaction transaction);
 }
