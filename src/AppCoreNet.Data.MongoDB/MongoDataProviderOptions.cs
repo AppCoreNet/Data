@@ -15,7 +15,7 @@ public sealed class MongoDataProviderOptions
     /// <summary>
     /// Gets or sets the <see cref="MongoClientSettings"/> used by the data provider.
     /// </summary>
-    public MongoClientSettings ClientSettings { get; set; } = new ();
+    public MongoClientSettings ClientSettings { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the name of the database.

@@ -16,7 +16,7 @@ public static class EntityExtensions
     /// </summary>
     /// <typeparam name="TId">The type of the entity id.</typeparam>
     /// <param name="entity">The entity.</param>
-    /// <returns><c>tru</c> if the entity is transient; <c>false</c> otherwise.</returns>
+    /// <returns><c>true</c> if the entity is transient; <c>false</c> otherwise.</returns>
     public static bool IsTransient<TId>(this IEntity<TId> entity)
     {
         Ensure.Arg.NotNull(entity);

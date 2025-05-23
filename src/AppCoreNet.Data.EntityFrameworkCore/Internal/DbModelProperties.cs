@@ -8,11 +8,12 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
+// ReSharper disable once CheckNamespace
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
-internal class DbModelProperties
+internal sealed class DbModelProperties
 {
-    private static readonly ConcurrentDictionary<ValueTuple<Type, Type>, DbModelProperties> _properties = new ();
+    private static readonly ConcurrentDictionary<(Type DbContextType, Type DbEntityType), DbModelProperties> _properties = new();
 
     public IReadOnlyList<string> PrimaryKeyPropertyNames { get; }
 
@@ -22,10 +23,10 @@ internal class DbModelProperties
 
     private DbModelProperties(IModel model, Type dbEntityType)
     {
-        IEntityType? modelEntityType = model.FindEntityType(dbEntityType) !;
+        IEntityType? modelEntityType = model.FindEntityType(dbEntityType)!;
 
         PrimaryKeyPropertyNames = modelEntityType
-                                  .FindPrimaryKey() !
+                                  .FindPrimaryKey()!
                                   .Properties.Select(p => p.Name)
                                   .ToList();
 
@@ -42,9 +43,9 @@ internal class DbModelProperties
 
     public static DbModelProperties Get(Type dbContextType, Type dbEntityType, IModel model, Type entityType)
     {
-        return _properties.GetOrAdd((dbContextType, dbEntityType), t =>
+        return _properties.GetOrAdd((DbContextType: dbContextType, DbEntityType: dbEntityType), t =>
         {
-            var properties = new DbModelProperties(model, t.Item2);
+            var properties = new DbModelProperties(model, t.DbEntityType);
 
             if (typeof(IHasChangeToken).IsAssignableFrom(entityType)
                 || typeof(IHasChangeTokenEx).IsAssignableFrom(entityType))

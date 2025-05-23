@@ -80,7 +80,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         }
     }
 
-    private static readonly EntityModelProperties<TId, TEntity> _entityModelProperties = new ();
+    private static readonly EntityModelProperties<TId, TEntity> _entityModelProperties = new();
     private readonly DbModelProperties _modelProperties;
 
     /// <inheritdoc />
@@ -137,7 +137,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         {
             string primaryKeyPropertyName = _modelProperties.PrimaryKeyPropertyNames[0];
             object? keyValue = primaryKey[0];
-            return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName) !.Equals(keyValue));
+            return queryable.Where(e => EF.Property<TId>(e, primaryKeyPropertyName)!.Equals(keyValue));
         }
 
         for (int i = 0; i < primaryKey.Length; i++)
@@ -255,17 +255,30 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         TResult result;
         try
         {
-            result = await DoAsync(
-                    () => Provider.Logger.QueryExecuting(query),
-                    async () => await queryHandler.ExecuteAsync(query, cancellationToken)
-                                                  .ConfigureAwait(false),
-                    (_, elapsedTimeMs) => Provider.Logger.QueryExecuted(query, elapsedTimeMs),
-                    error => Provider.Logger.QueryExecuteFailed(error, query))
-                .ConfigureAwait(false);
+            result =
+                await DoAsync(
+                        () =>
+                        {
+                            Provider.Logger.QueryExecuting(query);
+                        },
+                        async () =>
+                        {
+                            return await queryHandler.ExecuteAsync(query, cancellationToken)
+                                                     .ConfigureAwait(false);
+                        },
+                        (_, elapsedTimeMs) =>
+                        {
+                            Provider.Logger.QueryExecuted(query, elapsedTimeMs);
+                        },
+                        error =>
+                        {
+                            Provider.Logger.QueryExecuteFailed(error, query);
+                        })
+                    .ConfigureAwait(false);
         }
         finally
         {
-            await DisposeQueryHandler(queryHandler)
+            await DisposeQueryHandlerAsync(queryHandler)
                 .ConfigureAwait(false);
         }
 
@@ -277,7 +290,7 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
             "ReSharper",
             "SuspiciousTypeConversion.Global",
             Justification = "Handler may implement IDisposable.")]
-        async ValueTask DisposeQueryHandler(IDbContextQueryHandler<TEntity, TResult, TDbContext> handler)
+        async ValueTask DisposeQueryHandlerAsync(IDbContextQueryHandler<TEntity, TResult, TDbContext> handler)
         {
             switch (handler)
             {
@@ -315,30 +328,37 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
     {
         Ensure.Arg.NotNull(id);
 
-        TEntity? entity = await DoAsync(
-                () => Provider.Logger.EntityLoading(typeof(TEntity), id),
-                async () =>
-                {
-                    TDbEntity? dbEntity = await FindCoreAsync(id, cancellationToken)
-                        .ConfigureAwait(false);
+        TEntity? entity =
+            await DoAsync(
+                    () =>
+                    {
+                        Provider.Logger.EntityLoading(typeof(TEntity), id);
+                    },
+                    async () =>
+                    {
+                        TDbEntity? dbEntity = await FindCoreAsync(id, cancellationToken)
+                            .ConfigureAwait(false);
 
-                    return dbEntity != null
-                        ? Provider.EntityMapper.Map<TEntity>(dbEntity)
-                        : default;
-                },
-                (result, elapsedTimeMs) =>
-                {
-                    if (result != default)
+                        return dbEntity != null
+                            ? Provider.EntityMapper.Map<TEntity>(dbEntity)
+                            : default;
+                    },
+                    (result, elapsedTimeMs) =>
                     {
-                        Provider.Logger.EntityLoaded(result, elapsedTimeMs);
-                    }
-                    else
+                        if (result != default)
+                        {
+                            Provider.Logger.EntityLoaded(result, elapsedTimeMs);
+                        }
+                        else
+                        {
+                            Provider.Logger.EntityNotFound(typeof(TEntity), id);
+                        }
+                    },
+                    error =>
                     {
-                        Provider.Logger.EntityNotFound(typeof(TEntity), id);
-                    }
-                },
-                error => Provider.Logger.EntityLoadFailed(error, typeof(TEntity), id))
-            .ConfigureAwait(false);
+                        Provider.Logger.EntityLoadFailed(error, typeof(TEntity), id);
+                    })
+                .ConfigureAwait(false);
 
         return entity;
     }
@@ -377,26 +397,36 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
     {
         Ensure.Arg.NotNull(entity);
 
-        TEntity result = await DoAsync(
-                () => Provider.Logger.EntityCreating(entity),
-                async () =>
-                {
-                    var dbEntity = Provider.EntityMapper.Map<TDbEntity>(entity);
+        TEntity result =
+            await DoAsync(
+                    () =>
+                    {
+                        Provider.Logger.EntityCreating(entity);
+                    },
+                    async () =>
+                    {
+                        var dbEntity = Provider.EntityMapper.Map<TDbEntity>(entity);
 
-                    EntityEntry<TDbEntity> dbEntry = await CreateCoreAsync(entity, dbEntity, cancellationToken)
-                        .ConfigureAwait(false);
+                        EntityEntry<TDbEntity> dbEntry = await CreateCoreAsync(entity, dbEntity, cancellationToken)
+                            .ConfigureAwait(false);
 
-                    dbEntity = dbEntry.Entity;
-                    UpdateChangeToken(dbEntry, entity);
+                        dbEntity = dbEntry.Entity;
+                        UpdateChangeToken(dbEntry, entity);
 
-                    await Provider.SaveChangesAsync(cancellationToken)
-                                  .ConfigureAwait(false);
+                        await Provider.SaveChangesAsync(cancellationToken)
+                                      .ConfigureAwait(false);
 
-                    return Provider.EntityMapper.Map<TEntity>(dbEntity);
-                },
-                (e, elapsedTimeMs) => Provider.Logger.EntityCreated(e, elapsedTimeMs),
-                error => Provider.Logger.EntityCreateFailed(error, entity))
-            .ConfigureAwait(false);
+                        return Provider.EntityMapper.Map<TEntity>(dbEntity);
+                    },
+                    (e, elapsedTimeMs) =>
+                    {
+                        Provider.Logger.EntityCreated(e, elapsedTimeMs);
+                    },
+                    error =>
+                    {
+                        Provider.Logger.EntityCreateFailed(error, entity);
+                    })
+                .ConfigureAwait(false);
 
         return result;
     }
@@ -427,36 +457,46 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
                 $"The entity cannot be updated because the '{nameof(IEntity<TId>.Id)}' property has the default value.");
         }
 
-        TEntity result = await DoAsync(
-                () => Provider.Logger.EntityUpdating(entity),
-                async () =>
-                {
-                    TDbEntity? dbEntity = await GetQueryable(entity.Id)
-                                                .FirstOrDefaultAsync(cancellationToken)
-                                                .ConfigureAwait(false);
+        TEntity result =
+            await DoAsync(
+                    () =>
+                    {
+                        Provider.Logger.EntityUpdating(entity);
+                    },
+                    async () =>
+                    {
+                        TDbEntity? dbEntity = await GetQueryable(entity.Id)
+                                                    .FirstOrDefaultAsync(cancellationToken)
+                                                    .ConfigureAwait(false);
 
-                    if (dbEntity == null)
-                        throw new EntityConcurrencyException();
+                        if (dbEntity == null)
+                            throw new EntityConcurrencyException();
 
-                    Provider.EntityMapper.Map(entity, dbEntity);
+                        Provider.EntityMapper.Map(entity, dbEntity);
 
-                    EntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(
-                            entity,
-                            dbEntity,
-                            cancellationToken)
-                        .ConfigureAwait(false);
+                        EntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(
+                                entity,
+                                dbEntity,
+                                cancellationToken)
+                            .ConfigureAwait(false);
 
-                    dbEntity = dbEntry.Entity;
-                    UpdateChangeToken(dbEntry, entity);
+                        dbEntity = dbEntry.Entity;
+                        UpdateChangeToken(dbEntry, entity);
 
-                    await Provider.SaveChangesAsync(cancellationToken)
-                                  .ConfigureAwait(false);
+                        await Provider.SaveChangesAsync(cancellationToken)
+                                      .ConfigureAwait(false);
 
-                    return Provider.EntityMapper.Map<TEntity>(dbEntity);
-                },
-                (e, elapsedTimeMs) => Provider.Logger.EntityUpdated(e, elapsedTimeMs),
-                error => Provider.Logger.EntityUpdateFailed(error, entity))
-            .ConfigureAwait(false);
+                        return Provider.EntityMapper.Map<TEntity>(dbEntity);
+                    },
+                    (e, elapsedTimeMs) =>
+                    {
+                        Provider.Logger.EntityUpdated(e, elapsedTimeMs);
+                    },
+                    error =>
+                    {
+                        Provider.Logger.EntityUpdateFailed(error, entity);
+                    })
+                .ConfigureAwait(false);
 
         return result;
     }
@@ -482,7 +522,10 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
         Ensure.Arg.NotNull(entity);
 
         await DoAsync(
-                () => Provider.Logger.EntityDeleting(entity),
+                () =>
+                {
+                    Provider.Logger.EntityDeleting(entity);
+                },
                 async () =>
                 {
                     var dbEntity = Provider.EntityMapper.Map<TDbEntity>(entity);
@@ -495,8 +538,14 @@ public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbConte
                     await Provider.SaveChangesAsync(cancellationToken)
                                   .ConfigureAwait(false);
                 },
-                elapsedTimeMs => Provider.Logger.EntityDeleted(entity, elapsedTimeMs),
-                error => Provider.Logger.EntityDeleteFailed(error, entity))
+                elapsedTimeMs =>
+                {
+                    Provider.Logger.EntityDeleted(entity, elapsedTimeMs);
+                },
+                error =>
+                {
+                    Provider.Logger.EntityDeleteFailed(error, entity);
+                })
             .ConfigureAwait(false);
     }
 }
