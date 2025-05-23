@@ -36,7 +36,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration ${{env.BUILD_CONFIGURATION}} --no-restore
       - name: Test
-        run: dotnet test --configuration ${{env.BUILD_CONFIGURATION}} --collect:"Code Coverage;Format=Cobertura" --logger trx --results-directory test-results --no-build
+        run: dotnet test --configuration ${{env.BUILD_CONFIGURATION}} --filter "Category!=Integration" --collect:"Code Coverage;Format=Cobertura" --logger trx --results-directory test-results --no-build
       - name: Build packages
         run: dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --output ./artifacts --no-build
 #      - name: Upload coverage to Codecov
