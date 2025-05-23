@@ -24,7 +24,7 @@ namespace AppCoreNet.Data.MongoDB;
 public sealed class MongoTransactionManager : ITransactionManager
 {
     private readonly IMongoClient _client;
-    private readonly AsyncLocal<MongoTransaction?> _currentTransaction = new ();
+    private readonly AsyncLocal<MongoTransaction?> _currentTransaction = new();
     private readonly DataProviderLogger<MongoDataProvider> _logger;
 
     /// <summary>

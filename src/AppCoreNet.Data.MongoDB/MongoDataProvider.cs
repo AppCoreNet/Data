@@ -65,9 +65,8 @@ public sealed class MongoDataProvider : IDataProvider
         _name = name;
     }
 
-    internal string GetCollectionName<TEntity>()
-        where TEntity : IEntity
+    internal string GetCollectionName<TDocument>()
     {
-        return typeof(TEntity).Name;
+        return typeof(TDocument).Name;
     }
 }

@@ -55,7 +55,7 @@ public class MongoRepositoryTests : RepositoryTests
         var mongo = (MongoDataProvider)provider;
 
         TDao document =
-            await mongo.Database.GetCollection<TDao>(mongo.GetCollectionName<TEntity>())
+            await mongo.Database.GetCollection<TDao>(mongo.GetCollectionName<TDao>())
                        .Find(expression)
                        .FirstOrDefaultAsync();
 
@@ -111,7 +111,7 @@ public class MongoRepositoryTests : RepositoryTests
         var mongo = (MongoDataProvider)provider;
 
         IMongoCollection<DAO.TestEntity> collection =
-            mongo.Database.GetCollection<DAO.TestEntity>(mongo.GetCollectionName<Entities.TestEntity>());
+            mongo.Database.GetCollection<DAO.TestEntity>(mongo.GetCollectionName<DAO.TestEntity>());
 
         var dataEntity = Mapper.Map<DAO.TestEntity>(entity);
         await collection.InsertOneAsync(dataEntity);
@@ -123,7 +123,7 @@ public class MongoRepositoryTests : RepositoryTests
         var mongo = (MongoDataProvider)provider;
 
         IMongoCollection<DAO.TestEntity2> collection =
-            mongo.Database.GetCollection<DAO.TestEntity2>(mongo.GetCollectionName<Entities.TestEntity2>());
+            mongo.Database.GetCollection<DAO.TestEntity2>(mongo.GetCollectionName<DAO.TestEntity2>());
 
         var dataEntity = Mapper.Map<DAO.TestEntity2>(entity);
         await collection.InsertOneAsync(dataEntity);

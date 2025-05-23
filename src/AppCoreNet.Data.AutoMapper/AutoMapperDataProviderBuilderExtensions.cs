@@ -22,9 +22,12 @@ public static class AutoMapperDataProviderBuilderExtensions
     /// </summary>
     /// <param name="builder">The <see cref="IDataProviderBuilder"/>.</param>
     /// <param name="config">The delegate used to configure AutoMapper.</param>
-    public static void AddAutoMapper(this IDataProviderBuilder builder, Action<IMapperConfigurationExpression>? config = null)
+    public static void AddAutoMapper(
+        this IDataProviderBuilder builder,
+        Action<IMapperConfigurationExpression>? config = null)
     {
         Ensure.Arg.NotNull(builder);
+
         builder.Services.AddAutoMapper(config);
         builder.Services.TryAddTransient<IEntityMapper, AutoMapperEntityMapper>();
     }

@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+// ReSharper disable once CheckNamespace
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
-internal class EntityModelProperties<TId, TEntity>
+internal sealed class EntityModelProperties<TId, TEntity>
     where TEntity : class, IEntity<TId>
 {
     public Func<TId, object?[]> GetIdValues { get; }

@@ -26,17 +26,17 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            6.0.x
             8.0.x
+            9.0.x
       - name: Restore
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration ${{env.BUILD_CONFIGURATION}} --no-restore
       - name: Test
-        run: dotnet test --configuration ${{env.BUILD_CONFIGURATION}} --filter "Category!=Integration" --collect:"Code Coverage;Format=Cobertura" --logger trx --results-directory test-results --no-build
+        run: dotnet test --configuration ${{env.BUILD_CONFIGURATION}} --collect:"Code Coverage;Format=Cobertura" --logger trx --results-directory test-results --no-build
       - name: Build packages
         run: dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --output ./artifacts --no-build
 #      - name: Upload coverage to Codecov
@@ -47,12 +47,12 @@ jobs:
 #
       - name: Upload artifacts
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: ./artifacts
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.os }}
           path: ./test-results
@@ -66,13 +66,13 @@ jobs:
     name: Deploy Testing
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            6.0.x
             8.0.x
+            9.0.x
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifacts
           path: ./artifacts
@@ -89,13 +89,13 @@ jobs:
     name: Deploy Production
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            6.0.x
             8.0.x
+            9.0.x
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifacts
           path: ./artifacts
