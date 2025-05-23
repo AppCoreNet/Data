@@ -29,5 +29,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.2" />
 
     <PackageVersion Include="AppCoreNet.Extensions.DependencyInjection.Abstractions" Version="0.6.3" />
+
+    <PackageVersion Include="EntityFramework" Version="6.4.4" />
   </ItemGroup>
 </Project>
