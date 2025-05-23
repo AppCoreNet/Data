@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Testcontainers.MongoDb" VersionOverride="3.10.0" />
+    <PackageReference Include="Testcontainers.MongoDb" VersionOverride="4.4.0" />
   </ItemGroup>
 
 </Project>
