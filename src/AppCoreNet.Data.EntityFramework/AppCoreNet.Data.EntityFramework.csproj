@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <Description>Adds EntityFramework (EF6) support to AppCore .NET persistence.</Description>
+    <PackageTags>$(PackageTags);EntityFramework;EF6</PackageTags>
+    <RootNamespace>AppCoreNet.Data.EntityFramework</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\AppCoreNet.Data\AppCoreNet.Data.csproj" />
+  </ItemGroup>
+
+</Project>
