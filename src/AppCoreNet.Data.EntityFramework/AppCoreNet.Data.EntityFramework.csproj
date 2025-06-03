@@ -8,11 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="EntityFramework" VersionOverride="6.5.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AppCoreNet.Data\AppCoreNet.Data.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data\AppCoreNet.Data.csproj" />
   </ItemGroup>
 
 </Project>

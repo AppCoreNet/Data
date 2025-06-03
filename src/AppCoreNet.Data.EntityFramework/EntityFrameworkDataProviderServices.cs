@@ -14,7 +14,7 @@ namespace AppCoreNet.Data.EntityFramework;
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 public sealed class EntityFrameworkDataProviderServices<TDbContext>
-    where TDbContext : System.Data.Entity.DbContext
+    where TDbContext : DbContext
 {
     /// <summary>
     /// Gets the <see cref="DbContext"/>.

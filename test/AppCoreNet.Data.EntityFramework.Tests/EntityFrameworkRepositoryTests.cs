@@ -2,48 +2,26 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AppCoreNet.Data.EntityFramework.DAO;
-using AppCoreNet.Data.SpecificationTests; // For RepositoryTests base and domain entities
+using AppCoreNet.Data.EntityFramework.Queries;
 using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace AppCoreNet.Data.EntityFramework;
 
-// Define a simple repository interface for testing purposes
-public interface ITestEntityRepository : IRepository<Guid, SpecificationTests.Entities.TestEntity>
-{
-}
-
-// Define a simple repository implementation for testing purposes
-public class EntityFrameworkTestEntityRepository : EntityFrameworkRepository<Guid, SpecificationTests.Entities.TestEntity, TestDbContext, DAO.TestEntity>, ITestEntityRepository
-{
-    public EntityFrameworkTestEntityRepository(EntityFrameworkDataProvider<TestDbContext> provider)
-        : base(provider)
-    {
-    }
-
-    // Example of how to map domain entity to DB entity if they were different
-    // For this basic test, they are directly mapped by TestEntityMapper if names match
-    // or if TEntity and TDbEntity are the same.
-    // If more complex mapping is needed, this is where it would be customized.
-}
-
-
 public class EntityFrameworkRepositoryTests : RepositoryTests
 {
-    private const string ProviderName = "ef6-test";
-
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
 
-        // Use the simple TestEntityMapper
-        services.AddSingleton<IEntityMapper, TestEntityMapper>();
+        Mapper = EntityMapper.Instance;
 
         services.AddDataProvider(
             p =>
@@ -56,64 +34,111 @@ public class EntityFrameworkRepositoryTests : RepositoryTests
 
                 p.AddEntityFramework<TestDbContext>(ProviderName)
                  .AddRepository<ITestEntityRepository, EntityFrameworkTestEntityRepository>()
-                 .AddEntityMapper<TestEntityMapper>(); // Register the specific mapper for this provider
-                 // .AddQueryHandler<...>() // Add query handlers if needed for more complex tests
+                 .AddRepository<ITestEntity2Repository, EntityFrameworkTestEntity2Repository>()
+                 .AddQueryHandler<TestEntityByIdQueryHandler>()
+                 .AddQueryHandler<TestEntity2ByIdQueryHandler>();
             });
     }
 
-    // Helper to find data directly from DbContext for assertion
-    private async Task<DAO.TestEntity?> FindDataEntity(IDataProvider provider, Guid id)
+    private async Task<TDao?> FindDataEntity<TDao, TEntity>(IDataProvider provider, Expression<Func<TDao, bool>> expression)
+        where TDao : class
+        where TEntity : IEntity
     {
-        var efDataProvider = (EntityFrameworkDataProvider<TestDbContext>)provider;
-        return await efDataProvider.DbContext.Set<DAO.TestEntity>()
-                                   .AsNoTracking()
-                                   .FirstOrDefaultAsync(e => e.Id == id);
+        var dbContextDataProvider = (EntityFrameworkDataProvider<TestDbContext>)provider;
+
+        TDao? dao =
+            await dbContextDataProvider.DbContext.Set<TDao>()
+                                       .AsNoTracking()
+                                       .Where(expression)
+                                       .FirstOrDefaultAsync();
+
+        return dao;
     }
 
-    protected override async Task AssertExistingDataEntity(IDataProvider provider, SpecificationTests.Entities.TestEntity entity)
+    private async Task<DAO.TestDao?> FindDataEntity(IDataProvider provider, Guid id)
     {
-        DAO.TestEntity? dao = await FindDataEntity(provider, entity.Id);
+        return await FindDataEntity<DAO.TestDao, Entities.TestEntity>(
+            provider,
+            e => e.Id == id);
+    }
 
-        dao.Should().NotBeNull();
-        // Assuming TestEntityMapper maps properties correctly or they are the same
-        dao!.Id.Should().Be(entity.Id);
-        dao.Name.Should().Be(entity.Name);
-        // dao.ChangeToken.Should().Be(entity.ChangeToken); // If domain entity had ChangeToken
+    private async Task<DAO.TestDao2?> FindDataEntity(IDataProvider provider, Entities.ComplexId id)
+    {
+        return await FindDataEntity<DAO.TestDao2, Entities.TestEntity2>(
+            provider,
+            e => e.Id == id.Id && e.Version == id.Version);
+    }
+
+    protected override async Task AssertExistingDataEntity(IDataProvider provider, Entities.TestEntity entity)
+    {
+        DAO.TestDao? dao = await FindDataEntity(provider, entity.Id);
+
+        dao.Should()
+           .NotBeNull();
+
+        dao.Should()
+           .BeEquivalentTo(entity);
+    }
+
+    protected override async Task AssertExistingDataEntity(IDataProvider provider, Entities.TestEntity2 entity)
+    {
+        DAO.TestDao2? dao = await FindDataEntity(provider, entity.Id);
+
+        dao.Should()
+           .NotBeNull();
+
+        dao.Should()
+           .BeEquivalentTo(
+               entity,
+               o => o.Excluding(e => e.Id)
+                     .ExcludingMissingMembers());
+
+        dao!.Id.Should()
+            .Be(entity.Id.Id);
+
+        dao.Version.Should()
+           .Be(entity.Id.Version);
     }
 
     protected override async Task AssertNonExistingDataEntity(IDataProvider provider, Guid id)
     {
-        DAO.TestEntity? dao = await FindDataEntity(provider, id);
-        dao.Should().BeNull();
+        DAO.TestDao? dao = await FindDataEntity(provider, id);
+
+        dao.Should()
+           .BeNull();
     }
 
-    // CreateDataEntity and AssertExistingDataEntity for TestEntity2 would be similar if needed
-
-    // This test is adapted from the base class or typical repository tests.
-    // The base RepositoryTests class in SpecificationTests should provide the actual [Fact] methods.
-    // This class just provides the EF6 specific setup and assertions.
-
-    // Example of a local test if not using the base class structure:
-    [Fact]
-    public async Task CreateAndFindAsync_Should_PersistAndRetrieveEntity()
+    private async Task CreateDataEntity<TDao>(IDataProvider provider, TDao dataEntity)
+        where TDao : class
     {
-        // Arrange
-        var newEntity = new SpecificationTests.Entities.TestEntity(Guid.NewGuid(), "Test Name 1");
-        IRepository<Guid, SpecificationTests.Entities.TestEntity> repository =
-            ServiceProvider.GetRequiredService<IDataProviderResolver>()
-                           .Resolve(ProviderName)
-                           .GetRepository<IRepository<Guid, SpecificationTests.Entities.TestEntity>>();
+        var dbContextDataProvider = (EntityFrameworkDataProvider<TestDbContext>)provider;
+        TestDbContext dbContext = dbContextDataProvider.DbContext;
 
-        // Act
-        await repository.CreateAsync(newEntity, default);
+        dbContext.Set<TDao>()
+                 .Add(dataEntity);
 
-        // Assert
-        SpecificationTests.Entities.TestEntity? foundEntity = await repository.FindAsync(newEntity.Id, default);
-        foundEntity.Should().NotBeNull();
-        foundEntity!.Id.Should().Be(newEntity.Id);
-        foundEntity.Name.Should().Be(newEntity.Name);
+        await dbContext.SaveChangesAsync();
 
-        // Assert against DB directly
-        await AssertExistingDataEntity(repository.Provider, newEntity);
+        DbEntityEntry[] entries = dbContext.ChangeTracker.Entries()
+                                         .ToArray();
+
+        foreach (DbEntityEntry entry in entries)
+        {
+            entry.State = EntityState.Detached;
+        }
+    }
+
+    protected override async Task<object> CreateDataEntity(IDataProvider provider, Entities.TestEntity entity)
+    {
+        var dataEntity = Mapper.Map<DAO.TestDao>(entity);
+        await CreateDataEntity(provider, dataEntity);
+        return dataEntity;
+    }
+
+    protected override async Task<object> CreateDataEntity(IDataProvider provider, Entities.TestEntity2 entity)
+    {
+        var dataEntity = Mapper.Map<DAO.TestDao2>(entity);
+        await CreateDataEntity(provider, dataEntity);
+        return dataEntity;
     }
 }

@@ -4,7 +4,7 @@
 using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
-namespace AppCoreNet.Data.EntityFramework.Internal; // Adjusted namespace
+namespace AppCoreNet.Data.EntityFramework;
 
 internal static class LogEventIds
 {

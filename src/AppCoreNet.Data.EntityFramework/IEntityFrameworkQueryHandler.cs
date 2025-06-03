@@ -1,18 +1,18 @@
 ﻿// Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
+using System.Data.Entity;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Data.Entity; // Added for DbContext
 
-namespace AppCoreNet.Data.EntityFramework; // Adjusted namespace
+namespace AppCoreNet.Data.EntityFramework;
 
 /// <summary>
 /// Represents a <see cref="System.Data.Entity.DbContext"/> based query handler.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="System.Data.Entity.DbContext"/>.</typeparam>
-public interface IEntityFrameworkQueryHandler<TDbContext> // Renamed
-    where TDbContext : System.Data.Entity.DbContext // Adjusted constraint
+public interface IEntityFrameworkQueryHandler<TDbContext>
+    where TDbContext : DbContext
 {
 }
 
@@ -22,9 +22,9 @@ public interface IEntityFrameworkQueryHandler<TDbContext> // Renamed
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="System.Data.Entity.DbContext"/>.</typeparam>
-public interface IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext> : IEntityFrameworkQueryHandler<TDbContext> // Renamed and base interface updated
+public interface IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext> : IEntityFrameworkQueryHandler<TDbContext>
     where TEntity : class, IEntity
-    where TDbContext : System.Data.Entity.DbContext // Adjusted constraint
+    where TDbContext : DbContext
 {
     /// <summary>
     /// Gets a value indicating whether the query can be executed.

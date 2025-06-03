@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace AppCoreNet.Data.EntityFramework; // Adjusted namespace
+namespace AppCoreNet.Data.EntityFramework;
 
 internal sealed class PagedResult<TResult> : IPagedResult<TResult>
 {

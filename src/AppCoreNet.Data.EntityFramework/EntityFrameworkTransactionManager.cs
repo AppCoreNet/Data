@@ -3,12 +3,11 @@
 
 using System;
 using System.Data;
+using System.Data.Entity;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure; // For DbContextTransaction if not directly from System.Data.Entity
 using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFramework;
@@ -26,10 +25,10 @@ namespace AppCoreNet.Data.EntityFramework;
     "IDISP006:Implement IDisposable",
     Justification = "Transaction must be disposed by consumer.")]
 public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransactionManager
-    where TDbContext : System.Data.Entity.DbContext
+    where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
-    private readonly DataProviderLogger<DbContextDataProvider<TDbContext>> _logger;
+    private readonly DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> _logger;
     private EntityFrameworkTransaction<TDbContext>? _currentTransaction;
 
     /// <summary>
@@ -46,7 +45,7 @@ public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransaction
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public EntityFrameworkTransactionManager(
         TDbContext dbContext,
-        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
+        DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> logger)
     {
         Ensure.Arg.NotNull(dbContext);
         Ensure.Arg.NotNull(logger);
@@ -68,30 +67,11 @@ public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransaction
     /// <param name="isolationLevel">Specifies the isolation level of the transaction.</param>
     /// <param name="cancellationToken">Can be used to cancel the asynchronous operation.</param>
     /// <returns>The created transaction.</returns>
-    public async Task<ITransaction> BeginTransactionAsync(
+    public Task<ITransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel,
         CancellationToken cancellationToken = default)
     {
-        if (CurrentTransaction != null)
-            throw new InvalidOperationException("A transaction is already in progress.");
-
-        // EF6 BeginTransactionAsync returns Task<DbContextTransaction>
-        DbContextTransaction transaction =
-            await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken)
-                            .ConfigureAwait(false);
-
-        try
-        {
-            var t = new EntityFrameworkTransaction<TDbContext>(_dbContext, transaction, _logger);
-            t.TransactionFinished += OnTransactionFinished;
-            return _currentTransaction = t;
-        }
-        catch
-        {
-            // EF6 DbContextTransaction is IDisposable, not IAsyncDisposable
-            transaction.Dispose();
-            throw;
-        }
+        return Task.FromResult(BeginTransaction(isolationLevel));
     }
 
     /// <inheritdoc />
@@ -111,7 +91,6 @@ public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransaction
         if (CurrentTransaction != null)
             throw new InvalidOperationException("A transaction is already in progress.");
 
-        // EF6 BeginTransaction returns DbContextTransaction
         DbContextTransaction transaction = _dbContext.Database.BeginTransaction(isolationLevel);
 
         try

@@ -1,12 +1,11 @@
 // Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using System.Linq;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 
 namespace AppCoreNet.Data.EntityFramework;
 
@@ -92,9 +91,9 @@ public sealed class EntityFrameworkDataProvider<TDbContext> : IDataProvider
         }
 
         // detach all entities after saving changes
-        foreach (var entry in DbContext.ChangeTracker.Entries())
+        foreach (DbEntityEntry entry in DbContext.ChangeTracker.Entries())
         {
-            if (entry.Entity != null) // Add null check for safety
+            if (entry.Entity != null)
             {
                 entry.State = EntityState.Detached;
             }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 
 // ReSharper disable once CheckNamespace
-namespace AppCoreNet.Data.EntityFramework.Internal; // Adjusted namespace
+namespace AppCoreNet.Data.EntityFramework;
 
 internal sealed class EntityModelProperties<TId, TEntity>
     where TEntity : class, IEntity<TId>

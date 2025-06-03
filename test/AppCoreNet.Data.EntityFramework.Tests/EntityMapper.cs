@@ -1,61 +1,85 @@
 // Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using System;
+using NSubstitute;
 
 namespace AppCoreNet.Data.EntityFramework;
 
-/// <summary>
-/// A simple pass-through entity mapper for testing purposes.
-/// Assumes domain entity and DB entity are the same type or directly mappable.
-/// </summary>
-public class TestEntityMapper : IEntityMapper
+public static class EntityMapper
 {
-    public TTarget Map<TTarget>(object source)
+    public static readonly IEntityMapper Instance;
+
+    static EntityMapper()
     {
-        if (source == null)
-            return default!; // Or throw ArgumentNullException if preferred
+        Instance = Substitute.For<IEntityMapper>();
 
-        // For basic tests, assume TTarget is the same as source type or directly assignable.
-        // More complex mapping would require a real mapping library or manual implementation.
-        if (source is TTarget target)
-        {
-            return target;
-        }
+        Instance.Map<DAO.TestDao>(Arg.Any<Entities.TestEntity>())
+              .Returns(
+                  ci =>
+                  {
+                      var entity = ci.ArgAt<Entities.TestEntity>(0);
+                      return new DAO.TestDao()
+                      {
+                          Id = entity.Id,
+                          Name = entity.Name,
+                          ChangeToken = entity.ChangeToken,
+                      };
+                  });
 
-        // Attempt a simple property-based mapping if types are different but compatible for basic tests.
-        // This is a very naive implementation.
-        var targetInstance = Activator.CreateInstance<TTarget>();
-        var sourceProperties = source.GetType().GetProperties();
-        var targetProperties = typeof(TTarget).GetProperties();
-
-        foreach (var sourceProp in sourceProperties)
-        {
-            var targetProp = Array.Find(targetProperties, p => p.Name == sourceProp.Name && p.PropertyType == sourceProp.PropertyType);
-            if (targetProp != null && targetProp.CanWrite)
+        Instance.When(m => m.Map(Arg.Any<Entities.TestEntity>(), Arg.Any<DAO.TestDao>())).Do(
+            ci =>
             {
-                targetProp.SetValue(targetInstance, sourceProp.GetValue(source));
-            }
-        }
-        return targetInstance;
-    }
+                var from = ci.ArgAt<Entities.TestEntity>(0);
+                var to = ci.ArgAt<DAO.TestDao>(1);
 
-    public void Map(object source, object target)
-    {
-        if (source == null || target == null)
-            return; // Or throw
+                to.Id = from.Id;
+                to.Name = from.Name;
+                to.ChangeToken = from.ChangeToken;
+            });
 
-        // Naive property copy
-        var sourceProperties = source.GetType().GetProperties();
-        var targetProperties = target.GetType().GetProperties();
+        Instance.Map<Entities.TestEntity>(Arg.Any<DAO.TestDao>())
+              .Returns(
+                  ci =>
+                  {
+                      var document = ci.ArgAt<DAO.TestDao>(0);
+                      return new Entities.TestEntity()
+                      {
+                          Id = document.Id,
+                          Name = document.Name,
+                          ChangeToken = document.ChangeToken,
+                      };
+                  });
 
-        foreach (var sourceProp in sourceProperties)
-        {
-            var targetProp = Array.Find(targetProperties, p => p.Name == sourceProp.Name && p.PropertyType == sourceProp.PropertyType);
-            if (targetProp != null && targetProp.CanWrite)
-            {
-                targetProp.SetValue(target, sourceProp.GetValue(source));
-            }
-        }
+        Instance.Map<DAO.TestDao2>(Arg.Any<Entities.TestEntity2>())
+              .Returns(
+                  ci =>
+                  {
+                      var entity = ci.ArgAt<Entities.TestEntity2>(0);
+                      return new DAO.TestDao2()
+                      {
+                          Id = entity.Id.Id,
+                          Version = entity.Id.Version,
+                          Name = entity.Name,
+                          ChangeToken = entity.ChangeToken,
+                      };
+                  });
+
+        Instance.Map<Entities.TestEntity2>(Arg.Any<DAO.TestDao2>())
+              .Returns(
+                  ci =>
+                  {
+                      var document = ci.ArgAt<DAO.TestDao2>(0);
+                      return new Entities.TestEntity2()
+                      {
+                          Id = new Entities.ComplexId
+                          {
+                              Id = document.Id,
+                              Version = document.Version,
+                          },
+                          Name = document.Name,
+                          ChangeToken = document.ChangeToken,
+                          ExpectedChangeToken = document.ChangeToken,
+                      };
+                  });
     }
 }
