@@ -3,10 +3,10 @@
 
 using System;
 using System.ComponentModel;
+using System.Data.Entity;
 using AppCoreNet.Data;
-using AppCoreNet.Data.EntityFramework; // Adjusted namespace
+using AppCoreNet.Data.EntityFramework;
 using AppCoreNet.Diagnostics;
-using System.Data.Entity; // Added for DbContext
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -18,7 +18,7 @@ namespace AppCoreNet.Extensions.DependencyInjection;
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
-    where TDbContext : System.Data.Entity.DbContext // Adjusted constraint
+    where TDbContext : DbContext
 {
     /// <summary>
     /// Gets the name of the provider.
@@ -77,15 +77,14 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
         Services.TryAddEnumerable(
             ServiceDescriptor.Describe(
                 typeof(TService),
-                new Func<IServiceProvider, TImplementation>(
-                    sp =>
-                    {
-                        var provider =
-                            (EntityFrameworkDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
-                                                                 .Resolve(Name);
+                new Func<IServiceProvider, TImplementation>(sp =>
+                {
+                    var provider =
+                        (EntityFrameworkDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
+                                                                   .Resolve(Name);
 
-                        return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
-                    }),
+                    return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
+                }),
                 ProviderLifetime));
 
         return this;

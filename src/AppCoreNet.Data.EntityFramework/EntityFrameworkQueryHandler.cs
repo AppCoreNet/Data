@@ -1,11 +1,11 @@
 ﻿// Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
+using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
-using System.Data.Entity;
 
 namespace AppCoreNet.Data.EntityFramework;
 
@@ -21,7 +21,7 @@ public abstract class EntityFrameworkQueryHandler<TQuery, TEntity, TResult, TDbC
     : IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext>
     where TQuery : IQuery<TEntity, TResult>
     where TEntity : class, IEntity
-    where TDbContext : System.Data.Entity.DbContext
+    where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>

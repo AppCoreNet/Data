@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -10,8 +12,6 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 
 namespace AppCoreNet.Data.EntityFramework;
 
@@ -24,7 +24,7 @@ namespace AppCoreNet.Data.EntityFramework;
 /// <typeparam name="TDbEntity">The type of the database entity.</typeparam>
 public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IEntityFrameworkRepository<TDbContext>, IRepository<TId, TEntity>
     where TEntity : class, IEntity<TId>
-    where TDbContext : System.Data.Entity.DbContext
+    where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
@@ -101,10 +101,8 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     public EntityFrameworkRepository(EntityFrameworkDataProvider<TDbContext> provider)
     {
         Ensure.Arg.NotNull(provider);
-        Provider = provider; // Provider must be set before accessing Provider.DbContext
-
-        // DbModelProperties requires a live DbContext instance to access MetadataWorkspace
-        _modelProperties = Internal.DbModelProperties.Get(Provider.DbContext, typeof(TDbEntity), typeof(TEntity));
+        Provider = provider;
+        _modelProperties = DbModelProperties.Get(provider.DbContext, typeof(TDbEntity), typeof(TEntity));
     }
 
     /// <summary>
@@ -167,7 +165,11 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
 
             if (entity is IHasChangeTokenEx expectedChangeToken)
             {
-                concurrencyTokenProperty.OriginalValue = expectedChangeToken.ExpectedChangeToken;
+                if (entry.State != EntityState.Added)
+                {
+                    concurrencyTokenProperty.OriginalValue = expectedChangeToken.ExpectedChangeToken;
+                }
+
                 if (entry.State != EntityState.Deleted)
                 {
                     string? changeToken = expectedChangeToken.ChangeToken;
@@ -182,7 +184,11 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
             }
             else if (entity is IHasChangeToken changeToken)
             {
-                concurrencyTokenProperty.OriginalValue = changeToken.ChangeToken;
+                if (entry.State != EntityState.Added)
+                {
+                    concurrencyTokenProperty.OriginalValue = changeToken.ChangeToken;
+                }
+
                 if (entry.State != EntityState.Deleted)
                 {
                     concurrencyTokenProperty.CurrentValue = Provider.TokenGenerator.Generate();
@@ -443,8 +449,9 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
         if (entry.State == EntityState.Detached)
         {
             Set.Attach(dbEntity);
-            // entry = Provider.DbContext.Entry(dbEntity); // Re-getting entry after attach is good practice
+            entry = Provider.DbContext.Entry(dbEntity);
         }
+
         entry.State = EntityState.Modified;
         return new ValueTask<DbEntityEntry<TDbEntity>>(entry);
     }
@@ -476,7 +483,6 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
                             throw new EntityConcurrencyException();
 
                         Provider.EntityMapper.Map(entity, dbEntity);
-                        // Ensure the entity is marked as modified after mapping.
                         Provider.DbContext.Entry(dbEntity).State = EntityState.Modified;
 
                         DbEntityEntry<TDbEntity> dbEntry = await UpdateCoreAsync(
@@ -522,12 +528,10 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
         if (entry.State == EntityState.Detached)
         {
             Set.Attach(dbEntity);
-            entry = Provider.DbContext.Entry(dbEntity); 
+            entry = Provider.DbContext.Entry(dbEntity);
         }
-        
+
         TDbEntity removedEntity = Set.Remove(dbEntity);
-        // entry.State = EntityState.Deleted; // Set.Remove should already do this.
-        // We want the entry for the entity that was just removed.
         return new ValueTask<DbEntityEntry<TDbEntity>>(Provider.DbContext.Entry(removedEntity));
     }
 

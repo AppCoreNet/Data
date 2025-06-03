@@ -3,9 +3,9 @@
 
 using System;
 
-namespace AppCoreNet.Data.EntityFramework.DAO; // Adjusted namespace
+namespace AppCoreNet.Data.EntityFramework.DAO;
 
-public class TestEntity2
+public class TestDao2
 {
     public Guid Id { get; set; }
 

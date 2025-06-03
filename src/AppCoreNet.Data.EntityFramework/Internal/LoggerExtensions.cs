@@ -4,9 +4,9 @@
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace AppCoreNet.Data.EntityFramework.Internal; // Adjusted namespace
+// ReSharper disable once CheckNamespace
+namespace AppCoreNet.Data.EntityFramework;
 
-// TODO: Use same code like in MongoDataProviderLogger
 internal static class LoggerExtensions
 {
     // DbContextDataProvider

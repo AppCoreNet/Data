@@ -4,20 +4,25 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
+using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
+using System.Linq;
 
 // ReSharper disable once CheckNamespace
-namespace AppCoreNet.Data.EntityFramework.Internal;
+namespace AppCoreNet.Data.EntityFramework;
 
 internal sealed class DbModelProperties
 {
-    private static readonly ConcurrentDictionary<(Type DbContextType, Type DbEntityType, Type EntityType), DbModelProperties> _cache = new();
+    private static readonly
+        ConcurrentDictionary<(Type DbContextType, Type DbEntityType, Type EntityType), DbModelProperties> _cache =
+            new();
 
     public IReadOnlyList<string> PrimaryKeyPropertyNames { get; private set; } = new List<string>();
+
     public bool HasConcurrencyToken { get; private set; }
+
     public string? ConcurrencyTokenPropertyName { get; private set; }
 
     private readonly Type _dbContextType;
@@ -34,8 +39,8 @@ internal sealed class DbModelProperties
 
     private void Initialize(DbContext dbContext)
     {
-        var objectContext = ((IObjectContextAdapter)dbContext).ObjectContext;
-        var workspace = objectContext.MetadataWorkspace;
+        ObjectContext objectContext = ((IObjectContextAdapter)dbContext).ObjectContext;
+        MetadataWorkspace workspace = objectContext.MetadataWorkspace;
 
         // Determine the non-proxy type for dbEntityType to ensure reliable metadata lookup
         Type typeForMetadataLookup = _dbEntityType;
@@ -55,7 +60,7 @@ internal sealed class DbModelProperties
         }
 
         // Get corresponding CSpace EntityType
-        EntityType? cspaceEntityType = workspace.GetItem<EntityType>(ospaceEntityType.FullName, DataSpace.CSpace);
+        var cspaceEntityType = workspace.GetItem<EntityType>(ospaceEntityType.FullName, DataSpace.CSpace);
         if (cspaceEntityType == null)
         {
              // This case should ideally not happen if OSpace type was found and metadata is consistent.
@@ -93,8 +98,8 @@ internal sealed class DbModelProperties
 
     internal static DbModelProperties Get(DbContext dbContext, Type dbEntityType, Type entityType)
     {
-        return _cache.GetOrAdd((dbContext.GetType(), dbEntityType, entityType),
+        return _cache.GetOrAdd(
+            (dbContext.GetType(), DbEntityType: dbEntityType, EntityType: entityType),
             key => new DbModelProperties(dbContext, key.DbEntityType, key.EntityType));
-                                     // Pass dbContext directly, not key.DbContextType
     }
 }

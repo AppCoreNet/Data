@@ -2,11 +2,10 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
-using System.ComponentModel.DataAnnotations;
 
-namespace AppCoreNet.Data.EntityFramework.DAO; // Adjusted namespace
+namespace AppCoreNet.Data.EntityFramework.DAO;
 
-public class TestEntity
+public class TestDao
 {
     public Guid Id { get; set; }
 

@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using AppCoreNet.Diagnostics;
-using System.Data.Entity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AppCoreNet.Data.EntityFramework;
@@ -15,7 +15,7 @@ namespace AppCoreNet.Data.EntityFramework;
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 public sealed class EntityFrameworkQueryHandlerFactory<TDbContext>
-    where TDbContext : System.Data.Entity.DbContext
+    where TDbContext : DbContext
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<Type> _queryHandlerTypes;
@@ -37,7 +37,7 @@ public sealed class EntityFrameworkQueryHandlerFactory<TDbContext>
     /// <summary>
     /// Creates a query handler for the specified query.
     /// </summary>
-    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
     /// <param name="query">The query.</param>
     /// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>

@@ -2,10 +2,10 @@
 // Copyright (c) The AppCore .NET project.
 
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Data.Entity;
 
 namespace AppCoreNet.Data.EntityFramework;
 
@@ -21,7 +21,7 @@ public abstract class EntityFrameworkVectorQueryHandler<TQuery, TEntity, TResult
     : EntityFrameworkQueryHandler<TQuery, TEntity, IReadOnlyCollection<TResult>, TDbContext, TDbEntity>
     where TQuery : IQuery<TEntity, IReadOnlyCollection<TResult>>
     where TEntity : class, IEntity
-    where TDbContext : System.Data.Entity.DbContext
+    where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
