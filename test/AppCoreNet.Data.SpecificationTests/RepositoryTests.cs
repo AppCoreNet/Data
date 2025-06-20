@@ -202,6 +202,11 @@ public abstract class RepositoryTests
 
         createdEntity.ChangeToken.Should()
                      .Be(changeToken);
+
+        IDataProvider provider = sp.GetRequiredService<IDataProviderResolver>()
+                                   .Resolve(ProviderName);
+
+        await AssertExistingDataEntity(provider, createdEntity);
     }
 
     [Fact]
