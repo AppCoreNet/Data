@@ -12,6 +12,7 @@ using AppCoreNet.Data.EntityFramework.Queries;
 using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace AppCoreNet.Data.EntityFramework;
 
@@ -140,5 +141,11 @@ public class EntityFrameworkRepositoryTests : RepositoryTests
         var dataEntity = Mapper.Map<DAO.TestDao2>(entity);
         await CreateDataEntity(provider, dataEntity);
         return dataEntity;
+    }
+
+    [Fact(Skip = "Not supported by EF6")]
+    public override Task CreateAssignsId()
+    {
+        return base.CreateAssignsId();
     }
 }
