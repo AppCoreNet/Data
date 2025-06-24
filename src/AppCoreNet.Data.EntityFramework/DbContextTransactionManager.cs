@@ -24,28 +24,28 @@ namespace AppCoreNet.Data.EntityFramework;
     "IDisposableAnalyzers.Correctness",
     "IDISP006:Implement IDisposable",
     Justification = "Transaction must be disposed by consumer.")]
-public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransactionManager
+public sealed class DbContextTransactionManager<TDbContext> : ITransactionManager
     where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
-    private readonly DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> _logger;
-    private EntityFrameworkTransaction<TDbContext>? _currentTransaction;
+    private readonly DataProviderLogger<DbContextDataProvider<TDbContext>> _logger;
+    private DbContextTransaction<TDbContext>? _currentTransaction;
 
     /// <summary>
-    /// Gets the currently active <see cref="EntityFrameworkTransaction{TDbContext}"/>.
+    /// Gets the currently active <see cref="DbContextTransaction{TDbContext}"/>.
     /// </summary>
-    public EntityFrameworkTransaction<TDbContext>? CurrentTransaction => _currentTransaction;
+    public DbContextTransaction<TDbContext>? CurrentTransaction => _currentTransaction;
 
     ITransaction? ITransactionManager.CurrentTransaction => CurrentTransaction;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkTransactionManager{TDbContext}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextTransactionManager{TDbContext}"/> class.
     /// </summary>
     /// <param name="dbContext">The <see cref="DbContext"/>.</param>
     /// <param name="logger">The <see cref="ILogger"/>.</param>
-    public EntityFrameworkTransactionManager(
+    public DbContextTransactionManager(
         TDbContext dbContext,
-        DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> logger)
+        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
     {
         Ensure.Arg.NotNull(dbContext);
         Ensure.Arg.NotNull(logger);
@@ -56,7 +56,7 @@ public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransaction
 
     private void OnTransactionFinished(object? sender, EventArgs args)
     {
-        var transaction = (EntityFrameworkTransaction<TDbContext>)sender!;
+        var transaction = (DbContextTransaction<TDbContext>)sender!;
         transaction.TransactionFinished -= OnTransactionFinished;
         _currentTransaction = null;
     }
@@ -95,7 +95,7 @@ public sealed class EntityFrameworkTransactionManager<TDbContext> : ITransaction
 
         try
         {
-            var t = new EntityFrameworkTransaction<TDbContext>(_dbContext, transaction, _logger);
+            var t = new DbContextTransaction<TDbContext>(_dbContext, transaction, _logger);
             t.TransactionFinished += OnTransactionFinished;
             return _currentTransaction = t;
         }

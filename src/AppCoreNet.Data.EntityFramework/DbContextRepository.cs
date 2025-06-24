@@ -22,7 +22,7 @@ namespace AppCoreNet.Data.EntityFramework;
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the database entity.</typeparam>
-public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IEntityFrameworkRepository<TDbContext>, IRepository<TId, TEntity>
+public class DbContextRepository<TId, TEntity, TDbContext, TDbEntity> : IDbContextRepository<TDbContext>, IRepository<TId, TEntity>
     where TEntity : class, IEntity<TId>
     where TDbContext : DbContext
     where TDbEntity : class
@@ -32,14 +32,14 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     /// </summary>
     /// <typeparam name="TQuery">The type of the query.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    public abstract class ScalarQueryHandler<TQuery, TResult> : EntityFrameworkScalarQueryHandler<TQuery, TEntity, TResult?, TDbContext, TDbEntity>
+    public abstract class ScalarQueryHandler<TQuery, TResult> : DbContextScalarQueryHandler<TQuery, TEntity, TResult?, TDbContext, TDbEntity>
         where TQuery : IQuery<TEntity, TResult?>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ScalarQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
-        /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
-        protected ScalarQueryHandler(EntityFrameworkDataProvider<TDbContext> provider)
+        /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+        protected ScalarQueryHandler(DbContextDataProvider<TDbContext> provider)
             : base(provider)
         {
         }
@@ -50,14 +50,14 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     /// </summary>
     /// <typeparam name="TQuery">The type of the query.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    public abstract class VectorQueryHandler<TQuery, TResult> : EntityFrameworkVectorQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+    public abstract class VectorQueryHandler<TQuery, TResult> : DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
         where TQuery : IQuery<TEntity, IReadOnlyCollection<TResult>>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="VectorQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
-        /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
-        protected VectorQueryHandler(EntityFrameworkDataProvider<TDbContext> provider)
+        /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+        protected VectorQueryHandler(DbContextDataProvider<TDbContext> provider)
             : base(provider)
         {
         }
@@ -68,14 +68,14 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     /// </summary>
     /// <typeparam name="TQuery">The type of the query.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    public abstract class PagedQueryHandler<TQuery, TResult> : EntityFrameworkPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+    public abstract class PagedQueryHandler<TQuery, TResult> : DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
         where TQuery : IPagedQuery<TEntity, TResult>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PagedQueryHandler{TQuery,TResult}"/> class.
         /// </summary>
-        /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
-        protected PagedQueryHandler(EntityFrameworkDataProvider<TDbContext> provider)
+        /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+        protected PagedQueryHandler(DbContextDataProvider<TDbContext> provider)
             : base(provider)
         {
         }
@@ -85,7 +85,7 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     private readonly DbModelProperties _modelProperties;
 
     /// <inheritdoc />
-    public EntityFrameworkDataProvider<TDbContext> Provider { get; }
+    public DbContextDataProvider<TDbContext> Provider { get; }
 
     /// <summary>
     /// Gets the <see cref="DbSet{TDbEntity}"/>.
@@ -95,10 +95,10 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     IDataProvider IRepository<TId, TEntity>.Provider => Provider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkRepository{TId,TEntity,TDbContext,TDbEntity}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextRepository{TId,TEntity,TDbContext,TDbEntity}"/> class.
     /// </summary>
     /// <param name="provider">The data provider.</param>
-    public EntityFrameworkRepository(EntityFrameworkDataProvider<TDbContext> provider)
+    public DbContextRepository(DbContextDataProvider<TDbContext> provider)
     {
         Ensure.Arg.NotNull(provider);
         Provider = provider;
@@ -247,7 +247,7 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
     {
         Ensure.Arg.NotNull(query);
 
-        IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext> queryHandler =
+        IDbContextQueryHandler<TEntity, TResult, TDbContext> queryHandler =
             Provider.QueryHandlerFactory.CreateHandler(Provider, query);
 
         TResult result;
@@ -288,7 +288,7 @@ public class EntityFrameworkRepository<TId, TEntity, TDbContext, TDbEntity> : IE
             "ReSharper",
             "SuspiciousTypeConversion.Global",
             Justification = "Handler may implement IDisposable.")]
-        async ValueTask DisposeQueryHandlerAsync(IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext> handler)
+        async ValueTask DisposeQueryHandlerAsync(IDbContextQueryHandler<TEntity, TResult, TDbContext> handler)
         {
             switch (handler)
             {

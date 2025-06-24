@@ -16,18 +16,18 @@ namespace AppCoreNet.Data.EntityFramework;
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
-public abstract class EntityFrameworkPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-    : EntityFrameworkQueryHandler<TQuery, TEntity, IPagedResult<TResult>, TDbContext, TDbEntity>
+public abstract class DbContextPagedQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+    : DbContextQueryHandler<TQuery, TEntity, IPagedResult<TResult>, TDbContext, TDbEntity>
     where TQuery : IPagedQuery<TEntity, TResult>
     where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkPagedQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextPagedQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
-    protected EntityFrameworkPagedQueryHandler(EntityFrameworkDataProvider<TDbContext> provider)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    protected DbContextPagedQueryHandler(DbContextDataProvider<TDbContext> provider)
         : base(provider)
     {
     }

@@ -19,12 +19,12 @@ namespace AppCoreNet.Data.EntityFramework;
     "IDisposableAnalyzers.Correctness",
     "IDISP007:Don\'t dispose injected",
     Justification = "Ownership is transferred from DbContextTransactionManager.")]
-public sealed class EntityFrameworkTransaction<TDbContext> : ITransaction
+public sealed class DbContextTransaction<TDbContext> : ITransaction
     where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
     private readonly DbContextTransaction _transaction;
-    private readonly DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> _logger;
+    private readonly DataProviderLogger<DbContextDataProvider<TDbContext>> _logger;
     private bool _disposed;
 
     /// <inheritdoc />
@@ -34,10 +34,10 @@ public sealed class EntityFrameworkTransaction<TDbContext> : ITransaction
 
     internal event EventHandler? TransactionFinished;
 
-    internal EntityFrameworkTransaction(
+    internal DbContextTransaction(
         TDbContext dbContext,
         DbContextTransaction transaction,
-        DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> logger)
+        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
     {
         Ensure.Arg.NotNull(dbContext);
         Ensure.Arg.NotNull(transaction);
@@ -53,7 +53,7 @@ public sealed class EntityFrameworkTransaction<TDbContext> : ITransaction
     {
         if (_disposed)
         {
-            throw new ObjectDisposedException(nameof(EntityFrameworkTransaction<TDbContext>));
+            throw new ObjectDisposedException(nameof(DbContextTransaction<TDbContext>));
         }
     }
 

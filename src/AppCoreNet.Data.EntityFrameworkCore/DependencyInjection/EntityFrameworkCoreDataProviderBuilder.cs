@@ -17,7 +17,7 @@ namespace AppCoreNet.Extensions.DependencyInjection;
 /// Represents the builder for Entity Framework Core data providers.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-public sealed class DbContextDataProviderBuilder<TDbContext>
+public sealed class EntityFrameworkCoreDataProviderBuilder<TDbContext>
     where TDbContext : DbContext
 {
     /// <summary>
@@ -38,12 +38,15 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
     public ServiceLifetime ProviderLifetime { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DbContextDataProviderBuilder{TDbContext}"/> class.
+    /// Initializes a new instance of the <see cref="EntityFrameworkCoreDataProviderBuilder{TDbContext}"/> class.
     /// </summary>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
     /// <param name="providerLifetime">The lifetime of the <see cref="IDataProvider"/>.</param>
-    public DbContextDataProviderBuilder(string name, IServiceCollection services, ServiceLifetime providerLifetime)
+    public EntityFrameworkCoreDataProviderBuilder(
+        string name,
+        IServiceCollection services,
+        ServiceLifetime providerLifetime)
     {
         Ensure.Arg.NotNull(name);
         Ensure.Arg.NotNull(services);
@@ -57,8 +60,8 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
     /// Adds the specified repository implementation.
     /// </summary>
     /// <typeparam name="TImplementation">The type of the repository.</typeparam>
-    /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
-    public DbContextDataProviderBuilder<TDbContext> AddRepository<TImplementation>()
+    /// <returns>The <see cref="EntityFrameworkCoreDataProviderBuilder{TDbContext}"/>.</returns>
+    public EntityFrameworkCoreDataProviderBuilder<TDbContext> AddRepository<TImplementation>()
         where TImplementation : class, IDbContextRepository<TDbContext>
     {
         return AddRepository<TImplementation, TImplementation>();
@@ -69,8 +72,8 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
     /// </summary>
     /// <typeparam name="TService">The type of the repository service.</typeparam>
     /// <typeparam name="TImplementation">The type of the repository implementation.</typeparam>
-    /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
-    public DbContextDataProviderBuilder<TDbContext> AddRepository<TService, TImplementation>()
+    /// <returns>The <see cref="EntityFrameworkCoreDataProviderBuilder{TDbContext}"/>.</returns>
+    public EntityFrameworkCoreDataProviderBuilder<TDbContext> AddRepository<TService, TImplementation>()
         where TService : class
         where TImplementation : class, IDbContextRepository<TDbContext>, TService
     {
@@ -95,8 +98,8 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
     /// Adds the specified query handler implementation.
     /// </summary>
     /// <typeparam name="TQueryHandler">The type of the <see cref="DbContextQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/>.</typeparam>
-    /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
-    public DbContextDataProviderBuilder<TDbContext> AddQueryHandler<TQueryHandler>()
+    /// <returns>The <see cref="EntityFrameworkCoreDataProviderBuilder{TDbContext}"/>.</returns>
+    public EntityFrameworkCoreDataProviderBuilder<TDbContext> AddQueryHandler<TQueryHandler>()
         where TQueryHandler : class, IDbContextQueryHandler<TDbContext>
     {
         Type queryHandlerType = typeof(TQueryHandler);
@@ -112,8 +115,8 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
     /// Registers a <see cref="ITokenGenerator"/> which generates concurrency tokens.
     /// </summary>
     /// <typeparam name="T">The type of the <see cref="ITokenGenerator"/>.</typeparam>
-    /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
-    public DbContextDataProviderBuilder<TDbContext> AddTokenGenerator<T>()
+    /// <returns>The <see cref="EntityFrameworkCoreDataProviderBuilder{TDbContext}"/>.</returns>
+    public EntityFrameworkCoreDataProviderBuilder<TDbContext> AddTokenGenerator<T>()
         where T : class, ITokenGenerator
     {
         Services.Configure<DbContextDataProviderOptions>(
@@ -127,8 +130,8 @@ public sealed class DbContextDataProviderBuilder<TDbContext>
     /// Registers a <see cref="IEntityMapper"/> which maps entities to database entities.
     /// </summary>
     /// <typeparam name="T">The type of the <see cref="IEntityMapper"/>.</typeparam>
-    /// <returns>The <see cref="DbContextDataProviderBuilder{TDbContext}"/>.</returns>
-    public DbContextDataProviderBuilder<TDbContext> AddEntityMapper<T>()
+    /// <returns>The <see cref="EntityFrameworkCoreDataProviderBuilder{TDbContext}"/>.</returns>
+    public EntityFrameworkCoreDataProviderBuilder<TDbContext> AddEntityMapper<T>()
         where T : class, IEntityMapper
     {
         Services.Configure<DbContextDataProviderOptions>(

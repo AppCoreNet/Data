@@ -8,9 +8,9 @@ using AppCoreNet.Data.Queries;
 
 namespace AppCoreNet.Data.EntityFramework.Queries;
 
-public class TestEntity2ByIdQueryHandler : EntityFrameworkTestEntity2Repository.ScalarQueryHandler<TestEntity2ByIdQuery, TestEntity2>
+public class TestEntity2ByIdQueryHandler : DbContextTestEntity2Repository.ScalarQueryHandler<TestEntity2ByIdQuery, TestEntity2>
 {
-    public TestEntity2ByIdQueryHandler(EntityFrameworkDataProvider<TestDbContext> provider)
+    public TestEntity2ByIdQueryHandler(DbContextDataProvider<TestDbContext> provider)
         : base(provider)
     {
     }

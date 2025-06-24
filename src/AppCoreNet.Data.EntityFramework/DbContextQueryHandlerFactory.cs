@@ -14,18 +14,18 @@ namespace AppCoreNet.Data.EntityFramework;
 /// Provides query handler factory for <see cref="DbContext"/>.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-public sealed class EntityFrameworkQueryHandlerFactory<TDbContext>
+public sealed class DbContextQueryHandlerFactory<TDbContext>
     where TDbContext : DbContext
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<Type> _queryHandlerTypes;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkQueryHandlerFactory{TDbContext}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextQueryHandlerFactory{TDbContext}"/> class.
     /// </summary>
     /// <param name="serviceProvider">The <see cref="IServiceProvider"/>.</param>
     /// <param name="queryHandlerTypes">The types of the query handlers.</param>
-    public EntityFrameworkQueryHandlerFactory(IServiceProvider serviceProvider, IEnumerable<Type> queryHandlerTypes)
+    public DbContextQueryHandlerFactory(IServiceProvider serviceProvider, IEnumerable<Type> queryHandlerTypes)
     {
         Ensure.Arg.NotNull(serviceProvider);
         Ensure.Arg.NotNull(queryHandlerTypes);
@@ -37,21 +37,21 @@ public sealed class EntityFrameworkQueryHandlerFactory<TDbContext>
     /// <summary>
     /// Creates a query handler for the specified query.
     /// </summary>
-    /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
     /// <param name="query">The query.</param>
     /// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    /// <returns>The <see cref="IEntityFrameworkQueryHandler{TEntity,TResult,TDbContext}"/>.</returns>
+    /// <returns>The <see cref="IDbContextQueryHandler{TEntity,TResult,TDbContext}"/>.</returns>
     /// <exception cref="InvalidOperationException">There is no handler registered for the specified query.</exception>
-    public IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext> CreateHandler<TEntity, TResult>(
-        EntityFrameworkDataProvider<TDbContext> provider,
+    public IDbContextQueryHandler<TEntity, TResult, TDbContext> CreateHandler<TEntity, TResult>(
+        DbContextDataProvider<TDbContext> provider,
         IQuery<TEntity, TResult> query)
         where TEntity : class, IEntity
     {
         Ensure.Arg.NotNull(provider);
         Ensure.Arg.NotNull(query);
 
-        Type queryHandlerType = typeof(IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext>);
+        Type queryHandlerType = typeof(IDbContextQueryHandler<TEntity, TResult, TDbContext>);
 
         IEnumerable<Type> eligibleHandlers = _queryHandlerTypes.Where(
             t => queryHandlerType.IsAssignableFrom(t));
@@ -59,7 +59,7 @@ public sealed class EntityFrameworkQueryHandlerFactory<TDbContext>
         foreach (Type handlerType in eligibleHandlers)
         {
             var handler =
-                (IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext>)ActivatorUtilities.CreateInstance(
+                (IDbContextQueryHandler<TEntity, TResult, TDbContext>)ActivatorUtilities.CreateInstance(
                     _serviceProvider,
                     handlerType,
                     provider);

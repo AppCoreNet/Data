@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading;
@@ -9,25 +10,25 @@ using System.Threading.Tasks;
 namespace AppCoreNet.Data.EntityFramework;
 
 /// <summary>
-/// Provides a base class for <see cref="DbContext"/> based query handlers which return a scalar.
+/// Provides a base class for <see cref="DbContext"/> based query handlers which return a vector.
 /// </summary>
 /// <typeparam name="TQuery">The type of the <see cref="IQuery{TEntity,TResult}"/>.</typeparam>
 /// <typeparam name="TEntity">The type of the <see cref="IEntity"/>.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
-public abstract class EntityFrameworkScalarQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-    : EntityFrameworkQueryHandler<TQuery, TEntity, TResult?, TDbContext, TDbEntity>
-    where TQuery : IQuery<TEntity, TResult?>
+public abstract class DbContextVectorQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+    : DbContextQueryHandler<TQuery, TEntity, IReadOnlyCollection<TResult>, TDbContext, TDbEntity>
+    where TQuery : IQuery<TEntity, IReadOnlyCollection<TResult>>
     where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkScalarQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextVectorQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
-    protected EntityFrameworkScalarQueryHandler(EntityFrameworkDataProvider<TDbContext> provider)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    protected DbContextVectorQueryHandler(DbContextDataProvider<TDbContext> provider)
         : base(provider)
     {
     }
@@ -49,14 +50,14 @@ public abstract class EntityFrameworkScalarQueryHandler<TQuery, TEntity, TResult
     protected abstract IQueryable<TResult> ApplyProjection(IQueryable<TDbEntity> queryable, TQuery query);
 
     /// <inheritdoc />
-    protected override async Task<TResult?> QueryResultAsync(
+    protected override async Task<IReadOnlyCollection<TResult>> QueryResultAsync(
         IQueryable<TDbEntity> queryable,
         TQuery query,
         CancellationToken cancellationToken)
     {
         queryable = ApplyQuery(queryable, query);
         IQueryable<TResult> result = ApplyProjection(queryable, query);
-        return await result.FirstOrDefaultAsync(cancellationToken)
+        return await result.ToArrayAsync(cancellationToken)
                            .ConfigureAwait(false);
     }
 }

@@ -13,7 +13,7 @@ namespace AppCoreNet.Data.EntityFramework;
 /// Provides services for <see cref="DbContext"/> based data provider.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-public sealed class EntityFrameworkDataProviderServices<TDbContext>
+public sealed class DbContextDataProviderServices<TDbContext>
     where TDbContext : DbContext
 {
     /// <summary>
@@ -32,27 +32,27 @@ public sealed class EntityFrameworkDataProviderServices<TDbContext>
     public ITokenGenerator TokenGenerator { get; }
 
     /// <summary>
-    /// Gets the <see cref="EntityFrameworkQueryHandlerFactory{TDbContext}"/>.
+    /// Gets the <see cref="DbContextQueryHandlerFactory{TDbContext}"/>.
     /// </summary>
-    public EntityFrameworkQueryHandlerFactory<TDbContext> QueryHandlerFactory { get; }
+    public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory { get; }
 
     /// <summary>
-    /// Gets the <see cref="EntityFrameworkTransactionManager{TDbContext}"/>.
+    /// Gets the <see cref="DbContextTransactionManager{TDbContext}"/>.
     /// </summary>
-    public EntityFrameworkTransactionManager<TDbContext> TransactionManager { get; }
+    public DbContextTransactionManager<TDbContext> TransactionManager { get; }
 
     /// <summary>
     /// Gets the <see cref="ILogger"/>.
     /// </summary>
-    public DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> Logger { get; }
+    public DataProviderLogger<DbContextDataProvider<TDbContext>> Logger { get; }
 
-    internal EntityFrameworkDataProviderServices(
+    internal DbContextDataProviderServices(
         TDbContext dbContext,
         IEntityMapper entityMapper,
         ITokenGenerator tokenGenerator,
-        EntityFrameworkQueryHandlerFactory<TDbContext> queryHandlerFactory,
-        EntityFrameworkTransactionManager<TDbContext> transactionManager,
-        DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> logger)
+        DbContextQueryHandlerFactory<TDbContext> queryHandlerFactory,
+        DbContextTransactionManager<TDbContext> transactionManager,
+        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
     {
         DbContext = dbContext;
         EntityMapper = entityMapper;
@@ -70,20 +70,20 @@ public sealed class EntityFrameworkDataProviderServices<TDbContext>
             : serviceProvider.GetRequiredService<T>();
     }
 
-    internal static EntityFrameworkDataProviderServices<TDbContext> Create(string name, IServiceProvider serviceProvider)
+    internal static DbContextDataProviderServices<TDbContext> Create(string name, IServiceProvider serviceProvider)
     {
-        var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<EntityFrameworkDataProviderOptions>>();
-        EntityFrameworkDataProviderOptions options = optionsMonitor.Get(name);
+        var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<DbContextDataProviderOptions>>();
+        DbContextDataProviderOptions options = optionsMonitor.Get(name);
 
         var entityMapper = GetOrCreateInstance<IEntityMapper>(serviceProvider, options.EntityMapperType);
         var tokenGenerator = GetOrCreateInstance<ITokenGenerator>(serviceProvider, options.TokenGeneratorType);
-        var logger = serviceProvider.GetRequiredService<DataProviderLogger<EntityFrameworkDataProvider<TDbContext>>>();
+        var logger = serviceProvider.GetRequiredService<DataProviderLogger<DbContextDataProvider<TDbContext>>>();
 
         var dbContext = serviceProvider.GetRequiredService<TDbContext>();
-        var queryHandlerFactory = new EntityFrameworkQueryHandlerFactory<TDbContext>(serviceProvider, options.QueryHandlerTypes);
-        var transactionManager = new EntityFrameworkTransactionManager<TDbContext>(dbContext, logger);
+        var queryHandlerFactory = new DbContextQueryHandlerFactory<TDbContext>(serviceProvider, options.QueryHandlerTypes);
+        var transactionManager = new DbContextTransactionManager<TDbContext>(dbContext, logger);
 
-        return new EntityFrameworkDataProviderServices<TDbContext>(
+        return new DbContextDataProviderServices<TDbContext>(
             dbContext,
             entityMapper,
             tokenGenerator,

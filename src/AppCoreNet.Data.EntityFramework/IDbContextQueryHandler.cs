@@ -11,7 +11,7 @@ namespace AppCoreNet.Data.EntityFramework;
 /// Represents a <see cref="System.Data.Entity.DbContext"/> based query handler.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="System.Data.Entity.DbContext"/>.</typeparam>
-public interface IEntityFrameworkQueryHandler<TDbContext>
+public interface IDbContextQueryHandler<TDbContext>
     where TDbContext : DbContext
 {
 }
@@ -22,7 +22,7 @@ public interface IEntityFrameworkQueryHandler<TDbContext>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="System.Data.Entity.DbContext"/>.</typeparam>
-public interface IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext> : IEntityFrameworkQueryHandler<TDbContext>
+public interface IDbContextQueryHandler<TEntity, TResult, TDbContext> : IDbContextQueryHandler<TDbContext>
     where TEntity : class, IEntity
     where TDbContext : DbContext
 {

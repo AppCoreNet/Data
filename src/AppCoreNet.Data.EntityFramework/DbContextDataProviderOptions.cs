@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace AppCoreNet.Data.EntityFramework;
 
-internal sealed class EntityFrameworkDataProviderOptions
+internal sealed class DbContextDataProviderOptions
 {
     public Type? EntityMapperType { get; set; }
 

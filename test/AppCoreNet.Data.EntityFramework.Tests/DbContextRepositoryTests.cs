@@ -16,7 +16,7 @@ using Xunit;
 
 namespace AppCoreNet.Data.EntityFramework;
 
-public class EntityFrameworkRepositoryTests : RepositoryTests
+public class DbContextRepositoryTests : RepositoryTests
 {
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -34,8 +34,8 @@ public class EntityFrameworkRepositoryTests : RepositoryTests
                 services.AddScoped<TestDbContext>(); // Register TestDbContext for Effort
 
                 p.AddEntityFramework<TestDbContext>(ProviderName)
-                 .AddRepository<ITestEntityRepository, EntityFrameworkTestEntityRepository>()
-                 .AddRepository<ITestEntity2Repository, EntityFrameworkTestEntity2Repository>()
+                 .AddRepository<ITestEntityRepository, DbContextTestEntityRepository>()
+                 .AddRepository<ITestEntity2Repository, DbContextTestEntity2Repository>()
                  .AddQueryHandler<TestEntityByIdQueryHandler>()
                  .AddQueryHandler<TestEntity2ByIdQueryHandler>();
             });
@@ -45,7 +45,7 @@ public class EntityFrameworkRepositoryTests : RepositoryTests
         where TDao : class
         where TEntity : IEntity
     {
-        var dbContextDataProvider = (EntityFrameworkDataProvider<TestDbContext>)provider;
+        var dbContextDataProvider = (DbContextDataProvider<TestDbContext>)provider;
 
         TDao? dao =
             await dbContextDataProvider.DbContext.Set<TDao>()
@@ -112,7 +112,7 @@ public class EntityFrameworkRepositoryTests : RepositoryTests
     private async Task CreateDataEntity<TDao>(IDataProvider provider, TDao dataEntity)
         where TDao : class
     {
-        var dbContextDataProvider = (EntityFrameworkDataProvider<TestDbContext>)provider;
+        var dbContextDataProvider = (DbContextDataProvider<TestDbContext>)provider;
         TestDbContext dbContext = dbContextDataProvider.DbContext;
 
         dbContext.Set<TDao>()

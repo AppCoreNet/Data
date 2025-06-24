@@ -17,24 +17,24 @@ namespace AppCoreNet.Data.EntityFramework;
 /// <typeparam name="TResult">The type of the result.</typeparam>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
 /// <typeparam name="TDbEntity">The type of the DB entity.</typeparam>
-public abstract class EntityFrameworkQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
-    : IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext>
+public abstract class DbContextQueryHandler<TQuery, TEntity, TResult, TDbContext, TDbEntity>
+    : IDbContextQueryHandler<TEntity, TResult, TDbContext>
     where TQuery : IQuery<TEntity, TResult>
     where TEntity : class, IEntity
     where TDbContext : DbContext
     where TDbEntity : class
 {
     /// <summary>
-    /// Gets the <see cref="EntityFrameworkDataProvider{TDbContext}"/> used by the query.
+    /// Gets the <see cref="DbContextDataProvider{TDbContext}"/> used by the query.
     /// </summary>
-    protected EntityFrameworkDataProvider<TDbContext> Provider { get; }
+    protected DbContextDataProvider<TDbContext> Provider { get; }
 
     /// <summary>
     /// Initializes a new instance of the
-    /// <see cref="EntityFrameworkQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
+    /// <see cref="DbContextQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/> class.
     /// </summary>
-    /// <param name="provider">The <see cref="EntityFrameworkDataProvider{TDbContext}"/>.</param>
-    protected EntityFrameworkQueryHandler(EntityFrameworkDataProvider<TDbContext> provider)
+    /// <param name="provider">The <see cref="DbContextDataProvider{TDbContext}"/>.</param>
+    protected DbContextQueryHandler(DbContextDataProvider<TDbContext> provider)
     {
         Ensure.Arg.NotNull(provider);
         Provider = provider;
@@ -90,13 +90,13 @@ public abstract class EntityFrameworkQueryHandler<TQuery, TEntity, TResult, TDbC
     }
 
     /// <inheritdoc />
-    bool IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext>.CanExecute(IQuery<TEntity, TResult> query)
+    bool IDbContextQueryHandler<TEntity, TResult, TDbContext>.CanExecute(IQuery<TEntity, TResult> query)
     {
         return query is TQuery;
     }
 
     /// <inheritdoc />
-    Task<TResult> IEntityFrameworkQueryHandler<TEntity, TResult, TDbContext>.ExecuteAsync(
+    Task<TResult> IDbContextQueryHandler<TEntity, TResult, TDbContext>.ExecuteAsync(
         IQuery<TEntity, TResult> query,
         CancellationToken cancellationToken)
     {

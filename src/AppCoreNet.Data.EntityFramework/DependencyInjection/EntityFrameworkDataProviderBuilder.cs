@@ -43,7 +43,10 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     /// <param name="name">The name of the data provider.</param>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
     /// <param name="providerLifetime">The lifetime of the <see cref="IDataProvider"/>.</param>
-    public EntityFrameworkDataProviderBuilder(string name, IServiceCollection services, ServiceLifetime providerLifetime)
+    public EntityFrameworkDataProviderBuilder(
+        string name,
+        IServiceCollection services,
+        ServiceLifetime providerLifetime)
     {
         Ensure.Arg.NotNull(name);
         Ensure.Arg.NotNull(services);
@@ -59,7 +62,7 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     /// <typeparam name="TImplementation">The type of the repository.</typeparam>
     /// <returns>The <see cref="EntityFrameworkDataProviderBuilder{TDbContext}"/>.</returns>
     public EntityFrameworkDataProviderBuilder<TDbContext> AddRepository<TImplementation>()
-        where TImplementation : class, IEntityFrameworkRepository<TDbContext>
+        where TImplementation : class, IDbContextRepository<TDbContext>
     {
         return AddRepository<TImplementation, TImplementation>();
     }
@@ -72,7 +75,7 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     /// <returns>The <see cref="EntityFrameworkDataProviderBuilder{TDbContext}"/>.</returns>
     public EntityFrameworkDataProviderBuilder<TDbContext> AddRepository<TService, TImplementation>()
         where TService : class
-        where TImplementation : class, IEntityFrameworkRepository<TDbContext>, TService
+        where TImplementation : class, IDbContextRepository<TDbContext>, TService
     {
         Services.TryAddEnumerable(
             ServiceDescriptor.Describe(
@@ -80,7 +83,7 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
                 new Func<IServiceProvider, TImplementation>(sp =>
                 {
                     var provider =
-                        (EntityFrameworkDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
+                        (DbContextDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
                                                                    .Resolve(Name);
 
                     return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
@@ -93,14 +96,14 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     /// <summary>
     /// Adds the specified query handler implementation.
     /// </summary>
-    /// <typeparam name="TQueryHandler">The type of the <see cref="EntityFrameworkQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/>.</typeparam>
+    /// <typeparam name="TQueryHandler">The type of the <see cref="DbContextQueryHandler{TQuery,TEntity,TResult,TDbContext,TDbEntity}"/>.</typeparam>
     /// <returns>The <see cref="EntityFrameworkDataProviderBuilder{TDbContext}"/>.</returns>
     public EntityFrameworkDataProviderBuilder<TDbContext> AddQueryHandler<TQueryHandler>()
-        where TQueryHandler : class, IEntityFrameworkQueryHandler<TDbContext>
+        where TQueryHandler : class, IDbContextQueryHandler<TDbContext>
     {
         Type queryHandlerType = typeof(TQueryHandler);
 
-        Services.Configure<EntityFrameworkDataProviderOptions>(
+        Services.Configure<DbContextDataProviderOptions>(
             Name,
             o => o.QueryHandlerTypes.Add(queryHandlerType));
 
@@ -115,7 +118,7 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     public EntityFrameworkDataProviderBuilder<TDbContext> AddTokenGenerator<T>()
         where T : class, ITokenGenerator
     {
-        Services.Configure<EntityFrameworkDataProviderOptions>(
+        Services.Configure<DbContextDataProviderOptions>(
             Name,
             o => o.TokenGeneratorType = typeof(T));
 
@@ -130,7 +133,7 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     public EntityFrameworkDataProviderBuilder<TDbContext> AddEntityMapper<T>()
         where T : class, IEntityMapper
     {
-        Services.Configure<EntityFrameworkDataProviderOptions>(
+        Services.Configure<DbContextDataProviderOptions>(
             Name,
             o => o.EntityMapperType = typeof(T));
 

@@ -9,11 +9,11 @@ namespace AppCoreNet.Data.EntityFramework;
 /// Represents a <see cref="System.Data.Entity.DbContext"/> based repository.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="System.Data.Entity.DbContext"/>.</typeparam>
-public interface IEntityFrameworkRepository<TDbContext>
+public interface IDbContextRepository<TDbContext>
     where TDbContext : DbContext
 {
     /// <summary>
-    /// Gets the <see cref="EntityFrameworkDataProvider{TDbContext}"/> which owns the repository.
+    /// Gets the <see cref="DbContextDataProvider{TDbContext}"/> which owns the repository.
     /// </summary>
-    EntityFrameworkDataProvider<TDbContext> Provider { get; }
+    DbContextDataProvider<TDbContext> Provider { get; }
 }

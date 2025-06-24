@@ -13,11 +13,11 @@ namespace AppCoreNet.Data.EntityFramework;
 /// Represents a Entity Framework data provider.
 /// </summary>
 /// <typeparam name="TDbContext">The type of the <see cref="DbContext"/>.</typeparam>
-public sealed class EntityFrameworkDataProvider<TDbContext> : IDataProvider
-    where TDbContext : System.Data.Entity.DbContext
+public sealed class DbContextDataProvider<TDbContext> : IDataProvider
+    where TDbContext : DbContext
 {
     private readonly string _name;
-    private readonly EntityFrameworkDataProviderServices<TDbContext> _services;
+    private readonly DbContextDataProviderServices<TDbContext> _services;
 
     /// <inheritdoc />
     public string Name => _name;
@@ -39,27 +39,27 @@ public sealed class EntityFrameworkDataProvider<TDbContext> : IDataProvider
     public ITokenGenerator TokenGenerator => _services.TokenGenerator;
 
     /// <summary>
-    /// Gets the <see cref="EntityFrameworkQueryHandlerFactory{TDbContext}"/> of the data provider.
+    /// Gets the <see cref="DbContextQueryHandlerFactory{TDbContext}"/> of the data provider.
     /// </summary>
-    public EntityFrameworkQueryHandlerFactory<TDbContext> QueryHandlerFactory => _services.QueryHandlerFactory;
+    public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory => _services.QueryHandlerFactory;
 
     /// <summary>
-    /// Gets the <see cref="EntityFrameworkTransactionManager{TDbContext}"/>.
+    /// Gets the <see cref="DbContextTransactionManager{TDbContext}"/>.
     /// </summary>
-    public EntityFrameworkTransactionManager<TDbContext> TransactionManager => _services.TransactionManager;
+    public DbContextTransactionManager<TDbContext> TransactionManager => _services.TransactionManager;
 
     ITransactionManager IDataProvider.TransactionManager => TransactionManager;
 
-    internal DataProviderLogger<EntityFrameworkDataProvider<TDbContext>> Logger => _services.Logger;
+    internal DataProviderLogger<DbContextDataProvider<TDbContext>> Logger => _services.Logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EntityFrameworkDataProvider{TDbContext}"/> class.
+    /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
     /// </summary>
     /// <param name="name">The name of the data provider.</param>
-    /// <param name="services">The <see cref="EntityFrameworkDataProviderServices{TDbContext}"/>.</param>
-    public EntityFrameworkDataProvider(
+    /// <param name="services">The <see cref="DbContextDataProviderServices{TDbContext}"/>.</param>
+    public DbContextDataProvider(
         string name,
-        EntityFrameworkDataProviderServices<TDbContext> services)
+        DbContextDataProviderServices<TDbContext> services)
     {
         Ensure.Arg.NotNull(name);
         Ensure.Arg.NotNull(services);

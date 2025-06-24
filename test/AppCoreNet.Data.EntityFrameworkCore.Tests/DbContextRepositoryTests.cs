@@ -27,7 +27,7 @@ public class DbContextRepositoryTests : RepositoryTests
         services.AddDataProvider(
             p =>
             {
-                p.AddDbContext<TestContext>(
+                p.AddEntityFrameworkCore<TestContext>(
                     ProviderName,
                     o =>
                     {
