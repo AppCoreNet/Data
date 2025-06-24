@@ -43,7 +43,7 @@ public class MongoRepositoryTests : RepositoryTests
         services.AddDataProvider(
             p =>
             {
-                p.AddMongoDB(
+                p.AddMongoDb(
                      ProviderName,
                      o =>
                      {

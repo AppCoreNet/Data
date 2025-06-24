@@ -21,7 +21,7 @@ public static class MongoDataProviderBuilderExtensions
     /// <param name="name">The name of the data provider.</param>
     /// <param name="configure">Optional delegate to configure the <see cref="MongoDataProviderOptions"/>.</param>
     /// <returns>A <see cref="MongoDataProviderBuilder"/> to further configure the data provider.</returns>
-    public static MongoDataProviderBuilder AddMongoDB(
+    public static MongoDataProviderBuilder AddMongoDb(
         this IDataProviderBuilder builder,
         string name,
         Action<MongoDataProviderOptions>? configure)
@@ -30,11 +30,11 @@ public static class MongoDataProviderBuilderExtensions
         Ensure.Arg.NotNull(name);
 
         builder.Services.AddOptions();
+        builder.Services.AddLogging();
 
-        // TODO: builder.Services.AddLogging();
         if (configure != null)
         {
-            builder.Services.Configure(configure);
+            builder.Services.Configure(name, configure);
         }
 
         builder.AddProvider<MongoDataProvider>(
