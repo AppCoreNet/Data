@@ -101,6 +101,8 @@ public sealed class MongoTransaction : ITransaction
             _logger.TransactionCommitFailed(this, error);
             throw;
         }
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
@@ -121,6 +123,8 @@ public sealed class MongoTransaction : ITransaction
             _logger.TransactionRollbackFailed(this, error);
             throw;
         }
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
@@ -143,6 +147,8 @@ public sealed class MongoTransaction : ITransaction
             _logger.TransactionCommitFailed(this, error);
             throw;
         }
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 
     /// <inheritdoc />
@@ -165,5 +171,7 @@ public sealed class MongoTransaction : ITransaction
             _logger.TransactionRollbackFailed(this, error);
             throw;
         }
+
+        TransactionFinished?.Invoke(this, EventArgs.Empty);
     }
 }
