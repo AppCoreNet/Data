@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Unix'">$(TargetFrameworks);net472</TargetFrameworks>
+    <RootNamespace>AppCoreNet.Data.EntityFramework</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Effort.EF6" VersionOverride="2.2.17" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AppCoreNet.Data.EntityFramework\AppCoreNet.Data.EntityFramework.csproj" />
+    <ProjectReference Include="..\AppCoreNet.Data.SpecificationTests\AppCoreNet.Data.SpecificationTests.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -8,6 +8,9 @@ using AppCoreNet.Data.MongoDB.Queries;
 using AppCoreNet.Extensions.DependencyInjection;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Xunit;
 
@@ -20,6 +23,11 @@ public class MongoRepositoryTests : RepositoryTests
     private const string DatabaseName = "test";
 
     private readonly MongoTestFixture _mongoTestFixture;
+
+    static MongoRepositoryTests()
+    {
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+    }
 
     public MongoRepositoryTests(MongoTestFixture mongoTestFixture)
     {
@@ -35,13 +43,13 @@ public class MongoRepositoryTests : RepositoryTests
         services.AddDataProvider(
             p =>
             {
-                p.AddMongoDB(
-                    ProviderName,
-                    o =>
-                    {
-                        o.ClientSettings = MongoClientSettings.FromConnectionString(_mongoTestFixture.ConnectionString);
-                        o.Database = DatabaseName;
-                    })
+                p.AddMongoDb(
+                     ProviderName,
+                     o =>
+                     {
+                         o.ClientSettings = MongoClientSettings.FromConnectionString(_mongoTestFixture.ConnectionString);
+                         o.Database = DatabaseName;
+                     })
                  .AddRepository<ITestEntityRepository, MongoTestEntityRepository>()
                  .AddQueryHandler<TestEntityByIdQueryHandler>()
                  .AddQueryHandler<TestEntity2ByIdQueryHandler>()

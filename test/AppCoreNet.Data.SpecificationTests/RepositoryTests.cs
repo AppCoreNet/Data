@@ -73,7 +73,7 @@ public abstract class RepositoryTests
     protected abstract Task<object> CreateDataEntity(IDataProvider provider, TestEntity2 entity);
 
     [Fact]
-    public async Task CreateAssignsId()
+    public virtual async Task CreateAssignsId()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntityRepository>();
@@ -97,7 +97,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task CreateUsesProvidedId()
+    public virtual async Task CreateUsesProvidedId()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntityRepository>();
@@ -115,7 +115,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task CreateUsesProvidedComplexId()
+    public virtual async Task CreateUsesProvidedComplexId()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntity2Repository>();
@@ -138,7 +138,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task CreateCreatesDataEntity()
+    public virtual async Task CreateCreatesDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntityRepository>();
@@ -160,7 +160,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task CreateCreatesComplexIdDataEntity()
+    public virtual async Task CreateCreatesComplexIdDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntity2Repository>();
@@ -186,7 +186,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task CreateAssignsChangeToken()
+    public virtual async Task CreateAssignsChangeToken()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntityRepository>();
@@ -202,10 +202,15 @@ public abstract class RepositoryTests
 
         createdEntity.ChangeToken.Should()
                      .Be(changeToken);
+
+        IDataProvider provider = sp.GetRequiredService<IDataProviderResolver>()
+                                   .Resolve(ProviderName);
+
+        await AssertExistingDataEntity(provider, createdEntity);
     }
 
     [Fact]
-    public async Task CreateUsesExplicitChangeToken()
+    public virtual async Task CreateUsesExplicitChangeToken()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntity2Repository>();
@@ -224,7 +229,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task FindLoadsDataEntity()
+    public virtual async Task FindLoadsDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -253,7 +258,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task FindReturnsNullForUnknownDataEntity()
+    public virtual async Task FindReturnsNullForUnknownDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -267,7 +272,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task LoadLoadsDataEntity()
+    public virtual async Task LoadLoadsDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -296,7 +301,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task LoadThrowsForUnknownDataEntity()
+    public virtual async Task LoadThrowsForUnknownDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -309,7 +314,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task DeleteRemovesDataEntity()
+    public virtual async Task DeleteRemovesDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -333,7 +338,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task DeleteThrowsForUnknownDataEntity()
+    public virtual async Task DeleteThrowsForUnknownDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -351,7 +356,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task UpdateModifiesExistingDataEntity()
+    public virtual async Task UpdateModifiesExistingDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -383,7 +388,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task UpdateThrowsForNonExistentDataEntity()
+    public virtual async Task UpdateThrowsForNonExistentDataEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
         var repository = sp.GetRequiredService<ITestEntityRepository>();
@@ -400,7 +405,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task UpdateModifiesDataEntityIfChangeTokenMatches()
+    public virtual async Task UpdateModifiesDataEntityIfChangeTokenMatches()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -431,7 +436,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task UpdateThrowsIfChangeTokenDoesNotMatch()
+    public virtual async Task UpdateThrowsIfChangeTokenDoesNotMatch()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -458,7 +463,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task UpdateModifiesDataEntityIfExpectedChangeTokenMatches()
+    public virtual async Task UpdateModifiesDataEntityIfExpectedChangeTokenMatches()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -493,7 +498,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task UpdateThrowsIfExpectedChangeTokenDoesNotMatch()
+    public virtual async Task UpdateThrowsIfExpectedChangeTokenDoesNotMatch()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -520,7 +525,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task QueryByIdReturnsEntity()
+    public virtual async Task QueryByIdReturnsEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
@@ -548,7 +553,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public async Task QueryByComplexIdReturnsEntity()
+    public virtual async Task QueryByComplexIdReturnsEntity()
     {
         await using ServiceProvider sp = CreateServiceProvider();
 
