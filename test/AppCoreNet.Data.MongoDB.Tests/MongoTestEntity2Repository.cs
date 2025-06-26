@@ -1,7 +1,6 @@
 ﻿// Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using AppCoreNet.Data.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -16,7 +15,8 @@ public class MongoTestEntity2Repository
     {
     }
 
-    protected override BsonValue GetPrimaryKey(ComplexId id)
+    /*
+    protected override BsonValue GetPrimaryKey(Entities.ComplexId id)
     {
         return new BsonDocument()
         {
@@ -24,4 +24,5 @@ public class MongoTestEntity2Repository
             { "Version", id.Version },
         };
     }
+    */
 }

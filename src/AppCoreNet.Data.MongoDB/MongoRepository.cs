@@ -156,11 +156,16 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
     /// <returns>The primary key values.</returns>
     protected virtual BsonValue GetPrimaryKey(TId id)
     {
-        IDiscriminatorConvention objectDiscriminatorConvention =
-            BsonSerializer.LookupDiscriminatorConvention(typeof(object));
+        if (typeof(TId).IsPrimitive || typeof(TId) == typeof(string) || typeof(TId) == typeof(Guid))
+        {
+            IDiscriminatorConvention objectDiscriminatorConvention =
+                BsonSerializer.LookupDiscriminatorConvention(typeof(object));
 
-        var objectSerializer = new ObjectSerializer(objectDiscriminatorConvention, GuidRepresentation.Standard);
-        return objectSerializer.ToBsonValue(id);
+            var objectSerializer = new ObjectSerializer(objectDiscriminatorConvention, GuidRepresentation.Standard);
+            return objectSerializer.ToBsonValue(id);
+        }
+
+        return id.ToBsonDocument();
     }
 
     private FilterDefinition<BsonDocument> GetModificationFilter(TEntity entity)
