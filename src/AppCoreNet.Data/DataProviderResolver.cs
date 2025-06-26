@@ -24,7 +24,7 @@ internal sealed class DataProviderResolver : IDataProviderResolver
         IDataProvider? provider = _providers.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
         if (provider == null)
         {
-            throw new InvalidOperationException($"There is no data provider registered with '{name}'.");
+            throw new InvalidOperationException($"Data provider with name '{name}' is not registered.");
         }
 
         return provider;
