@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace AppCoreNet.Data.MongoDB;
@@ -143,10 +145,28 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
             collectionSettings);
     }
 
+    /// <summary>
+    /// Can be overridden to get the primary key from the specified entity id.
+    /// </summary>
+    /// <remarks>
+    /// For complex keys this needs to be overridden to return a <see cref="BsonValue"/> that uniquely
+    /// identifies the entity.
+    /// </remarks>
+    /// <param name="id">The unique entity id.</param>
+    /// <returns>The primary key values.</returns>
+    protected virtual BsonValue GetPrimaryKey(TId id)
+    {
+        IDiscriminatorConvention objectDiscriminatorConvention =
+            BsonSerializer.LookupDiscriminatorConvention(typeof(object));
+
+        var objectSerializer = new ObjectSerializer(objectDiscriminatorConvention, GuidRepresentation.Standard);
+        return objectSerializer.ToBsonValue(id);
+    }
+
     private FilterDefinition<BsonDocument> GetModificationFilter(TEntity entity)
     {
         FilterDefinitionBuilder<BsonDocument> builder = Builders<BsonDocument>.Filter;
-        FilterDefinition<BsonDocument> filter = builder.Eq(ObjectIdField, entity.Id);
+        FilterDefinition<BsonDocument> filter = builder.Eq(ObjectIdField, GetPrimaryKey(entity.Id));
 
         switch (entity)
         {
@@ -292,7 +312,7 @@ public class MongoRepository<TId, TEntity, TDocument> : IRepository<TId, TEntity
     {
         IClientSessionHandle? sessionHandle = Provider.TransactionManager.CurrentTransaction?.SessionHandle;
 
-        FilterDefinition<BsonDocument> filter = Builders<BsonDocument>.Filter.Eq(ObjectIdField, id);
+        FilterDefinition<BsonDocument> filter = Builders<BsonDocument>.Filter.Eq(ObjectIdField, GetPrimaryKey(id));
 
         IFindFluent<BsonDocument, BsonDocument> find = sessionHandle != null
             ? Collection.Find(sessionHandle, filter)

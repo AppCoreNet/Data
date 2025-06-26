@@ -1,12 +1,11 @@
 // Licensed under the MIT license.
 // Copyright (c) The AppCore .NET project.
 
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 
 namespace AppCoreNet.Data.EntityFrameworkCore;
 
@@ -17,56 +16,73 @@ namespace AppCoreNet.Data.EntityFrameworkCore;
 public sealed class DbContextDataProvider<TDbContext> : IDataProvider
     where TDbContext : DbContext
 {
-    private readonly string _name;
-    private readonly DbContextDataProviderServices<TDbContext> _services;
-
     /// <inheritdoc />
-    public string Name => _name;
+    public string Name { get; }
 
     /// <summary>
     /// Gets the <see cref="DbContext"/> of the data provider.
     /// </summary>
     /// <value>The <see cref="DbContext"/>.</value>
-    public TDbContext DbContext => _services.DbContext;
+    public TDbContext DbContext { get; }
 
     /// <summary>
     /// Gets the <see cref="IEntityMapper"/> of the data provider.
     /// </summary>
-    public IEntityMapper EntityMapper => _services.EntityMapper;
+    public IEntityMapper EntityMapper { get; }
 
     /// <summary>
     /// Gets the <see cref="ITokenGenerator"/> of the data provider.
     /// </summary>
-    public ITokenGenerator TokenGenerator => _services.TokenGenerator;
+    public ITokenGenerator TokenGenerator { get; }
 
     /// <summary>
     /// Gets the <see cref="DbContextQueryHandlerFactory{TDbContext}"/> of the data provider.
     /// </summary>
-    public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory => _services.QueryHandlerFactory;
+    public DbContextQueryHandlerFactory<TDbContext> QueryHandlerFactory { get; }
 
     /// <summary>
     /// Gets the <see cref="DbContextTransactionManager{TDbContext}"/>.
     /// </summary>
-    public DbContextTransactionManager<TDbContext> TransactionManager => _services.TransactionManager;
+    public DbContextTransactionManager<TDbContext> TransactionManager { get; }
 
     ITransactionManager IDataProvider.TransactionManager => TransactionManager;
 
-    internal DataProviderLogger<DbContextDataProvider<TDbContext>> Logger => _services.Logger;
+    internal DataProviderLogger<DbContextDataProvider<TDbContext>> Logger { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DbContextDataProvider{TDbContext}"/> class.
     /// </summary>
     /// <param name="name">The name of the data provider.</param>
-    /// <param name="services">The <see cref="DbContextDataProviderServices{TDbContext}"/>.</param>
+    /// <param name="dbContext">The <see cref="DbContext"/>.</param>
+    /// <param name="entityMapper">The <see cref="IEntityMapper"/>.</param>
+    /// <param name="tokenGenerator">The <see cref="ITokenGenerator"/>.</param>
+    /// <param name="queryHandlerFactory">The <see cref="DbContextQueryHandlerFactory{TDbContext}"/>.</param>
+    /// <param name="transactionManager">The <see cref="DbContextTransactionManager{TDbContext}"/>.</param>
+    /// <param name="logger">The <see cref="DataProviderLogger{T}"/>.</param>
     public DbContextDataProvider(
         string name,
-        DbContextDataProviderServices<TDbContext> services)
+        TDbContext dbContext,
+        IEntityMapper entityMapper,
+        ITokenGenerator tokenGenerator,
+        DbContextQueryHandlerFactory<TDbContext> queryHandlerFactory,
+        DbContextTransactionManager<TDbContext> transactionManager,
+        DataProviderLogger<DbContextDataProvider<TDbContext>> logger)
     {
         Ensure.Arg.NotNull(name);
-        Ensure.Arg.NotNull(services);
+        Ensure.Arg.NotNull(dbContext);
+        Ensure.Arg.NotNull(entityMapper);
+        Ensure.Arg.NotNull(tokenGenerator);
+        Ensure.Arg.NotNull(queryHandlerFactory);
+        Ensure.Arg.NotNull(transactionManager);
+        Ensure.Arg.NotNull(logger);
 
-        _name = name;
-        _services = services;
+        Name = name;
+        DbContext = dbContext;
+        EntityMapper = entityMapper;
+        TokenGenerator = tokenGenerator;
+        QueryHandlerFactory = queryHandlerFactory;
+        TransactionManager = transactionManager;
+        Logger = logger;
     }
 
     /// <summary>
@@ -90,27 +106,6 @@ public sealed class DbContextDataProvider<TDbContext> : IDataProvider
             throw new EntityUpdateException(error);
         }
 
-        // detach all entities after saving changes
-        #if NET462 || NETSTANDARD2_0
-        CascadeTiming cascadeDeleteTiming = DbContext.ChangeTracker.CascadeDeleteTiming;
-        CascadeTiming deleteOrphansTiming = DbContext.ChangeTracker.DeleteOrphansTiming;
-        try
-        {
-            DbContext.ChangeTracker.CascadeDeleteTiming = CascadeTiming.OnSaveChanges;
-            DbContext.ChangeTracker.DeleteOrphansTiming = CascadeTiming.OnSaveChanges;
-            EntityEntry[] entries = DbContext.ChangeTracker.Entries().ToArray();
-            foreach (EntityEntry entry in entries)
-            {
-                entry.State = EntityState.Detached;
-            }
-        }
-        finally
-        {
-            DbContext.ChangeTracker.CascadeDeleteTiming = cascadeDeleteTiming;
-            DbContext.ChangeTracker.DeleteOrphansTiming = deleteOrphansTiming;
-        }
-        #else
         DbContext.ChangeTracker.Clear();
-        #endif
     }
 }

@@ -2,11 +2,14 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
+using AppCoreNet.Data;
 using AppCoreNet.Data.EntityFrameworkCore;
 using AppCoreNet.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace AppCoreNet.Extensions.DependencyInjection;
@@ -38,21 +41,52 @@ public static class EntityFrameworkCoreDataProviderBuilderExtensions
         Ensure.Arg.NotNull(builder);
         Ensure.Arg.NotNull(name);
 
-        builder.Services.AddOptions();
-        builder.Services.AddLogging();
+        IServiceCollection services = builder.Services;
+
+        services.AddOptions();
+        services.AddLogging();
+
+        services.TryAdd(
+            ServiceDescriptor.Describe(
+                typeof(DbContextTransactionManager<TDbContext>),
+                typeof(DbContextTransactionManager<TDbContext>),
+                providerLifetime));
+
+        services.TryAdd(
+            ServiceDescriptor.DescribeKeyed(
+                typeof(DbContextQueryHandlerFactory<TDbContext>),
+                name,
+                static (sp, name) =>
+                {
+                    DbContextDataProviderOptions options = GetOptions(sp, (string)name!);
+                    return new DbContextQueryHandlerFactory<TDbContext>(sp, options.QueryHandlerTypes);
+                },
+                providerLifetime));
 
         builder.AddProvider<DbContextDataProvider<TDbContext>>(
             name,
             providerLifetime,
             static (sp, name) =>
             {
-                DbContextDataProviderServices<TDbContext> services =
-                    DbContextDataProviderServices<TDbContext>.Create(name, sp);
+                DbContextDataProviderOptions options = GetOptions(sp, name);
 
-                return new DbContextDataProvider<TDbContext>(name, services);
+                return new DbContextDataProvider<TDbContext>(
+                    name,
+                    sp.GetRequiredService<TDbContext>(),
+                    options.EntityMapperFactory(sp),
+                    options.TokenGeneratorFactory(sp),
+                    sp.GetRequiredKeyedService<DbContextQueryHandlerFactory<TDbContext>>(name),
+                    sp.GetRequiredService<DbContextTransactionManager<TDbContext>>(),
+                    sp.GetRequiredService<DataProviderLogger<DbContextDataProvider<TDbContext>>>());
             });
 
-        return new EntityFrameworkCoreDataProviderBuilder<TDbContext>(name, builder.Services, providerLifetime);
+        return new EntityFrameworkCoreDataProviderBuilder<TDbContext>(name, services, providerLifetime);
+
+        static DbContextDataProviderOptions GetOptions(IServiceProvider sp, string name)
+        {
+            var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<DbContextDataProviderOptions>>();
+            return optionsMonitor.Get(name);
+        }
     }
 
     /// <summary>

@@ -5,37 +5,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppCoreNet.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AppCoreNet.Data;
 
 internal sealed class DataProviderResolver : IDataProviderResolver
 {
-    private readonly IEnumerable<ProviderRegistration> _registrations;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IEnumerable<IDataProvider> _providers;
 
-    public DataProviderResolver(IEnumerable<ProviderRegistration> registrations, IServiceProvider serviceProvider)
+    public DataProviderResolver(IEnumerable<IDataProvider> providers)
     {
-        _registrations = registrations;
-        _serviceProvider = serviceProvider;
+        _providers = providers;
     }
 
     public IDataProvider Resolve(string name)
     {
         Ensure.Arg.NotNull(name);
 
-        ProviderRegistration? registration = _registrations.FirstOrDefault(r => r.Name == name);
-        if (registration == null)
+        IDataProvider? provider = _providers.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (provider == null)
         {
-            throw new InvalidOperationException($"Data provider with name '{name}' is not registered.");
+            throw new InvalidOperationException($"There is no data provider registered with '{name}'.");
         }
 
-#if !NET8_0_OR_GREATER
-        return _serviceProvider.GetServices(registration.ProviderType)
-                               .OfType<IDataProvider>()
-                               .First(p => p.Name == name);
-#else
-        return (IDataProvider)_serviceProvider.GetRequiredKeyedService(registration.ProviderType, name);
-#endif
+        return provider;
     }
 }

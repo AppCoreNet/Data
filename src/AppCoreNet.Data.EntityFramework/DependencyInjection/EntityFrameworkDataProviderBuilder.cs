@@ -82,10 +82,8 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
                 typeof(TService),
                 new Func<IServiceProvider, TImplementation>(sp =>
                 {
-                    var provider =
-                        (DbContextDataProvider<TDbContext>)sp.GetRequiredService<IDataProviderResolver>()
-                                                                   .Resolve(Name);
-
+                    var resolver = sp.GetRequiredService<IDataProviderResolver>();
+                    var provider = (DbContextDataProvider<TDbContext>)resolver.Resolve(Name);
                     return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
                 }),
                 ProviderLifetime));
@@ -120,7 +118,9 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     {
         Services.Configure<DbContextDataProviderOptions>(
             Name,
-            o => o.TokenGeneratorType = typeof(T));
+            o =>
+                o.TokenGeneratorFactory = static sp =>
+                    ActivatorUtilities.GetServiceOrCreateInstance<T>(sp));
 
         return this;
     }
@@ -135,7 +135,9 @@ public sealed class EntityFrameworkDataProviderBuilder<TDbContext>
     {
         Services.Configure<DbContextDataProviderOptions>(
             Name,
-            o => o.EntityMapperType = typeof(T));
+            o =>
+                o.EntityMapperFactory = static sp =>
+                    ActivatorUtilities.GetServiceOrCreateInstance<T>(sp));
 
         return this;
     }

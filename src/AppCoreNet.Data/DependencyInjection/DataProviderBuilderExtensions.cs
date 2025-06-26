@@ -2,7 +2,6 @@
 // Copyright (c) The AppCore .NET project.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using AppCoreNet.Data;
 using AppCoreNet.Diagnostics;
@@ -16,17 +15,6 @@ namespace AppCoreNet.Extensions.DependencyInjection;
 /// </summary>
 public static class DataProviderBuilderExtensions
 {
-    private static ProviderRegistration? FindRegistration(IServiceCollection services, string name)
-    {
-        IEnumerable<ServiceDescriptor> registrations =
-            services.Where(sd => sd.ServiceType == typeof(ProviderRegistration));
-
-        return (ProviderRegistration?)registrations
-                                      .FirstOrDefault(
-                                          r => ((ProviderRegistration)r.ImplementationInstance!).Name == name)
-                                      ?.ImplementationInstance;
-    }
-
     /// <summary>
     /// Registers a data provider with a factory.
     /// </summary>
@@ -47,45 +35,40 @@ public static class DataProviderBuilderExtensions
         Ensure.Arg.NotNull(name);
         Ensure.Arg.NotNull(factory);
 
-        ProviderRegistration? registration = FindRegistration(builder.Services, name);
-        if (registration != null)
+        IServiceCollection services = builder.Services;
+
+        // check whether a data provider with the same name and different type is already registered
+        if (services.Any(sd => typeof(IDataProvider).IsAssignableFrom(sd.ServiceType)
+                               && sd.IsKeyedService
+                               && sd.ServiceType != typeof(IDataProvider)
+                               && sd.ServiceType != typeof(T)
+                               && (string?)sd.ServiceKey == name))
         {
-            if (registration.ProviderType != typeof(T))
-            {
-                throw new InvalidOperationException(
-                    $"Data provider with name '{name}' is already registered with type '{typeof(T).GetDisplayName()}'.");
-            }
+            throw new InvalidOperationException(
+                $"Data provider with name '{name}' is already registered with type '{typeof(T).GetDisplayName()}'.");
         }
-        else
+
+        // check whether a data provider with the same name and type is already registered
+        if (services.Any(sd => sd.IsKeyedService
+                               && sd.ServiceType == typeof(T)
+                               && (string?)sd.ServiceKey! == name))
         {
-            builder.Services.AddSingleton(new ProviderRegistration(name, typeof(T)));
+            return builder;
+        }
 
-#if !NET8_0_OR_GREATER
-            builder.Services.Add(
-                ServiceDescriptor.Describe(
-                    typeof(T),
-                    sp => factory(sp, name),
-                    lifetime));
-
-            builder.Services.AddTransient<IDataProvider>(
-                sp => sp.GetRequiredService<IDataProviderResolver>()
-                        .Resolve(name));
-#else
-            builder.Services.Add(
-                ServiceDescriptor.DescribeKeyed(
-                    typeof(T),
-                    name,
-                    (sp, key) => factory(sp, (string)key!),
-                    lifetime));
-
-            builder.Services.AddKeyedTransient<IDataProvider>(
+        services.Add(
+            ServiceDescriptor.DescribeKeyed(
+                typeof(T),
                 name,
-                (sp, key) => sp.GetRequiredKeyedService<T>(key));
+                (sp, key) => factory(sp, (string)key!),
+                lifetime));
 
-            builder.Services.AddTransient<T>(sp => sp.GetRequiredKeyedService<T>(name));
-            builder.Services.AddTransient<IDataProvider>(sp => sp.GetRequiredKeyedService<T>(name));
-#endif
-        }
+        services.AddKeyedTransient<IDataProvider>(
+            name,
+            (sp, key) => sp.GetRequiredKeyedService<T>(key));
+
+        services.AddTransient<T>(sp => sp.GetRequiredKeyedService<T>(name));
+        services.AddTransient<IDataProvider>(sp => sp.GetRequiredKeyedService<T>(name));
 
         return builder;
     }

@@ -48,7 +48,7 @@ public class MongoRepositoryTests : RepositoryTests
                      o =>
                      {
                          o.ClientSettings = MongoClientSettings.FromConnectionString(_mongoTestFixture.ConnectionString);
-                         o.Database = DatabaseName;
+                         o.DatabaseName = DatabaseName;
                      })
                  .AddRepository<ITestEntityRepository, MongoTestEntityRepository>()
                  .AddQueryHandler<TestEntityByIdQueryHandler>()
