@@ -68,10 +68,8 @@ public sealed class MongoDataProviderBuilder
             ServiceDescriptor.Transient<TService, TImplementation>(
                 sp =>
                 {
-                    var provider =
-                        (MongoDataProvider)sp.GetRequiredService<IDataProviderResolver>()
-                                             .Resolve(Name);
-
+                    var resolver = sp.GetRequiredService<IDataProviderResolver>();
+                    var provider = (MongoDataProvider)resolver.Resolve(Name);
                     return ActivatorUtilities.CreateInstance<TImplementation>(sp, provider);
                 }));
 
@@ -105,7 +103,9 @@ public sealed class MongoDataProviderBuilder
     {
         Services.Configure<MongoDataProviderOptions>(
             Name,
-            o => o.TokenGeneratorType = typeof(T));
+            o =>
+                o.TokenGeneratorFactory = static sp =>
+                    ActivatorUtilities.GetServiceOrCreateInstance<T>(sp));
 
         return this;
     }
@@ -120,7 +120,9 @@ public sealed class MongoDataProviderBuilder
     {
         Services.Configure<MongoDataProviderOptions>(
             Name,
-            o => o.EntityMapperType = typeof(T));
+            o =>
+                o.EntityMapperFactory = static sp =>
+                    ActivatorUtilities.GetServiceOrCreateInstance<T>(sp));
 
         return this;
     }
